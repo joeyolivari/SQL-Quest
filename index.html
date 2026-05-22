@@ -496,7 +496,7 @@
 <header>
   <div class="logo">Compliance SQL Quest</div>
   <div class="stats">
-    <div class="stat">Level <span id="levelNum">1</span>/10</div>
+    <div class="stat">Level <span id="levelNum">1</span>/20</div>
     <div class="stat">Score <span id="score">0</span></div>
     <div class="stat">Hints <span id="hintsLeft">3</span></div>
     <div class="stat">Attempts <span id="attempts">0</span></div>
@@ -723,6 +723,116 @@ const levels = [
     starter: "SELECT c.full_name AS client_name, ad.advisor_name, a.account_type,\n       t.transaction_id, t.amount, cf.flag_type, cf.severity\nFROM compliance_flags cf\n",
     solutionSQL: "SELECT c.full_name AS client_name, ad.advisor_name, a.account_type,\n       t.transaction_id, t.amount, cf.flag_type, cf.severity\nFROM compliance_flags cf\nJOIN transactions t ON cf.transaction_id = t.transaction_id\nJOIN accounts a ON t.account_id = a.account_id\nJOIN clients c ON a.client_id = c.client_id\nJOIN advisors ad ON c.advisor_id = ad.advisor_id\nWHERE cf.reviewed = 0;",
     learn: 'The final report combines source data into a compliance exception view. This mirrors real analyst work: connect clients, advisors, accounts, activity, and flags into one audit-ready output.'
+  },
+  {
+    title: 'Subquery — Clients with Unreviewed Flags',
+    desc: "Use a subquery to find clients who have at least one unreviewed compliance flag linked to their transactions. Return client_id, full_name, and risk_rating.",
+    concepts: ['Subquery', 'IN'],
+    hint: "Build an inner query walking clients → accounts → transactions → compliance_flags WHERE reviewed = 0, then wrap it: WHERE client_id IN (...).",
+    requiredColumns: ['client_id', 'full_name', 'risk_rating'],
+    orderMatters: false,
+    starter: "SELECT client_id, full_name, risk_rating\nFROM clients\nWHERE client_id IN (\n  SELECT DISTINCT ",
+    solutionSQL: "SELECT client_id, full_name, risk_rating\nFROM clients\nWHERE client_id IN (\n  SELECT DISTINCT c2.client_id\n  FROM clients c2\n  JOIN accounts a ON c2.client_id = a.client_id\n  JOIN transactions t ON a.account_id = t.account_id\n  JOIN compliance_flags cf ON t.transaction_id = cf.transaction_id\n  WHERE cf.reviewed = 0\n);",
+    learn: 'Subqueries nest one query inside another. The inner query identifies at-risk client IDs; the outer query fetches their details. This pattern is common in compliance screening because it separates filter logic from presentation logic.'
+  },
+  {
+    title: 'DISTINCT — High-Risk Client Provinces',
+    desc: "Find the distinct provinces that contain at least one high-risk rated client. Return province sorted alphabetically.",
+    concepts: ['DISTINCT', 'ORDER BY'],
+    hint: "Use SELECT DISTINCT province FROM clients WHERE risk_rating = 'High' ORDER BY province.",
+    requiredColumns: ['province'],
+    orderMatters: true,
+    starter: "SELECT DISTINCT province\nFROM clients\nWHERE ",
+    solutionSQL: "SELECT DISTINCT province\nFROM clients\nWHERE risk_rating = 'High'\nORDER BY province;",
+    learn: 'DISTINCT removes duplicate rows from your result. When mapping geographic risk exposure, you need unique jurisdictions, not one row per client. This feeds into regional risk reporting and regulatory jurisdiction analysis.'
+  },
+  {
+    title: 'BETWEEN — Mid-Range Transaction Screening',
+    desc: "Find transactions with amounts between 5000 and 15000 inclusive — a bracket that can escape automated high-value screening. Return transaction_id, amount, and transaction_type.",
+    concepts: ['BETWEEN'],
+    hint: 'Use WHERE amount BETWEEN 5000 AND 15000.',
+    requiredColumns: ['transaction_id', 'amount', 'transaction_type'],
+    orderMatters: false,
+    starter: "SELECT transaction_id, amount, transaction_type\nFROM transactions\nWHERE ",
+    solutionSQL: "SELECT transaction_id, amount, transaction_type\nFROM transactions\nWHERE amount BETWEEN 5000 AND 15000;",
+    learn: 'BETWEEN is inclusive on both ends. Compliance teams screen mid-range amounts because some clients deliberately keep transactions just below automated thresholds — a practice called structuring that is itself a regulatory violation.'
+  },
+  {
+    title: 'NOT IN — Clients with No Review History',
+    desc: "Find clients who have no accounts with any compliance review on record — blind spots in the compliance program. Return client_id, full_name, and province.",
+    concepts: ['NOT IN', 'Subquery'],
+    hint: "Use WHERE client_id NOT IN (SELECT DISTINCT c2.client_id FROM clients c2 JOIN accounts a ON c2.client_id = a.client_id JOIN compliance_reviews cr ON a.account_id = cr.account_id).",
+    requiredColumns: ['client_id', 'full_name', 'province'],
+    orderMatters: false,
+    starter: "SELECT client_id, full_name, province\nFROM clients\nWHERE client_id NOT IN (\n  SELECT DISTINCT ",
+    solutionSQL: "SELECT client_id, full_name, province\nFROM clients\nWHERE client_id NOT IN (\n  SELECT DISTINCT c2.client_id\n  FROM clients c2\n  JOIN accounts a ON c2.client_id = a.client_id\n  JOIN compliance_reviews cr ON a.account_id = cr.account_id\n);",
+    learn: 'NOT IN is the inverse of IN. It finds gaps — entities that should appear in a related table but do not. Missing review history is itself a compliance exception: every active client should have a documented review trail.'
+  },
+  {
+    title: 'UNION — Combined Suspicious Transaction Queue',
+    desc: "Build a unified suspicious-transaction list by combining large deposits over 50000 with reversed transactions. Label each with a category. Return transaction_id, amount, transaction_status, and category.",
+    concepts: ['UNION', 'Labeling'],
+    hint: "Use two SELECT statements joined with UNION. Add a literal string 'Large Deposit' or 'Reversed' as the category column in each branch.",
+    requiredColumns: ['transaction_id', 'amount', 'transaction_status', 'category'],
+    orderMatters: false,
+    starter: "SELECT transaction_id, amount, transaction_status, 'Large Deposit' AS category\nFROM transactions\nWHERE amount > 50000 AND transaction_type = 'Deposit'\nUNION\n",
+    solutionSQL: "SELECT transaction_id, amount, transaction_status, 'Large Deposit' AS category\nFROM transactions\nWHERE amount > 50000 AND transaction_type = 'Deposit'\nUNION\nSELECT transaction_id, amount, transaction_status, 'Reversed' AS category\nFROM transactions\nWHERE transaction_status = 'Reversed';",
+    learn: 'UNION merges results from two queries into one set and removes duplicates. It is ideal for building unified exception queues from separate screening criteria — combining categories that analysts then triage together in a single review queue.'
+  },
+  {
+    title: 'CTE — Accounts with Multiple Compliance Flags',
+    desc: "Use a Common Table Expression to count compliance flags per account, then return only accounts with 2 or more flags. Return account_id and flag_count.",
+    concepts: ['CTE', 'WITH'],
+    hint: "Complete the CTE then add: SELECT account_id, flag_count FROM flag_counts WHERE flag_count >= 2.",
+    requiredColumns: ['account_id', 'flag_count'],
+    orderMatters: false,
+    starter: "WITH flag_counts AS (\n  SELECT t.account_id, COUNT(*) AS flag_count\n  FROM compliance_flags cf\n  JOIN transactions t ON cf.transaction_id = t.transaction_id\n  GROUP BY t.account_id\n)\n",
+    solutionSQL: "WITH flag_counts AS (\n  SELECT t.account_id, COUNT(*) AS flag_count\n  FROM compliance_flags cf\n  JOIN transactions t ON cf.transaction_id = t.transaction_id\n  GROUP BY t.account_id\n)\nSELECT account_id, flag_count\nFROM flag_counts\nWHERE flag_count >= 2;",
+    learn: 'CTEs let you name an intermediate result and reference it like a table within the same query. They make complex multi-step logic readable and testable. Accounts with multiple flags indicate concentrated risk warranting prioritised review.'
+  },
+  {
+    title: 'EXISTS — High-Risk Clients Under Active Review',
+    desc: "Find high-risk clients who currently have at least one open compliance review. Return client_id, full_name, and risk_rating.",
+    concepts: ['EXISTS', 'Correlated Subquery'],
+    hint: "Use WHERE c.risk_rating = 'High' AND EXISTS (SELECT 1 FROM accounts a JOIN compliance_reviews cr ON a.account_id = cr.account_id WHERE a.client_id = c.client_id AND cr.review_status = 'Open').",
+    requiredColumns: ['client_id', 'full_name', 'risk_rating'],
+    orderMatters: false,
+    starter: "SELECT c.client_id, c.full_name, c.risk_rating\nFROM clients c\nWHERE c.risk_rating = 'High'\n  AND EXISTS (\n    SELECT 1\n    ",
+    solutionSQL: "SELECT c.client_id, c.full_name, c.risk_rating\nFROM clients c\nWHERE c.risk_rating = 'High'\n  AND EXISTS (\n    SELECT 1\n    FROM accounts a\n    JOIN compliance_reviews cr ON a.account_id = cr.account_id\n    WHERE a.client_id = c.client_id\n      AND cr.review_status = 'Open'\n  );",
+    learn: 'EXISTS returns true as soon as the correlated subquery finds one matching row, making it efficient for existence checks. Combined with risk filters, it pinpoints the highest-priority clients requiring immediate compliance attention.'
+  },
+  {
+    title: 'AVG — Transaction Averages by Type',
+    desc: "Calculate the average transaction amount for each transaction type. Return transaction_type and avg_amount rounded to 2 decimal places.",
+    concepts: ['AVG', 'ROUND', 'GROUP BY'],
+    hint: "Use SELECT transaction_type, ROUND(AVG(amount), 2) AS avg_amount FROM transactions GROUP BY transaction_type.",
+    requiredColumns: ['transaction_type', 'avg_amount'],
+    orderMatters: false,
+    starter: "SELECT transaction_type, ROUND(AVG(amount), 2) AS avg_amount\nFROM transactions\nGROUP BY ",
+    solutionSQL: "SELECT transaction_type, ROUND(AVG(amount), 2) AS avg_amount\nFROM transactions\nGROUP BY transaction_type;",
+    learn: 'AVG is an aggregate function like COUNT and SUM. Rounding keeps decimal precision clean for reports. Comparing averages by transaction type helps analysts spot categories where amounts are unusually high or volatile compared to historical norms.'
+  },
+  {
+    title: 'Date Filter — Overdue Compliance Reviews',
+    desc: "Find compliance reviews opened before 2025-01-01 that are still not closed — overdue items requiring immediate escalation. Return review_id, account_id, review_date, issue_type, and review_status.",
+    concepts: ['Date Filtering', 'String Comparison'],
+    hint: "Use WHERE review_date < '2025-01-01' AND review_status != 'Closed'.",
+    requiredColumns: ['review_id', 'account_id', 'review_date', 'issue_type', 'review_status'],
+    orderMatters: false,
+    starter: "SELECT review_id, account_id, review_date, issue_type, review_status\nFROM compliance_reviews\nWHERE review_date < '2025-01-01'\n  AND ",
+    solutionSQL: "SELECT review_id, account_id, review_date, issue_type, review_status\nFROM compliance_reviews\nWHERE review_date < '2025-01-01'\n  AND review_status != 'Closed';",
+    learn: "Date filtering is fundamental in compliance. Reviews older than a year with no resolution signal process failures that regulators scrutinise closely. Storing dates as ISO text (YYYY-MM-DD) means standard string comparison orders them chronologically with no conversion needed."
+  },
+  {
+    title: 'Final Boss II — Advisor Risk Dashboard',
+    desc: "Build an executive summary using a CTE. For each advisor, count open and in-progress compliance reviews by severity. Return advisor_name, severity, and issue_count ordered by advisor_name then severity.",
+    concepts: ['CTE', 'Multi-table JOIN', 'GROUP BY', 'ORDER BY'],
+    hint: "Complete the CTE by adding the remaining JOINs (accounts, compliance_reviews), filter WHERE review_status IN ('Open','In Progress'), GROUP BY advisor_name and severity, then SELECT from it with ORDER BY.",
+    requiredColumns: ['advisor_name', 'severity', 'issue_count'],
+    orderMatters: true,
+    starter: "WITH advisor_issues AS (\n  SELECT ad.advisor_name, cr.severity, COUNT(*) AS issue_count\n  FROM advisors ad\n  JOIN clients c ON ad.advisor_id = c.advisor_id\n",
+    solutionSQL: "WITH advisor_issues AS (\n  SELECT ad.advisor_name, cr.severity, COUNT(*) AS issue_count\n  FROM advisors ad\n  JOIN clients c ON ad.advisor_id = c.advisor_id\n  JOIN accounts a ON c.client_id = a.client_id\n  JOIN compliance_reviews cr ON a.account_id = cr.account_id\n  WHERE cr.review_status IN ('Open', 'In Progress')\n  GROUP BY ad.advisor_name, cr.severity\n)\nSELECT advisor_name, severity, issue_count\nFROM advisor_issues\nORDER BY advisor_name, severity;",
+    learn: 'CTEs combined with multi-table JOINs produce executive dashboards from normalised relational data. This mirrors real compliance reporting: link advisors through clients and accounts to their open issues, aggregate by severity, and sort for readability. The result is audit-ready output you can hand directly to a manager.'
   }
 ];
 
