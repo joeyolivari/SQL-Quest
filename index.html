@@ -1,0 +1,1491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Compliance SQL Quest</title>
+<style>
+  :root {
+    --bg: #0b1120;
+    --panel: #111827;
+    --panel2: #1e293b;
+    --panel3: #0f172a;
+    --accent: #38bdf8;
+    --success: #22c55e;
+    --danger: #ef4444;
+    --warning: #f59e0b;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --border: #334155;
+    --font-mono: 'SF Mono', 'Fira Code', 'Consolas', 'Monaco', monospace;
+    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { min-height: 100%; overflow-x: hidden; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-sans);
+    display: flex;
+    flex-direction: column;
+    line-height: 1.5;
+  }
+
+  header {
+    background: var(--panel);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-shrink: 0;
+  }
+
+  .logo {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--accent);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    min-width: 0;
+  }
+
+  .stats {
+    display: flex;
+    gap: 14px;
+    font-size: 0.8rem;
+    color: var(--muted);
+    flex-wrap: wrap;
+    justify-content: flex-end;
+  }
+
+  .stat { white-space: nowrap; }
+  .stat span { color: var(--text); font-weight: 700; }
+
+  .game-container {
+    flex: 1;
+    height: calc(100vh - 58px);
+    display: grid;
+    grid-template-columns: 270px minmax(0, 1fr) 340px;
+    overflow: hidden;
+    min-height: 0;
+  }
+
+  .sidebar {
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    min-width: 0;
+  }
+
+  .panel-title, .sidebar h3 {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1.4px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .disclaimer {
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.28);
+    color: var(--muted);
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 0.75rem;
+  }
+
+  .schema-table {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    font-size: 0.75rem;
+    background: var(--panel2);
+  }
+
+  .schema-header {
+    background: var(--panel3);
+    padding: 7px 10px;
+    font-weight: 700;
+    color: var(--accent);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    user-select: none;
+  }
+
+  .schema-body { padding: 6px 10px; }
+  .schema-table.collapsed .schema-body { display: none; }
+
+  .schema-body div {
+    display: flex;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(51, 65, 85, 0.7);
+    color: var(--muted);
+  }
+
+  .schema-body div:last-child { border-bottom: none; }
+  .type-tag { color: var(--warning); font-size: 0.68rem; white-space: nowrap; }
+
+  .level-progress {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-top: 4px;
+  }
+
+  .dot {
+    width: 9px;
+    height: 9px;
+    border-radius: 50%;
+    background: var(--border);
+    transition: 0.25s ease;
+  }
+
+  .dot.done { background: var(--success); }
+  .dot.current { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+
+  .center {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 16px;
+    overflow: hidden;
+    min-width: 0;
+  }
+
+  .mission-card {
+    background: linear-gradient(135deg, var(--panel2) 0%, var(--panel) 100%);
+    border: 1px solid var(--border);
+    border-left: 4px solid var(--accent);
+    border-radius: 12px;
+    padding: 16px;
+    flex-shrink: 0;
+    box-shadow: 0 12px 28px rgba(0, 0, 0, 0.12);
+  }
+
+  .mission-card h2 {
+    font-size: 1rem;
+    color: var(--accent);
+    margin-bottom: 6px;
+  }
+
+  .mission-card p {
+    color: var(--text);
+    font-size: 0.85rem;
+  }
+
+  .badge-row {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+    margin-top: 10px;
+  }
+
+  .badge {
+    font-size: 0.68rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    color: var(--accent);
+    background: rgba(56, 189, 248, 0.14);
+    border: 1px solid rgba(56, 189, 248, 0.28);
+  }
+
+  .message-box, .solution-box {
+    border-radius: 10px;
+    padding: 11px 13px;
+    font-size: 0.82rem;
+    display: none;
+    flex-shrink: 0;
+  }
+
+  .message-box.visible, .solution-box.visible { display: block; }
+
+  .hint-box {
+    color: var(--warning);
+    background: rgba(245, 158, 11, 0.1);
+    border: 1px solid rgba(245, 158, 11, 0.7);
+  }
+
+  .error-box {
+    color: #fecaca;
+    background: rgba(239, 68, 68, 0.12);
+    border: 1px solid rgba(239, 68, 68, 0.72);
+  }
+
+  .success-box {
+    color: #bbf7d0;
+    background: rgba(34, 197, 94, 0.12);
+    border: 1px solid rgba(34, 197, 94, 0.72);
+  }
+
+  .learn-box {
+    color: var(--text);
+    background: rgba(56, 189, 248, 0.08);
+    border: 1px solid rgba(56, 189, 248, 0.45);
+  }
+
+  .learn-box h4 { color: var(--accent); margin-bottom: 5px; }
+  .learn-box p { color: var(--muted); margin-bottom: 5px; }
+
+  .solution-box {
+    color: var(--text);
+    background: var(--panel3);
+    border: 1px dashed var(--border);
+    font-family: var(--font-mono);
+    white-space: pre-wrap;
+    overflow-x: auto;
+    line-height: 1.55;
+  }
+
+  .editor-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    min-height: 0;
+  }
+
+  .editor-label {
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  textarea {
+    flex: 1;
+    min-height: 130px;
+    background: var(--panel3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    padding: 14px;
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
+    line-height: 1.6;
+    outline: none;
+    resize: none;
+    tab-size: 2;
+  }
+
+  textarea:focus { border-color: var(--accent); }
+  textarea:disabled { opacity: 0.65; cursor: not-allowed; }
+
+  .btn-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    flex-shrink: 0;
+  }
+
+  button {
+    padding: 8px 15px;
+    border: 0;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: 0.18s ease;
+    white-space: nowrap;
+    font-family: var(--font-sans);
+  }
+
+  button:disabled { opacity: 0.45; cursor: not-allowed; }
+
+  .btn-primary { background: var(--accent); color: #062033; }
+  .btn-primary:hover:not(:disabled) { background: #7dd3fc; }
+
+  .btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .btn-secondary:hover:not(:disabled) { color: var(--text); border-color: var(--text); }
+
+  .btn-hint {
+    background: rgba(245, 158, 11, 0.14);
+    border: 1px solid rgba(245, 158, 11, 0.68);
+    color: var(--warning);
+  }
+  .btn-hint:hover:not(:disabled) { background: rgba(245, 158, 11, 0.24); }
+
+  .btn-success { background: var(--success); color: #052e16; }
+  .btn-success:hover:not(:disabled) { background: #4ade80; }
+
+  .right-panel {
+    background: var(--panel);
+    border-left: 1px solid var(--border);
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .result-panel {
+    flex: 1;
+    min-height: 120px;
+    background: var(--panel3);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px;
+    overflow: auto;
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+  }
+
+  .result-panel table {
+    width: 100%;
+    min-width: 220px;
+    border-collapse: collapse;
+  }
+
+  .result-panel th {
+    text-align: left;
+    padding: 7px 8px;
+    border-bottom: 2px solid var(--border);
+    color: var(--accent);
+    background: var(--panel3);
+    position: sticky;
+    top: 0;
+    white-space: nowrap;
+  }
+
+  .result-panel td {
+    padding: 7px 8px;
+    border-bottom: 1px solid rgba(51, 65, 85, 0.7);
+    color: var(--text);
+    vertical-align: top;
+  }
+
+  .result-panel tr:hover td { background: rgba(56, 189, 248, 0.04); }
+
+  .empty-state, .loading {
+    color: var(--muted);
+    text-align: center;
+    padding: 28px 10px;
+    font-family: var(--font-sans);
+  }
+
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+  }
+
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    border-top-color: var(--accent);
+    animation: spin 0.8s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .row-count {
+    color: var(--muted);
+    font-size: 0.72rem;
+    text-align: right;
+  }
+
+  .celebration {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 100;
+    display: none;
+  }
+
+  .confetti {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    border-radius: 2px;
+    animation: fall 2.4s linear forwards;
+  }
+
+  @keyframes fall {
+    to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+  }
+
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.78);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    z-index: 60;
+  }
+
+  .modal-overlay.visible { display: flex; }
+
+  .modal {
+    width: 100%;
+    max-width: 460px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    text-align: center;
+    box-shadow: 0 26px 80px rgba(0, 0, 0, 0.35);
+  }
+
+  .modal h2 { color: var(--accent); margin-bottom: 10px; }
+  .modal p { color: var(--muted); margin-bottom: 14px; }
+  .final-score { color: var(--success); font-size: 2.2rem; font-weight: 900; margin: 8px 0; }
+
+  @media (max-width: 1100px) {
+    .game-container { grid-template-columns: 230px minmax(0, 1fr) 290px; }
+  }
+
+  @media (max-width: 820px) {
+    header { flex-wrap: wrap; }
+    .stats { width: 100%; justify-content: flex-start; }
+    .game-container {
+      height: auto;
+      min-height: calc(100vh - 92px);
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto auto;
+      overflow-y: auto;
+    }
+    .sidebar {
+      max-height: 260px;
+      border-right: 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .center { overflow: visible; }
+    .right-panel {
+      border-left: 0;
+      border-top: 1px solid var(--border);
+      min-height: 260px;
+    }
+    textarea { min-height: 180px; }
+  }
+
+  @media (max-width: 480px) {
+    header { padding: 10px 12px; }
+    .logo { font-size: 0.95rem; }
+    .sidebar, .center, .right-panel { padding: 12px; }
+    button { padding: 7px 11px; font-size: 0.74rem; }
+    .mission-card h2 { font-size: 0.92rem; }
+    .mission-card p { font-size: 0.8rem; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo">Compliance SQL Quest</div>
+  <div class="stats">
+    <div class="stat">Level <span id="levelNum">1</span>/20</div>
+    <div class="stat">Score <span id="score">0</span></div>
+    <div class="stat">Hints <span id="hintsLeft">3</span></div>
+    <div class="stat">Attempts <span id="attempts">0</span></div>
+  </div>
+</header>
+
+<div class="game-container">
+  <aside class="sidebar">
+    <h3>Database Schema</h3>
+    <div class="disclaimer">All client, account, transaction, and compliance records in this project are synthetic and created for learning purposes only.</div>
+    <div id="schemaPanel"></div>
+    <h3>Mission Progress</h3>
+    <div class="level-progress" id="progressDots"></div>
+  </aside>
+
+  <section class="center">
+    <div class="mission-card">
+      <h2 id="missionTitle">Loading SQLite engine...</h2>
+      <p id="missionDesc">Please wait while the in-browser database starts.</p>
+      <div class="badge-row" id="badgeRow"></div>
+    </div>
+
+    <div class="message-box hint-box" id="hintBox"></div>
+    <div class="message-box error-box" id="errorBox"></div>
+    <div class="message-box success-box" id="successBox"></div>
+    <div class="message-box learn-box" id="learnBox"></div>
+    <div class="solution-box" id="solutionBox"></div>
+
+    <div class="editor-wrap">
+      <div class="editor-label">SQL Editor — type a real SELECT query</div>
+      <textarea id="sqlInput" spellcheck="false" disabled>-- Loading SQL engine...</textarea>
+      <div class="btn-row">
+        <button class="btn-primary" id="btnRun" onclick="runQuery()" disabled>&#9654; Run Query</button>
+        <button class="btn-success" id="btnCheck" onclick="checkAnswer()" disabled>&#10003; Check Answer</button>
+        <button class="btn-hint" id="btnHint" onclick="showHint()" disabled>&#128161; Hint</button>
+        <button class="btn-secondary" id="btnReset" onclick="resetEditor()" disabled>&#8635; Reset</button>
+        <button class="btn-secondary" id="btnSolution" onclick="showSolution()" disabled>&#128275; Solution</button>
+        <button class="btn-primary" id="btnNext" onclick="nextLevel()" style="display:none;">Next Mission &#8594;</button>
+      </div>
+    </div>
+  </section>
+
+  <aside class="right-panel">
+    <div class="panel-title">Query Results</div>
+    <div class="result-panel" id="resultPanel">
+      <div class="loading"><div class="spinner"></div> Loading SQLite engine...</div>
+    </div>
+    <div class="row-count" id="rowCount"></div>
+  </aside>
+</div>
+
+<div class="celebration" id="celebration"></div>
+
+<div class="modal-overlay" id="winModal">
+  <div class="modal">
+    <h2>&#127942; Audit Ready</h2>
+    <p>You completed all 10 compliance SQL investigations.</p>
+    <div class="final-score" id="finalScore">0</div>
+    <p>final score</p>
+    <button class="btn-primary" onclick="location.reload()">Play Again</button>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.12.0/sql-wasm.js"></script>
+
+<script>
+const GAME_DATE = '2026-05-22';
+let db = null;
+let currentLevel = 0;
+let score = 0;
+let hintsLeft = 3;
+let attempts = 0;
+let levelHintUsed = false;
+let solutionUsed = false;
+let levelCompleted = false;
+let completedLevels = new Set();
+let lastResult = null;
+let lastRunSQL = '';
+
+const schema = {
+  clients: [
+    ['client_id', 'INTEGER PK'], ['full_name', 'TEXT'], ['email', 'TEXT'], ['advisor_id', 'INTEGER FK'],
+    ['kyc_status', 'TEXT'], ['province', 'TEXT'], ['risk_rating', 'TEXT'], ['onboarding_date', 'TEXT']
+  ],
+  advisors: [
+    ['advisor_id', 'INTEGER PK'], ['advisor_name', 'TEXT'], ['branch', 'TEXT'], ['region', 'TEXT'], ['license_type', 'TEXT']
+  ],
+  accounts: [
+    ['account_id', 'INTEGER PK'], ['client_id', 'INTEGER FK'], ['account_type', 'TEXT'], ['balance', 'REAL'],
+    ['open_date', 'TEXT'], ['account_status', 'TEXT'], ['last_review_date', 'TEXT']
+  ],
+  transactions: [
+    ['transaction_id', 'INTEGER PK'], ['account_id', 'INTEGER FK'], ['transaction_date', 'TEXT'], ['amount', 'REAL'],
+    ['transaction_type', 'TEXT'], ['debit_credit', 'TEXT'], ['transaction_status', 'TEXT'], ['description', 'TEXT']
+  ],
+  journal_entries: [
+    ['journal_id', 'INTEGER PK'], ['transaction_id', 'INTEGER FK'], ['entry_date', 'TEXT'], ['debit_amount', 'REAL'],
+    ['credit_amount', 'REAL'], ['gl_account', 'TEXT'], ['created_by', 'TEXT']
+  ],
+  compliance_reviews: [
+    ['review_id', 'INTEGER PK'], ['account_id', 'INTEGER FK'], ['review_date', 'TEXT'], ['issue_type', 'TEXT'],
+    ['severity', 'TEXT'], ['review_status', 'TEXT'], ['assigned_to', 'TEXT']
+  ],
+  compliance_flags: [
+    ['flag_id', 'INTEGER PK'], ['transaction_id', 'INTEGER FK'], ['flag_type', 'TEXT'], ['severity', 'TEXT'],
+    ['reviewed', 'INTEGER'], ['created_date', 'TEXT']
+  ],
+  regulatory_updates: [
+    ['update_id', 'INTEGER PK'], ['regulator', 'TEXT'], ['topic', 'TEXT'], ['effective_date', 'TEXT'],
+    ['impact_level', 'TEXT'], ['summary', 'TEXT']
+  ]
+};
+
+const levels = [
+  {
+    title: 'SELECT + WHERE — KYC Sweep',
+    desc: "Find all clients whose kyc_status is 'pending' or 'expired'. Return client_id, full_name, and kyc_status.",
+    concepts: ['SELECT', 'WHERE', 'IN'],
+    hint: "Use WHERE kyc_status IN ('pending', 'expired').",
+    requiredColumns: ['client_id', 'full_name', 'kyc_status'],
+    orderMatters: false,
+    starter: "SELECT client_id, full_name, kyc_status\nFROM clients\nWHERE ",
+    solutionSQL: "SELECT client_id, full_name, kyc_status\nFROM clients\nWHERE kyc_status IN ('pending', 'expired');",
+    learn: 'KYC filtering is the first step in compliance monitoring. A simple WHERE clause helps isolate incomplete or expired client documentation before it becomes an audit issue.'
+  },
+  {
+    title: 'JOIN — Pending KYC With Active Accounts',
+    desc: "Find active accounts belonging to clients with pending KYC. Return client_id, full_name, account_id, account_type, and account_status.",
+    concepts: ['JOIN', 'WHERE'],
+    hint: "Join clients to accounts using client_id, then filter kyc_status = 'pending' and account_status = 'Active'.",
+    requiredColumns: ['client_id', 'full_name', 'account_id', 'account_type', 'account_status'],
+    orderMatters: false,
+    starter: "SELECT c.client_id, c.full_name, a.account_id, a.account_type, a.account_status\nFROM clients c\nJOIN accounts a ON ",
+    solutionSQL: "SELECT c.client_id, c.full_name, a.account_id, a.account_type, a.account_status\nFROM clients c\nJOIN accounts a ON c.client_id = a.client_id\nWHERE c.kyc_status = 'pending'\n  AND a.account_status = 'Active';",
+    learn: 'JOINs connect business entities. In compliance work, the risk is rarely in one table. You often need client data plus account status to identify real operational exposure.'
+  },
+  {
+    title: 'ORDER BY — Large Transaction Review',
+    desc: 'Find all transactions above 10000 and sort them from largest to smallest. Return transaction_id, account_id, amount, and transaction_type.',
+    concepts: ['WHERE', 'ORDER BY'],
+    hint: 'Use WHERE amount > 10000 and ORDER BY amount DESC.',
+    requiredColumns: ['transaction_id', 'account_id', 'amount', 'transaction_type'],
+    orderMatters: true,
+    starter: "SELECT transaction_id, account_id, amount, transaction_type\nFROM transactions\nWHERE ",
+    solutionSQL: "SELECT transaction_id, account_id, amount, transaction_type\nFROM transactions\nWHERE amount > 10000\nORDER BY amount DESC;",
+    learn: 'Sorting large transactions by value helps analysts prioritize review. In real compliance queues, the largest exceptions often get reviewed first.'
+  },
+  {
+    title: 'GROUP BY — Flags by Severity',
+    desc: 'Count compliance flags by severity. Return severity and flag_count.',
+    concepts: ['GROUP BY', 'COUNT'],
+    hint: 'Use COUNT(*) and GROUP BY severity. Alias the count as flag_count.',
+    requiredColumns: ['severity', 'flag_count'],
+    orderMatters: false,
+    starter: "SELECT severity, COUNT(*) AS flag_count\nFROM compliance_flags\nGROUP BY ",
+    solutionSQL: "SELECT severity, COUNT(*) AS flag_count\nFROM compliance_flags\nGROUP BY severity;",
+    learn: 'GROUP BY turns raw exceptions into reporting metrics. This is how compliance teams summarize risk volume for management reporting.'
+  },
+  {
+    title: 'JOIN + GROUP BY — Advisor Risk Workload',
+    desc: 'Count unresolved compliance reviews by advisor. Return advisor_name and open_issue_count.',
+    concepts: ['JOIN', 'GROUP BY', 'COUNT'],
+    hint: "Join reviews → accounts → clients → advisors, then filter review_status IN ('Open', 'In Progress').",
+    requiredColumns: ['advisor_name', 'open_issue_count'],
+    orderMatters: false,
+    starter: "SELECT ad.advisor_name, COUNT(*) AS open_issue_count\nFROM compliance_reviews cr\nJOIN accounts a ON ",
+    solutionSQL: "SELECT ad.advisor_name, COUNT(*) AS open_issue_count\nFROM compliance_reviews cr\nJOIN accounts a ON cr.account_id = a.account_id\nJOIN clients c ON a.client_id = c.client_id\nJOIN advisors ad ON c.advisor_id = ad.advisor_id\nWHERE cr.review_status IN ('Open', 'In Progress')\nGROUP BY ad.advisor_name;",
+    learn: 'This is a workload query. It shows who has unresolved compliance items, which supports prioritization, staffing, and accountability.'
+  },
+  {
+    title: 'HAVING — Advisors With Multiple Open Issues',
+    desc: 'Find advisors with more than 1 unresolved compliance review. Return advisor_name and open_issue_count.',
+    concepts: ['HAVING', 'GROUP BY'],
+    hint: 'Use the same query as Mission 5, then add HAVING COUNT(*) > 1 after GROUP BY.',
+    requiredColumns: ['advisor_name', 'open_issue_count'],
+    orderMatters: false,
+    starter: "SELECT ad.advisor_name, COUNT(*) AS open_issue_count\nFROM compliance_reviews cr\nJOIN accounts a ON cr.account_id = a.account_id\n",
+    solutionSQL: "SELECT ad.advisor_name, COUNT(*) AS open_issue_count\nFROM compliance_reviews cr\nJOIN accounts a ON cr.account_id = a.account_id\nJOIN clients c ON a.client_id = c.client_id\nJOIN advisors ad ON c.advisor_id = ad.advisor_id\nWHERE cr.review_status IN ('Open', 'In Progress')\nGROUP BY ad.advisor_name\nHAVING COUNT(*) > 1;",
+    learn: 'WHERE filters rows before grouping. HAVING filters grouped results after aggregation. That is useful when reporting only material risk concentrations.'
+  },
+  {
+    title: 'LEFT JOIN + NULL — Missing Reviews',
+    desc: 'Find active accounts that do not have any compliance review. Return account_id, account_type, and account_status.',
+    concepts: ['LEFT JOIN', 'NULL'],
+    hint: 'LEFT JOIN accounts to reviews, then find rows where cr.review_id IS NULL.',
+    requiredColumns: ['account_id', 'account_type', 'account_status'],
+    orderMatters: false,
+    starter: "SELECT a.account_id, a.account_type, a.account_status\nFROM accounts a\nLEFT JOIN compliance_reviews cr ON ",
+    solutionSQL: "SELECT a.account_id, a.account_type, a.account_status\nFROM accounts a\nLEFT JOIN compliance_reviews cr ON a.account_id = cr.account_id\nWHERE a.account_status = 'Active'\n  AND cr.review_id IS NULL;",
+    learn: 'LEFT JOIN plus IS NULL is the classic missing-data check. It finds what should exist but does not, which is critical for audit readiness.'
+  },
+  {
+    title: 'Reconciliation — Unbalanced Journal Entries',
+    desc: 'Find journal entries where debit_amount does not equal credit_amount. Return journal_id, transaction_id, debit_amount, and credit_amount.',
+    concepts: ['Reconciliation', 'WHERE'],
+    hint: 'Use WHERE debit_amount <> credit_amount.',
+    requiredColumns: ['journal_id', 'transaction_id', 'debit_amount', 'credit_amount'],
+    orderMatters: false,
+    starter: "SELECT journal_id, transaction_id, debit_amount, credit_amount\nFROM journal_entries\nWHERE ",
+    solutionSQL: "SELECT journal_id, transaction_id, debit_amount, credit_amount\nFROM journal_entries\nWHERE debit_amount <> credit_amount;",
+    learn: 'Debit and credit mismatches are reconciliation exceptions. SQL can quickly identify accounting records that need investigation.'
+  },
+  {
+    title: 'CASE — Transaction Risk Bands',
+    desc: "Classify transactions as Low if amount < 5000, Medium if amount is between 5000 and 9999.99, and High if amount >= 10000. Return transaction_id, amount, and risk_band.",
+    concepts: ['CASE', 'Classification'],
+    hint: "Use CASE WHEN amount < 5000 THEN 'Low' WHEN amount < 10000 THEN 'Medium' ELSE 'High' END AS risk_band.",
+    requiredColumns: ['transaction_id', 'amount', 'risk_band'],
+    orderMatters: false,
+    starter: "SELECT transaction_id, amount,\n  CASE\n    WHEN amount < 5000 THEN 'Low'\n",
+    solutionSQL: "SELECT transaction_id, amount,\n  CASE\n    WHEN amount < 5000 THEN 'Low'\n    WHEN amount >= 5000 AND amount < 10000 THEN 'Medium'\n    ELSE 'High'\n  END AS risk_band\nFROM transactions;",
+    learn: 'CASE statements turn raw numbers into business labels. This is how analysts create risk bands, priority flags, and dashboard categories.'
+  },
+  {
+    title: 'Final Boss — Compliance Exception Report',
+    desc: 'Create a report joining clients, advisors, accounts, transactions, and compliance_flags. Show unreviewed compliance flags only. Return client_name, advisor_name, account_type, transaction_id, amount, flag_type, and severity.',
+    concepts: ['Multi-table JOIN', 'Exception Reporting'],
+    hint: 'Start from compliance_flags, join to transactions, accounts, clients, and advisors. Filter reviewed = 0.',
+    requiredColumns: [
+      { name: 'client_name', aliases: ['full_name'] },
+      'advisor_name', 'account_type', 'transaction_id', 'amount', 'flag_type', 'severity'
+    ],
+    orderMatters: false,
+    starter: "SELECT c.full_name AS client_name, ad.advisor_name, a.account_type,\n       t.transaction_id, t.amount, cf.flag_type, cf.severity\nFROM compliance_flags cf\n",
+    solutionSQL: "SELECT c.full_name AS client_name, ad.advisor_name, a.account_type,\n       t.transaction_id, t.amount, cf.flag_type, cf.severity\nFROM compliance_flags cf\nJOIN transactions t ON cf.transaction_id = t.transaction_id\nJOIN accounts a ON t.account_id = a.account_id\nJOIN clients c ON a.client_id = c.client_id\nJOIN advisors ad ON c.advisor_id = ad.advisor_id\nWHERE cf.reviewed = 0;",
+    learn: 'The final report combines source data into a compliance exception view. This mirrors real analyst work: connect clients, advisors, accounts, activity, and flags into one audit-ready output.'
+  },
+  {
+    title: 'Subquery — Clients with Unreviewed Flags',
+    desc: "Use a subquery to find clients who have at least one unreviewed compliance flag linked to their transactions. Return client_id, full_name, and risk_rating.",
+    concepts: ['Subquery', 'IN'],
+    hint: "Build an inner query walking clients → accounts → transactions → compliance_flags WHERE reviewed = 0, then wrap it: WHERE client_id IN (...).",
+    requiredColumns: ['client_id', 'full_name', 'risk_rating'],
+    orderMatters: false,
+    starter: "SELECT client_id, full_name, risk_rating\nFROM clients\nWHERE client_id IN (\n  SELECT DISTINCT ",
+    solutionSQL: "SELECT client_id, full_name, risk_rating\nFROM clients\nWHERE client_id IN (\n  SELECT DISTINCT c2.client_id\n  FROM clients c2\n  JOIN accounts a ON c2.client_id = a.client_id\n  JOIN transactions t ON a.account_id = t.account_id\n  JOIN compliance_flags cf ON t.transaction_id = cf.transaction_id\n  WHERE cf.reviewed = 0\n);",
+    learn: 'Subqueries nest one query inside another. The inner query identifies at-risk client IDs; the outer query fetches their details. This pattern is common in compliance screening because it separates filter logic from presentation logic.'
+  },
+  {
+    title: 'DISTINCT — High-Risk Client Provinces',
+    desc: "Find the distinct provinces that contain at least one high-risk rated client. Return province sorted alphabetically.",
+    concepts: ['DISTINCT', 'ORDER BY'],
+    hint: "Use SELECT DISTINCT province FROM clients WHERE risk_rating = 'High' ORDER BY province.",
+    requiredColumns: ['province'],
+    orderMatters: true,
+    starter: "SELECT DISTINCT province\nFROM clients\nWHERE ",
+    solutionSQL: "SELECT DISTINCT province\nFROM clients\nWHERE risk_rating = 'High'\nORDER BY province;",
+    learn: 'DISTINCT removes duplicate rows from your result. When mapping geographic risk exposure, you need unique jurisdictions, not one row per client. This feeds into regional risk reporting and regulatory jurisdiction analysis.'
+  },
+  {
+    title: 'BETWEEN — Mid-Range Transaction Screening',
+    desc: "Find transactions with amounts between 5000 and 15000 inclusive — a bracket that can escape automated high-value screening. Return transaction_id, amount, and transaction_type.",
+    concepts: ['BETWEEN'],
+    hint: 'Use WHERE amount BETWEEN 5000 AND 15000.',
+    requiredColumns: ['transaction_id', 'amount', 'transaction_type'],
+    orderMatters: false,
+    starter: "SELECT transaction_id, amount, transaction_type\nFROM transactions\nWHERE ",
+    solutionSQL: "SELECT transaction_id, amount, transaction_type\nFROM transactions\nWHERE amount BETWEEN 5000 AND 15000;",
+    learn: 'BETWEEN is inclusive on both ends. Compliance teams screen mid-range amounts because some clients deliberately keep transactions just below automated thresholds — a practice called structuring that is itself a regulatory violation.'
+  },
+  {
+    title: 'NOT IN — Clients with No Review History',
+    desc: "Find clients who have no accounts with any compliance review on record — blind spots in the compliance program. Return client_id, full_name, and province.",
+    concepts: ['NOT IN', 'Subquery'],
+    hint: "Use WHERE client_id NOT IN (SELECT DISTINCT c2.client_id FROM clients c2 JOIN accounts a ON c2.client_id = a.client_id JOIN compliance_reviews cr ON a.account_id = cr.account_id).",
+    requiredColumns: ['client_id', 'full_name', 'province'],
+    orderMatters: false,
+    starter: "SELECT client_id, full_name, province\nFROM clients\nWHERE client_id NOT IN (\n  SELECT DISTINCT ",
+    solutionSQL: "SELECT client_id, full_name, province\nFROM clients\nWHERE client_id NOT IN (\n  SELECT DISTINCT c2.client_id\n  FROM clients c2\n  JOIN accounts a ON c2.client_id = a.client_id\n  JOIN compliance_reviews cr ON a.account_id = cr.account_id\n);",
+    learn: 'NOT IN is the inverse of IN. It finds gaps — entities that should appear in a related table but do not. Missing review history is itself a compliance exception: every active client should have a documented review trail.'
+  },
+  {
+    title: 'UNION — Combined Suspicious Transaction Queue',
+    desc: "Build a unified suspicious-transaction list by combining large deposits over 50000 with reversed transactions. Label each with a category. Return transaction_id, amount, transaction_status, and category.",
+    concepts: ['UNION', 'Labeling'],
+    hint: "Use two SELECT statements joined with UNION. Add a literal string 'Large Deposit' or 'Reversed' as the category column in each branch.",
+    requiredColumns: ['transaction_id', 'amount', 'transaction_status', 'category'],
+    orderMatters: false,
+    starter: "SELECT transaction_id, amount, transaction_status, 'Large Deposit' AS category\nFROM transactions\nWHERE amount > 50000 AND transaction_type = 'Deposit'\nUNION\n",
+    solutionSQL: "SELECT transaction_id, amount, transaction_status, 'Large Deposit' AS category\nFROM transactions\nWHERE amount > 50000 AND transaction_type = 'Deposit'\nUNION\nSELECT transaction_id, amount, transaction_status, 'Reversed' AS category\nFROM transactions\nWHERE transaction_status = 'Reversed';",
+    learn: 'UNION merges results from two queries into one set and removes duplicates. It is ideal for building unified exception queues from separate screening criteria — combining categories that analysts then triage together in a single review queue.'
+  },
+  {
+    title: 'CTE — Accounts with Multiple Compliance Flags',
+    desc: "Use a Common Table Expression to count compliance flags per account, then return only accounts with 2 or more flags. Return account_id and flag_count.",
+    concepts: ['CTE', 'WITH'],
+    hint: "Complete the CTE then add: SELECT account_id, flag_count FROM flag_counts WHERE flag_count >= 2.",
+    requiredColumns: ['account_id', 'flag_count'],
+    orderMatters: false,
+    starter: "WITH flag_counts AS (\n  SELECT t.account_id, COUNT(*) AS flag_count\n  FROM compliance_flags cf\n  JOIN transactions t ON cf.transaction_id = t.transaction_id\n  GROUP BY t.account_id\n)\n",
+    solutionSQL: "WITH flag_counts AS (\n  SELECT t.account_id, COUNT(*) AS flag_count\n  FROM compliance_flags cf\n  JOIN transactions t ON cf.transaction_id = t.transaction_id\n  GROUP BY t.account_id\n)\nSELECT account_id, flag_count\nFROM flag_counts\nWHERE flag_count >= 2;",
+    learn: 'CTEs let you name an intermediate result and reference it like a table within the same query. They make complex multi-step logic readable and testable. Accounts with multiple flags indicate concentrated risk warranting prioritised review.'
+  },
+  {
+    title: 'EXISTS — High-Risk Clients Under Active Review',
+    desc: "Find high-risk clients who currently have at least one open compliance review. Return client_id, full_name, and risk_rating.",
+    concepts: ['EXISTS', 'Correlated Subquery'],
+    hint: "Use WHERE c.risk_rating = 'High' AND EXISTS (SELECT 1 FROM accounts a JOIN compliance_reviews cr ON a.account_id = cr.account_id WHERE a.client_id = c.client_id AND cr.review_status = 'Open').",
+    requiredColumns: ['client_id', 'full_name', 'risk_rating'],
+    orderMatters: false,
+    starter: "SELECT c.client_id, c.full_name, c.risk_rating\nFROM clients c\nWHERE c.risk_rating = 'High'\n  AND EXISTS (\n    SELECT 1\n    ",
+    solutionSQL: "SELECT c.client_id, c.full_name, c.risk_rating\nFROM clients c\nWHERE c.risk_rating = 'High'\n  AND EXISTS (\n    SELECT 1\n    FROM accounts a\n    JOIN compliance_reviews cr ON a.account_id = cr.account_id\n    WHERE a.client_id = c.client_id\n      AND cr.review_status = 'Open'\n  );",
+    learn: 'EXISTS returns true as soon as the correlated subquery finds one matching row, making it efficient for existence checks. Combined with risk filters, it pinpoints the highest-priority clients requiring immediate compliance attention.'
+  },
+  {
+    title: 'AVG — Transaction Averages by Type',
+    desc: "Calculate the average transaction amount for each transaction type. Return transaction_type and avg_amount rounded to 2 decimal places.",
+    concepts: ['AVG', 'ROUND', 'GROUP BY'],
+    hint: "Use SELECT transaction_type, ROUND(AVG(amount), 2) AS avg_amount FROM transactions GROUP BY transaction_type.",
+    requiredColumns: ['transaction_type', 'avg_amount'],
+    orderMatters: false,
+    starter: "SELECT transaction_type, ROUND(AVG(amount), 2) AS avg_amount\nFROM transactions\nGROUP BY ",
+    solutionSQL: "SELECT transaction_type, ROUND(AVG(amount), 2) AS avg_amount\nFROM transactions\nGROUP BY transaction_type;",
+    learn: 'AVG is an aggregate function like COUNT and SUM. Rounding keeps decimal precision clean for reports. Comparing averages by transaction type helps analysts spot categories where amounts are unusually high or volatile compared to historical norms.'
+  },
+  {
+    title: 'Date Filter — Overdue Compliance Reviews',
+    desc: "Find compliance reviews opened before 2025-01-01 that are still not closed — overdue items requiring immediate escalation. Return review_id, account_id, review_date, issue_type, and review_status.",
+    concepts: ['Date Filtering', 'String Comparison'],
+    hint: "Use WHERE review_date < '2025-01-01' AND review_status != 'Closed'.",
+    requiredColumns: ['review_id', 'account_id', 'review_date', 'issue_type', 'review_status'],
+    orderMatters: false,
+    starter: "SELECT review_id, account_id, review_date, issue_type, review_status\nFROM compliance_reviews\nWHERE review_date < '2025-01-01'\n  AND ",
+    solutionSQL: "SELECT review_id, account_id, review_date, issue_type, review_status\nFROM compliance_reviews\nWHERE review_date < '2025-01-01'\n  AND review_status != 'Closed';",
+    learn: "Date filtering is fundamental in compliance. Reviews older than a year with no resolution signal process failures that regulators scrutinise closely. Storing dates as ISO text (YYYY-MM-DD) means standard string comparison orders them chronologically with no conversion needed."
+  },
+  {
+    title: 'Final Boss II — Advisor Risk Dashboard',
+    desc: "Build an executive summary using a CTE. For each advisor, count open and in-progress compliance reviews by severity. Return advisor_name, severity, and issue_count ordered by advisor_name then severity.",
+    concepts: ['CTE', 'Multi-table JOIN', 'GROUP BY', 'ORDER BY'],
+    hint: "Complete the CTE by adding the remaining JOINs (accounts, compliance_reviews), filter WHERE review_status IN ('Open','In Progress'), GROUP BY advisor_name and severity, then SELECT from it with ORDER BY.",
+    requiredColumns: ['advisor_name', 'severity', 'issue_count'],
+    orderMatters: true,
+    starter: "WITH advisor_issues AS (\n  SELECT ad.advisor_name, cr.severity, COUNT(*) AS issue_count\n  FROM advisors ad\n  JOIN clients c ON ad.advisor_id = c.advisor_id\n",
+    solutionSQL: "WITH advisor_issues AS (\n  SELECT ad.advisor_name, cr.severity, COUNT(*) AS issue_count\n  FROM advisors ad\n  JOIN clients c ON ad.advisor_id = c.advisor_id\n  JOIN accounts a ON c.client_id = a.client_id\n  JOIN compliance_reviews cr ON a.account_id = cr.account_id\n  WHERE cr.review_status IN ('Open', 'In Progress')\n  GROUP BY ad.advisor_name, cr.severity\n)\nSELECT advisor_name, severity, issue_count\nFROM advisor_issues\nORDER BY advisor_name, severity;",
+    learn: 'CTEs combined with multi-table JOINs produce executive dashboards from normalised relational data. This mirrors real compliance reporting: link advisors through clients and accounts to their open issues, aggregate by severity, and sort for readability. The result is audit-ready output you can hand directly to a manager.'
+  }
+];
+
+function renderSchema() {
+  const panel = document.getElementById('schemaPanel');
+  panel.innerHTML = Object.entries(schema).map(([table, cols]) => `
+    <div class="schema-table">
+      <div class="schema-header" onclick="toggleSchema(this)">${escapeHtml(table)} <span>&#9660;</span></div>
+      <div class="schema-body">
+        ${cols.map(([name, type]) => `<div><span>${escapeHtml(name)}</span><span class="type-tag">${escapeHtml(type)}</span></div>`).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function toggleSchema(header) {
+  const box = header.closest('.schema-table');
+  box.classList.toggle('collapsed');
+  header.querySelector('span').textContent = box.classList.contains('collapsed') ? '\u25B6' : '\u25BC';
+}
+
+async function initGame() {
+  try {
+    renderSchema();
+    renderProgressDots();
+
+    const SQL = await initSqlJs({
+      locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.12.0/${file}`
+    });
+
+    db = new SQL.Database();
+    createTables();
+    seedData();
+    enableGame();
+    loadLevel(0);
+  } catch (err) {
+    showError('SQLite failed to load. Check your internet connection or CDN access. ' + err.message);
+    document.getElementById('resultPanel').innerHTML = '<div class="empty-state">Could not load SQLite engine.</div>';
+  }
+}
+
+function createTables() {
+  db.run(`
+    CREATE TABLE clients (
+      client_id INTEGER PRIMARY KEY,
+      full_name TEXT,
+      email TEXT,
+      advisor_id INTEGER,
+      kyc_status TEXT,
+      province TEXT,
+      risk_rating TEXT,
+      onboarding_date TEXT
+    );
+
+    CREATE TABLE advisors (
+      advisor_id INTEGER PRIMARY KEY,
+      advisor_name TEXT,
+      branch TEXT,
+      region TEXT,
+      license_type TEXT
+    );
+
+    CREATE TABLE accounts (
+      account_id INTEGER PRIMARY KEY,
+      client_id INTEGER,
+      account_type TEXT,
+      balance REAL,
+      open_date TEXT,
+      account_status TEXT,
+      last_review_date TEXT
+    );
+
+    CREATE TABLE transactions (
+      transaction_id INTEGER PRIMARY KEY,
+      account_id INTEGER,
+      transaction_date TEXT,
+      amount REAL,
+      transaction_type TEXT,
+      debit_credit TEXT,
+      transaction_status TEXT,
+      description TEXT
+    );
+
+    CREATE TABLE journal_entries (
+      journal_id INTEGER PRIMARY KEY,
+      transaction_id INTEGER,
+      entry_date TEXT,
+      debit_amount REAL,
+      credit_amount REAL,
+      gl_account TEXT,
+      created_by TEXT
+    );
+
+    CREATE TABLE compliance_reviews (
+      review_id INTEGER PRIMARY KEY,
+      account_id INTEGER,
+      review_date TEXT,
+      issue_type TEXT,
+      severity TEXT,
+      review_status TEXT,
+      assigned_to TEXT
+    );
+
+    CREATE TABLE compliance_flags (
+      flag_id INTEGER PRIMARY KEY,
+      transaction_id INTEGER,
+      flag_type TEXT,
+      severity TEXT,
+      reviewed INTEGER,
+      created_date TEXT
+    );
+
+    CREATE TABLE regulatory_updates (
+      update_id INTEGER PRIMARY KEY,
+      regulator TEXT,
+      topic TEXT,
+      effective_date TEXT,
+      impact_level TEXT,
+      summary TEXT
+    );
+  `);
+}
+
+function insertRows(table, columns, rows) {
+  const placeholders = columns.map(() => '?').join(', ');
+  const stmt = db.prepare(`INSERT INTO ${table} (${columns.join(', ')}) VALUES (${placeholders})`);
+  rows.forEach(row => stmt.run(row));
+  stmt.free();
+}
+
+function seedData() {
+  insertRows('advisors', ['advisor_id','advisor_name','branch','region','license_type'], [
+    [1,'Maya Thompson','Toronto King','Ontario','CSC'],
+    [2,'Noah Singh','Vancouver Centre','British Columbia','CSC'],
+    [3,'Elena Park','Calgary North','Prairies','IFC'],
+    [4,'Olivier Dubois','Montreal West','Quebec','CSC'],
+    [5,'Sofia Chen','Ottawa Central','Ontario','CSC'],
+    [6,'Liam Brooks','Winnipeg Main','Prairies','IFC'],
+    [7,'Priya Nair','Halifax Harbour','Atlantic','CSC'],
+    [8,'Marcus Reed','Victoria Island','British Columbia','CSC']
+  ]);
+
+  insertRows('clients', ['client_id','full_name','email','advisor_id','kyc_status','province','risk_rating','onboarding_date'], [
+    [1,'Sarah Chen','sarah.chen@example.ca',1,'complete','ON','Low','2020-03-15'],
+    [2,'Marcus Johnson','marcus.johnson@example.ca',2,'complete','BC','Medium','2019-01-10'],
+    [3,'Priya Patel','priya.patel@example.ca',2,'pending','ON','Medium','2024-11-02'],
+    [4,'David Kim','david.kim@example.ca',3,'complete','AB','High','2018-11-05'],
+    [5,'Elena Rodriguez','elena.rodriguez@example.ca',3,'complete','QC','Medium','2022-04-18'],
+    [6,'James Wilson','james.wilson@example.ca',4,'complete','ON','Low','2017-06-30'],
+    [7,'Aisha Mohammed','aisha.mohammed@example.ca',1,'complete','ON','High','2020-12-12'],
+    [8,'Robert Taylor','robert.taylor@example.ca',4,'expired','BC','Medium','2021-03-08'],
+    [9,'Lisa Wong','lisa.wong@example.ca',5,'complete','AB','Low','2022-08-15'],
+    [10,'Ahmed Hassan','ahmed.hassan@example.ca',5,'complete','ON','Medium','2019-05-20'],
+    [11,'Jennifer Brown','jennifer.brown@example.ca',6,'complete','ON','High','2016-02-28'],
+    [12,'Carlos Mendez','carlos.mendez@example.ca',2,'pending','QC','Medium','2023-01-05'],
+    [13,'Fatima Al-Rashid','fatima.alrashid@example.ca',7,'complete','BC','Low','2024-02-14'],
+    [14,'Grace Osei','grace.osei@example.ca',7,'complete','NS','Medium','2021-09-09'],
+    [15,'Daniel Novak','daniel.novak@example.ca',8,'expired','BC','High','2018-04-23'],
+    [16,'Mei Lin','mei.lin@example.ca',8,'complete','ON','High','2020-06-01'],
+    [17,'Ethan Miller','ethan.miller@example.ca',1,'complete','MB','Low','2022-10-17'],
+    [18,'Nadia Costa','nadia.costa@example.ca',2,'pending','QC','Low','2025-01-30'],
+    [19,'Victor Nguyen','victor.nguyen@example.ca',3,'complete','AB','Medium','2021-12-04'],
+    [20,'Olivia Martin','olivia.martin@example.ca',4,'complete','ON','Low','2023-07-19']
+  ]);
+
+  insertRows('accounts', ['account_id','client_id','account_type','balance','open_date','account_status','last_review_date'], [
+    [201,1,'RRSP',145000,'2020-03-15','Active','2026-01-10'],
+    [202,1,'TFSA',42000,'2021-07-22','Active','2025-01-15'],
+    [203,2,'RESP',28500,'2019-01-10','Active','2025-12-20'],
+    [204,3,'RRSP',89000,'2018-11-05','Active','2024-02-10'],
+    [205,3,'FHSA',12000,'2024-11-03','Active','2024-11-03'],
+    [206,4,'TFSA',150000,'2022-04-18','Active','2025-05-01'],
+    [207,5,'RRSP',-500,'2023-09-01','Suspended','2024-01-22'],
+    [208,6,'Non-Registered',520000,'2017-06-30','Active','2026-02-16'],
+    [209,7,'TFSA',78000,'2020-12-12','Active','2024-03-01'],
+    [210,8,'RRSP',34000,'2021-03-08','Active','2023-12-15'],
+    [211,9,'RESP',12000,'2022-08-15','Active','2025-10-01'],
+    [212,10,'TFSA',95000,'2019-05-20','Active','2024-04-01'],
+    [213,11,'RRSP',210000,'2016-02-28','Active','2025-11-05'],
+    [214,12,'Non-Registered',180000,'2023-01-05','Active','2023-05-01'],
+    [215,13,'TFSA',0,'2024-11-11','Dormant','2024-11-11'],
+    [216,14,'RRSP',66500,'2021-09-09','Active','2024-12-10'],
+    [217,15,'Non-Registered',390000,'2018-04-23','Active','2023-08-02'],
+    [218,16,'TFSA',88000,'2020-06-01','Active','2024-05-11'],
+    [219,17,'FHSA',18000,'2022-10-17','Active','2026-03-14'],
+    [220,18,'RESP',24000,'2025-01-30','Active','2025-01-30'],
+    [221,19,'RRSP',77000,'2021-12-04','Closed','2023-09-19'],
+    [222,20,'TFSA',31000,'2023-07-19','Active','2023-07-19'],
+    [223,4,'Non-Registered',810000,'2020-02-12','Active','2025-02-02'],
+    [224,7,'RRSP',101000,'2022-03-03','Active','2022-03-03'],
+    [225,8,'FHSA',8500,'2023-06-06','Active','2023-06-06'],
+    [226,11,'TFSA',70000,'2019-08-08','Suspended','2024-07-07'],
+    [227,12,'RRSP',63000,'2023-04-04','Active','2023-04-04'],
+    [228,14,'RESP',42000,'2022-02-02','Active','2022-02-02'],
+    [229,15,'RRSP',95000,'2018-07-07','Dormant','2020-12-31'],
+    [230,20,'Non-Registered',112000,'2024-01-15','Active','2024-01-15']
+  ]);
+
+  insertRows('transactions', ['transaction_id','account_id','transaction_date','amount','transaction_type','debit_credit','transaction_status','description'], [
+    [1001,201,'2026-01-15',5000,'Deposit','Credit','Posted','Annual contribution'],
+    [1002,202,'2026-01-16',2000,'Withdrawal','Debit','Posted','Emergency withdrawal'],
+    [1003,203,'2026-01-17',2500,'Deposit','Credit','Posted','RESP grant'],
+    [1004,204,'2026-01-18',120000,'Transfer','Credit','Posted','Large inbound transfer'],
+    [1005,206,'2026-01-19',75000,'Deposit','Credit','Pending','Wire transfer'],
+    [1006,207,'2026-01-20',300,'Withdrawal','Debit','Reversed','Overdraft attempt'],
+    [1007,208,'2026-01-21',85000,'Deposit','Credit','Posted','Investment proceeds'],
+    [1008,209,'2026-01-22',5000,'Deposit','Credit','Posted','Monthly savings'],
+    [1009,210,'2026-01-23',45000,'Withdrawal','Debit','Posted','Property purchase'],
+    [1010,211,'2026-01-24',2000,'Deposit','Credit','Posted','Family contribution'],
+    [1011,212,'2026-01-25',95000,'Deposit','Credit','Pending','Inheritance'],
+    [1012,203,'2026-01-26',12000,'Deposit','Credit','Posted','Bonus deposit'],
+    [1013,213,'2026-01-27',5000,'Withdrawal','Debit','Posted','Retirement income'],
+    [1014,214,'2026-01-28',150000,'Transfer','Credit','Posted','Estate settlement'],
+    [1015,215,'2026-01-29',0.01,'Interest','Credit','Posted','Minimum interest'],
+    [1016,201,'2026-02-01',3000,'Deposit','Credit','Posted','Regular contribution'],
+    [1017,206,'2026-02-02',75000,'Deposit','Credit','Pending','Duplicate wire review'],
+    [1018,208,'2026-02-03',92000,'Deposit','Credit','Posted','Stock sale'],
+    [1019,204,'2026-02-04',120000,'Transfer','Credit','Posted','Large inbound duplicate'],
+    [1020,202,'2026-02-05',500,'Withdrawal','Debit','Posted','ATM withdrawal']
+  ]);
+
+  insertRows('journal_entries', ['journal_id','transaction_id','entry_date','debit_amount','credit_amount','gl_account','created_by'], [
+    [9001,1001,'2026-01-15',5000,5000,'Client Contributions','system'],
+    [9002,1004,'2026-01-18',120000,120000,'Transfers In','system'],
+    [9003,1005,'2026-01-19',75000,75000,'Deposits Pending','ops_user'],
+    [9004,1007,'2026-01-21',85000,84000,'Investment Proceeds','ops_user'],
+    [9005,1009,'2026-01-23',45000,45000,'Withdrawals','system'],
+    [9006,1011,'2026-01-25',95000,95000,'Deposits Pending','system'],
+    [9007,1014,'2026-01-28',150000,150000,'Transfers In','ops_user'],
+    [9008,1017,'2026-02-02',75000,74000,'Deposits Pending','ops_user'],
+    [9009,1018,'2026-02-03',92000,92000,'Investment Proceeds','system'],
+    [9010,1019,'2026-02-04',120000,120000,'Transfers In','ops_user']
+  ]);
+
+  insertRows('compliance_reviews', ['review_id','account_id','review_date','issue_type','severity','review_status','assigned_to'], [
+    [7001,201,'2026-01-10','KYC refresh','Low','Closed','A. Carter'],
+    [7002,202,'2025-01-15','Missing documentation','Medium','Open','A. Carter'],
+    [7003,203,'2025-12-20','Routine review','Low','Closed','B. Singh'],
+    [7004,204,'2024-02-10','KYC pending active account','Medium','Open','B. Singh'],
+    [7005,206,'2025-05-01','Large pending deposit','High','Open','C. Lee'],
+    [7006,207,'2024-01-22','Suspended account activity','High','In Progress','C. Lee'],
+    [7007,208,'2026-02-16','High value account review','Low','Closed','D. Roy'],
+    [7008,209,'2024-03-01','High-risk client monitoring','High','In Progress','A. Carter'],
+    [7009,210,'2023-12-15','Expired KYC','High','Open','D. Roy'],
+    [7010,211,'2025-10-01','Routine RESP review','Low','Closed','E. Stone'],
+    [7011,212,'2024-04-01','Large pending inheritance','Medium','Open','E. Stone'],
+    [7012,213,'2025-11-05','High-risk client review','Medium','Open','F. Green'],
+    [7013,215,'2024-11-11','Dormant account review','Low','Closed','G. Wells'],
+    [7014,216,'2024-12-10','Missing suitability notes','Medium','Open','G. Wells'],
+    [7015,217,'2023-08-02','Expired KYC high balance','High','Open','H. Patel'],
+    [7016,218,'2024-05-11','High-risk monitoring','High','In Progress','H. Patel'],
+    [7017,219,'2026-03-14','FHSA review','Low','Closed','A. Carter'],
+    [7018,220,'2025-01-30','Pending KYC RESP','Medium','Open','B. Singh'],
+    [7019,221,'2023-09-19','Closed account review','Low','Closed','C. Lee'],
+    [7020,223,'2025-02-02','High value activity','High','Open','D. Roy']
+  ]);
+
+  insertRows('compliance_flags', ['flag_id','transaction_id','flag_type','severity','reviewed','created_date'], [
+    [8001,1004,'large_amount','High',0,'2026-01-18'],
+    [8002,1005,'pending_large','Medium',0,'2026-01-19'],
+    [8003,1007,'large_deposit','High',1,'2026-01-21'],
+    [8004,1009,'large_withdrawal','Medium',0,'2026-01-23'],
+    [8005,1011,'pending_large','Medium',0,'2026-01-25'],
+    [8006,1014,'estate_transfer','High',1,'2026-01-28'],
+    [8007,1017,'possible_duplicate','High',0,'2026-02-02'],
+    [8008,1019,'possible_duplicate','High',0,'2026-02-04'],
+    [8009,1018,'external_transfer','High',0,'2026-02-03'],
+    [8010,1012,'large_contribution','Medium',1,'2026-01-26'],
+    [8011,1014,'estate_review','Medium',0,'2026-01-28'],
+    [8012,1004,'duplicate_review','High',0,'2026-01-18']
+  ]);
+
+  insertRows('regulatory_updates', ['update_id','regulator','topic','effective_date','impact_level','summary'], [
+    [1,'CIRO','KYC and suitability','2025-06-30','High','Enhanced documentation expectations for client profiles.'],
+    [2,'CSA','Client focused reforms','2025-09-01','High','Reminder on conflicts, suitability, and disclosure controls.'],
+    [3,'FINTRAC','Large cash transaction review','2025-07-15','Medium','Monitoring expectations for unusual transaction patterns.'],
+    [4,'CIRO','Complaint handling','2025-10-01','Medium','Updated guidance for escalation and evidence retention.'],
+    [5,'CSA','Registered account disclosure','2026-01-01','Medium','Additional investor disclosure for account types.']
+  ]);
+}
+
+function enableGame() {
+  ['sqlInput','btnRun','btnCheck','btnHint','btnReset'].forEach(id => document.getElementById(id).disabled = false);
+}
+
+function loadLevel(index) {
+  currentLevel = index;
+  attempts = 0;
+  levelHintUsed = false;
+  solutionUsed = false;
+  levelCompleted = false;
+  lastResult = null;
+  lastRunSQL = '';
+
+  const level = levels[currentLevel];
+  document.getElementById('levelNum').textContent = currentLevel + 1;
+  document.getElementById('attempts').textContent = attempts;
+  document.getElementById('missionTitle').textContent = level.title;
+  document.getElementById('missionDesc').textContent = level.desc;
+  document.getElementById('badgeRow').innerHTML = level.concepts.map(c => `<span class="badge">${escapeHtml(c)}</span>`).join('');
+  document.getElementById('sqlInput').value = level.starter;
+
+  hideMessages();
+  document.getElementById('solutionBox').classList.remove('visible');
+  document.getElementById('solutionBox').textContent = '';
+  document.getElementById('btnSolution').disabled = true;
+  document.getElementById('btnNext').style.display = 'none';
+  document.getElementById('btnCheck').disabled = false;
+  document.getElementById('resultPanel').innerHTML = '<div class="empty-state">Run a query to see results.</div>';
+  document.getElementById('rowCount').textContent = '';
+  renderProgressDots();
+}
+
+function runQuery() {
+  hideMessages(false);
+  const sql = document.getElementById('sqlInput').value.trim();
+
+  if (!sql) {
+    showError('Write a SELECT query first.');
+    return;
+  }
+
+  if (!isSafeSelectQuery(sql)) {
+    showError('Only SELECT and WITH queries are allowed in this game.');
+    return;
+  }
+
+  try {
+    lastResult = executeQuery(sql);
+    lastRunSQL = sql;
+    renderResults(lastResult);
+  } catch (err) {
+    lastResult = null;
+    lastRunSQL = '';
+    renderErrorResult(err.message);
+    showError('SQL error: ' + err.message);
+  }
+}
+
+function checkAnswer() {
+  const currentSQL = document.getElementById('sqlInput').value.trim();
+
+  if (!lastResult) {
+    showError('Run your query before checking the answer.');
+    return;
+  }
+
+  if (currentSQL !== lastRunSQL) {
+    showError('You changed the SQL after running it. Run the query again before checking your answer.');
+    return;
+  }
+
+  const level = levels[currentLevel];
+  let expected;
+
+  try {
+    expected = executeQuery(level.solutionSQL);
+  } catch (err) {
+    showError('Internal solution error: ' + err.message);
+    return;
+  }
+
+  const comparison = compareResults(lastResult, expected, level.requiredColumns, level.orderMatters);
+
+  if (comparison.ok) {
+    completeLevel();
+  } else {
+    attempts += 1;
+    document.getElementById('attempts').textContent = attempts;
+
+    if (attempts >= 2) {
+      document.getElementById('btnSolution').disabled = false;
+    }
+
+    showError(comparison.message || 'Almost there. Your result set does not match the mission output yet.');
+  }
+}
+
+function completeLevel() {
+  if (levelCompleted) return;
+
+  levelCompleted = true;
+  completedLevels.add(currentLevel);
+
+  let points = 100;
+  points -= attempts * 15;
+  if (levelHintUsed) points -= 10;
+  if (solutionUsed) points -= 35;
+  points = Math.max(points, 35);
+
+  score += points;
+  document.getElementById('score').textContent = score;
+
+  document.getElementById('successBox').innerHTML = '&#10003; <strong>Mission complete.</strong> +' + points + ' points.';
+  document.getElementById('successBox').classList.add('visible');
+
+  document.getElementById('learnBox').innerHTML = '<h4>Why this matters</h4><p>' + escapeHtml(levels[currentLevel].learn) + '</p>';
+  document.getElementById('learnBox').classList.add('visible');
+
+  document.getElementById('btnCheck').disabled = true;
+
+  if (currentLevel < levels.length - 1) {
+    document.getElementById('btnNext').style.display = 'inline-block';
+  } else {
+    setTimeout(showWinModal, 550);
+  }
+
+  launchConfetti();
+  renderProgressDots();
+}
+
+function showHint() {
+  if (hintsLeft <= 0) {
+    showError('No hints left. Try running a query and studying the result.');
+    return;
+  }
+
+  if (!levelHintUsed) {
+    hintsLeft -= 1;
+    levelHintUsed = true;
+    document.getElementById('hintsLeft').textContent = hintsLeft;
+  }
+
+  const box = document.getElementById('hintBox');
+  box.textContent = '\uD83D\uDCA1 ' + levels[currentLevel].hint;
+  box.classList.add('visible');
+
+  if (hintsLeft <= 0) {
+    document.getElementById('btnHint').disabled = true;
+  }
+}
+
+function showSolution() {
+  const box = document.getElementById('solutionBox');
+  box.textContent = levels[currentLevel].solutionSQL;
+  box.classList.add('visible');
+  solutionUsed = true;
+}
+
+function resetEditor() {
+  document.getElementById('sqlInput').value = levels[currentLevel].starter;
+  lastResult = null;
+  lastRunSQL = '';
+  hideMessages();
+  document.getElementById('resultPanel').innerHTML = '<div class="empty-state">Run a query to see results.</div>';
+  document.getElementById('rowCount').textContent = '';
+}
+
+function nextLevel() {
+  if (currentLevel < levels.length - 1) {
+    loadLevel(currentLevel + 1);
+  }
+}
+
+function executeQuery(sql) {
+  const raw = db.exec(sql);
+  if (!raw.length) return { columns: [], rows: [] };
+  return { columns: raw[0].columns, rows: raw[0].values };
+}
+
+// BUG FIX: Proper newline handling and no stray closing brace
+function isSafeSelectQuery(sql) {
+  const withoutComments = sql
+    .split('\n')
+    .filter(line => !line.trim().startsWith('--'))
+    .join('\n')
+    .trim()
+    .replace(/^;+/, '')
+    .toLowerCase();
+
+  const startsOkay =
+    withoutComments.startsWith('select') ||
+    withoutComments.startsWith('with');
+
+  if (!startsOkay) return false;
+
+  const blocked = [
+    'insert', 'update', 'delete', 'drop', 'alter', 'create',
+    'replace', 'truncate', 'attach', 'detach', 'pragma', 'vacuum'
+  ];
+
+  return !blocked.some(word =>
+    new RegExp('\\b' + word + '\\b', 'i').test(withoutComments)
+  );
+}
+
+// BUG FIX: properly extract column names from both string and object requiredColumns specs
+function compareResults(userResult, expectedResult, requiredColumns, orderMatters) {
+  const missing = getMissingColumns(userResult.columns, requiredColumns);
+
+  if (missing.length > 0) {
+    return { ok: false, message: 'Missing required column(s): ' + missing.join(', ') + '.' };
+  }
+
+  const userRows = projectRows(userResult, requiredColumns);
+  // BUG FIX: extract plain column names for expected projection
+  const expectedColNames = requiredColumns.map(col => typeof col === 'string' ? col : col.name);
+  const expectedRows = projectRows(expectedResult, expectedColNames);
+
+  if (userRows.length !== expectedRows.length) {
+    return { ok: false, message: 'Expected ' + expectedRows.length + ' row(s), but your query returned ' + userRows.length + '.' };
+  }
+
+  const userComparable = userRows.map(row => JSON.stringify(row));
+  const expectedComparable = expectedRows.map(row => JSON.stringify(row));
+
+  if (!orderMatters) {
+    userComparable.sort();
+    expectedComparable.sort();
+  }
+
+  const ok = JSON.stringify(userComparable) === JSON.stringify(expectedComparable);
+
+  return {
+    ok,
+    message: orderMatters
+      ? 'Rows or row order do not match. This mission requires the correct ORDER BY.'
+      : 'Rows do not match the expected compliance result set.'
+  };
+}
+
+function getMissingColumns(columns, requiredColumns) {
+  const lowerCols = columns.map(c => c.toLowerCase());
+  const missing = [];
+
+  requiredColumns.forEach(col => {
+    const names = typeof col === 'string' ? [col] : [col.name, ...(col.aliases || [])];
+    const found = names.some(name => lowerCols.includes(name.toLowerCase()));
+    if (!found) missing.push(typeof col === 'string' ? col : col.name);
+  });
+
+  return missing;
+}
+
+function projectRows(result, requiredColumns) {
+  const lowerCols = result.columns.map(c => c.toLowerCase());
+
+  return result.rows.map(row => {
+    return requiredColumns.map(col => {
+      const names = typeof col === 'string' ? [col] : [col.name, ...(col.aliases || [])];
+      const index = names.map(n => lowerCols.indexOf(n.toLowerCase())).find(i => i >= 0);
+      return normalizeValue(row[index]);
+    });
+  });
+}
+
+function normalizeValue(value) {
+  if (value === null || value === undefined) return '__null__';
+  if (typeof value === 'number') return Number(value.toFixed(4));
+  return String(value).trim().toLowerCase();
+}
+
+function renderResults(result) {
+  const panel = document.getElementById('resultPanel');
+  const rowCount = document.getElementById('rowCount');
+
+  if (!result.columns.length) {
+    panel.innerHTML = '<div class="empty-state">Query executed, but returned no result table.</div>';
+    rowCount.textContent = '';
+    return;
+  }
+
+  if (!result.rows.length) {
+    panel.innerHTML = '<div class="empty-state">Query returned 0 rows.<br><br>Columns: ' + result.columns.map(escapeHtml).join(', ') + '</div>';
+    rowCount.textContent = '0 rows';
+    return;
+  }
+
+  const thead = result.columns.map(c => '<th>' + escapeHtml(c) + '</th>').join('');
+  const tbody = result.rows.map(row => '<tr>' + row.map(v => '<td>' + escapeHtml(formatValue(v)) + '</td>').join('') + '</tr>').join('');
+
+  panel.innerHTML = '<table><thead><tr>' + thead + '</tr></thead><tbody>' + tbody + '</tbody></table>';
+  rowCount.textContent = result.rows.length + ' row' + (result.rows.length === 1 ? '' : 's');
+}
+
+function renderErrorResult(message) {
+  document.getElementById('resultPanel').innerHTML = '<div class="empty-state">SQL error:<br><br>' + escapeHtml(message) + '</div>';
+  document.getElementById('rowCount').textContent = '';
+}
+
+function renderProgressDots() {
+  const dots = document.getElementById('progressDots');
+  dots.innerHTML = levels.map((_, i) => {
+    const cls = completedLevels.has(i) ? 'done' : i === currentLevel ? 'current' : '';
+    return '<span class="dot ' + cls + '" title="Level ' + (i + 1) + '"></span>';
+  }).join('');
+}
+
+function hideMessages(includeHint = true) {
+  ['errorBox','successBox','learnBox'].forEach(id => document.getElementById(id).classList.remove('visible'));
+  if (includeHint) {
+    document.getElementById('hintBox').classList.remove('visible');
+  }
+}
+
+function showError(message) {
+  const box = document.getElementById('errorBox');
+  box.textContent = message;
+  box.classList.add('visible');
+}
+
+function launchConfetti() {
+  const colors = ['#38bdf8', '#22c55e', '#f59e0b', '#ef4444', '#a78bfa'];
+  const container = document.getElementById('celebration');
+
+  container.innerHTML = '';
+  container.style.display = 'block';
+
+  for (let i = 0; i < 45; i++) {
+    const piece = document.createElement('div');
+    piece.className = 'confetti';
+    piece.style.left = Math.random() * 100 + 'vw';
+    piece.style.top = '-12px';
+    piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+    piece.style.animationDelay = Math.random() * 0.35 + 's';
+    piece.style.animationDuration = (1.7 + Math.random() * 1.2) + 's';
+    container.appendChild(piece);
+  }
+
+  setTimeout(() => {
+    container.style.display = 'none';
+    container.innerHTML = '';
+  }, 3200);
+}
+
+function showWinModal() {
+  document.getElementById('finalScore').textContent = score;
+  document.getElementById('winModal').classList.add('visible');
+}
+
+function formatValue(value) {
+  if (value === null || value === undefined) return '';
+  if (typeof value === 'number') return Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/\.00$/, '');
+  return String(value);
+}
+
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+document.addEventListener('DOMContentLoaded', initGame);
+
+document.addEventListener('keydown', event => {
+  if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') {
+    const runButton = document.getElementById('btnRun');
+    if (!runButton.disabled) runQuery();
+  }
+});
+</script>
+</body>
+</html>
