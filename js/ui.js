@@ -201,7 +201,7 @@ export function showWinModal(score, earnedBadges, total, totalTime, difficulty) 
 
 export function showContinueSection(info) {
   const sec = document.getElementById('continueSection');
-  if (sec) sec.style.display = 'block';
+  if (sec) sec.style.display = 'flex';
   const infoEl = document.getElementById('continueInfo');
   if (infoEl) infoEl.textContent = info;
 }
