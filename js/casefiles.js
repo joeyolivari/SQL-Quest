@@ -18,5 +18,15 @@ export const briefings = {
   17: '🎯 High-risk clients with open reviews are your immediate priority. Pull the list.',
   18: '📈 Calculate average transaction amounts by type to baseline normal behaviour for anomaly detection.',
   19: '⏰ Compliance reviews older than a year with no resolution are overdue. Find every one of them.',
-  20: '🏆 Build the executive risk dashboard — advisor, severity, and open issue counts for the morning brief.'
+  20: '🏆 Build the executive risk dashboard — advisor, severity, and open issue counts for the morning brief.',
+  21: '💰 Map total transaction volume per account — find out who is moving the most money.',
+  22: '🔍 A duplicate flag pattern was detected in the registry — scan for all matching flag types.',
+  23: '⚡ High-volume account alert — surface accounts whose cumulative transactions exceed the screening threshold.',
+  24: '📊 Above-average balance scan — flag accounts with balances significantly above the portfolio mean.',
+  25: '🧹 Advisor clearance check — confirm which advisors carry no high-severity review burden.',
+  26: '⏱️ Pull the most recent transaction per account to establish the current activity baseline.',
+  27: '🕰️ Stale review warning — active accounts with no review since 2025 are overdue and exam-ready risks.',
+  28: '📋 Advisor workload map — count open and in-progress reviews per advisor for the capacity report.',
+  29: '📜 Regulatory triage — classify incoming updates by action priority for the compliance calendar.',
+  30: '🏆 Full risk triage — build the complete open-review dashboard sorted by severity and date for the morning brief.'
 };

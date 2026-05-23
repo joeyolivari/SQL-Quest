@@ -50,6 +50,10 @@ function startGame(queue, scenarioId) {
   state.selectedScenario = scenarioId;
   ui.hideHomeScreen();
   ui.renderSchema(schema);
+  const totalEl = document.getElementById('levelTotal');
+  if (totalEl) totalEl.textContent = queue.length;
+  const winCount = document.getElementById('winModalCount');
+  if (winCount) winCount.textContent = queue.length;
   loadLevel(0);
 }
 
@@ -195,9 +199,27 @@ document.addEventListener('DOMContentLoaded', () => {
     const el = document.getElementById('sqlInput');
     const s = el.selectionStart, end = el.selectionEnd;
     const val = el.value;
-    el.value = val.slice(0, s) + "'" + val.slice(s, end) + "'" + val.slice(end);
-    el.selectionStart = s + 1;
-    el.selectionEnd = end + 1;
+    if (s !== end) {
+      // Wrap selection in quotes
+      el.value = val.slice(0, s) + "'" + val.slice(s, end) + "'" + val.slice(end);
+      el.selectionStart = s;
+      el.selectionEnd = end + 2;
+    } else {
+      // Find word boundaries at cursor
+      let ws = s, we = s;
+      while (ws > 0 && /\w/.test(val[ws - 1])) ws--;
+      while (we < val.length && /\w/.test(val[we])) we++;
+      if (ws < we) {
+        // Wrap word
+        el.value = val.slice(0, ws) + "'" + val.slice(ws, we) + "'" + val.slice(we);
+        el.selectionStart = ws;
+        el.selectionEnd = we + 2;
+      } else {
+        // No word — insert empty quotes, cursor inside
+        el.value = val.slice(0, s) + "''" + val.slice(s);
+        el.selectionStart = el.selectionEnd = s + 1;
+      }
+    }
     el.focus();
   });
 

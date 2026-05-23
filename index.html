@@ -11,7 +11,7 @@
 <header>
   <div class="logo">Compliance SQL Quest</div>
   <div class="stats">
-    <div class="stat">Level <span id="levelNum">1</span>/20</div>
+    <div class="stat">Level <span id="levelNum">1</span>/<span id="levelTotal">—</span></div>
     <div class="stat">Score <span id="score">0</span></div>
     <div class="stat">Hints <span id="hintsLeft">3</span></div>
     <div class="stat">Attempts <span id="attempts">0</span></div>
@@ -112,7 +112,7 @@
 <div class="modal-overlay" id="winModal">
   <div class="modal">
     <h2>&#127942; Audit Ready</h2>
-    <p>You completed all 20 compliance SQL investigations.</p>
+    <p>You completed all <span id="winModalCount">20</span> compliance SQL investigations.</p>
     <div class="final-score" id="finalScore">0</div>
     <p>final score</p>
     <button class="btn-primary" onclick="location.reload()">Play Again</button>
