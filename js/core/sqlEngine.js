@@ -1,4 +1,4 @@
-import { seedData } from './data.js';
+import { seedData } from '../data/data.js';
 
 let db = null;
 

@@ -1,13 +1,13 @@
-import { missions } from './missions.js';
-import { schema } from './schema.js';
-import { tutorials } from './tutorial.js';
-import { briefings } from './casefiles.js';
+import { missions } from '../data/missions.js';
+import { schema } from '../data/schema.js';
+import { tutorials } from '../data/tutorial.js';
+import { briefings } from '../data/casefiles.js';
 import { checkBadges, BADGE_DEFS } from './badges.js';
-import { initEngine, executeQuery, isSafeQuery } from './sqlEngine.js';
-import { compareResults } from './validation.js';
+import { initEngine, executeQuery, isSafeQuery } from '../core/sqlEngine.js';
+import { compareResults } from '../core/validation.js';
 import { state, resetForLevel, useHint, recordAttempt, completeCurrentMission,
-         saveProgress, loadProgress, clearProgress } from './gameState.js';
-import * as ui from './ui.js';
+         saveProgress, loadProgress, clearProgress } from '../core/gameState.js';
+import * as ui from '../ui/ui.js';
 
 let engineReady = false;
 let selectedDifficulty = 'beginner';
