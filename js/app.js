@@ -188,6 +188,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnSolution').addEventListener('click', showSolution);
   document.getElementById('btnNext').addEventListener('click', nextLevel);
   document.getElementById('btnTutorial').addEventListener('click', openTutorial);
+  document.getElementById('btnTutorialHome').addEventListener('click', openTutorial);
   document.getElementById('btnHome').addEventListener('click', goHome);
   document.getElementById('btnCloseTutorial').addEventListener('click', closeTutorial);
 
