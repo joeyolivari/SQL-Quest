@@ -138,10 +138,9 @@ function showHint() {
 function showSolution() {
   state.solutionUsed = true;
   const sql = state.missionQueue[state.currentMissionIndex].solutionSQL;
-  ui.showSolutionBox(sql);
   document.getElementById('sqlInput').value = sql;
-  state.lastResult = null;
-  state.lastRunSQL = '';
+  ui.showSolutionBox(sql);
+  runQuery();
 }
 
 function resetEditor() {
