@@ -702,17 +702,15 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 
 /* ── Back to Menu button ────────────────────────────────────────────────── */
 .btn-home {
-  display: block;
-  width: 100%;
-  margin-bottom: 16px;
+  display: inline-block;
+  margin-bottom: 12px;
   background: transparent;
   border: 1px solid var(--border);
   color: var(--text-dim);
   font-size: 0.8rem;
-  padding: 7px 12px;
+  padding: 6px 14px;
   border-radius: 6px;
   cursor: pointer;
-  text-align: left;
   transition: background .15s, color .15s;
 }
 .btn-home:hover { background: var(--surface-2, #1e293b); color: var(--text); }
