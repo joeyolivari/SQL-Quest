@@ -1,34 +1,69 @@
 import { missions } from './missions.js';
+import { scenarios } from './scenarios.js';
 import { schema } from './schema.js';
 import { tutorials } from './tutorial.js';
+import { briefings } from './casefiles.js';
+import { checkBadges, BADGE_DEFS } from './badges.js';
 import { initEngine, executeQuery, isSafeQuery } from './sqlEngine.js';
 import { compareResults } from './validation.js';
 import { state, resetForLevel, useHint, recordAttempt, completeCurrentMission } from './gameState.js';
 import * as ui from './ui.js';
 
-const TOTAL = missions.length;
+let engineReady = false;
+let selectedDifficulty = 'beginner';
 
-async function initGame() {
-  ui.renderSchema(schema);
-  ui.renderProgressDots(state.completedMissions, 0, TOTAL);
-  try {
-    await initEngine();
-    ['sqlInput', 'btnRun', 'btnCheck', 'btnHint', 'btnReset'].forEach(id => {
-      document.getElementById(id).disabled = false;
+// ── Home screen ──────────────────────────────────────────────────────────────
+
+function initHomeScreen() {
+  ui.renderScenarioCards(scenarios, (scenarioId) => {
+    startGame(getMissionQueue(selectedDifficulty, scenarioId), scenarioId);
+  });
+
+  document.querySelectorAll('.diff-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedDifficulty = btn.dataset.diff;
     });
-    loadLevel(0);
-  } catch (err) {
-    ui.showError('SQLite failed to load. Check your connection. ' + err.message);
-    document.getElementById('resultPanel').innerHTML =
-      '<div class="empty-state">Could not load SQLite engine.</div>';
-  }
+  });
+
+  document.getElementById('btnPlayAll').addEventListener('click', () => {
+    startGame(getMissionQueue(selectedDifficulty, null), null);
+  });
 }
 
+function getMissionQueue(difficulty, scenarioId) {
+  let queue = [...missions];
+  if (scenarioId) {
+    const sc = scenarios.find(s => s.id === scenarioId);
+    if (sc) queue = queue.filter(m => sc.missionIds.includes(m.id));
+  }
+  if (difficulty !== 'all') {
+    queue = queue.filter(m => m.difficulty.toLowerCase() === difficulty);
+  }
+  return queue.length ? queue : [...missions];
+}
+
+function startGame(queue, scenarioId) {
+  if (!engineReady) {
+    ui.showError('SQL engine is still loading. Please wait a moment.');
+    return;
+  }
+  state.missionQueue = queue;
+  state.selectedScenario = scenarioId;
+  ui.hideHomeScreen();
+  ui.renderSchema(schema);
+  loadLevel(0);
+}
+
+// ── Game loop ────────────────────────────────────────────────────────────────
+
 function loadLevel(index) {
+  const mission = state.missionQueue[index];
   resetForLevel(index);
-  ui.loadMission(missions[index], index);
+  ui.loadMission(mission, index, briefings[mission.id]);
   ui.updateStats(state.score, state.hintsLeft, state.attempts, index + 1);
-  ui.renderProgressDots(state.completedMissions, index, TOTAL);
+  ui.renderProgressDots(state.completedMissions, index, state.missionQueue.length);
 }
 
 function runQuery() {
@@ -55,7 +90,7 @@ function checkAnswer() {
     ui.showError('You changed the SQL after running it. Run the query again before checking.');
     return;
   }
-  const mission = missions[state.currentMissionIndex];
+  const mission = state.missionQueue[state.currentMissionIndex];
   let expected;
   try {
     expected = executeQuery(mission.solutionSQL);
@@ -69,9 +104,16 @@ function checkAnswer() {
     ui.showSuccess(`&#10003; <strong>Mission complete.</strong> +${points} points.`);
     ui.showExplanation(mission.explanation);
     document.getElementById('btnCheck').disabled = true;
-    ui.renderProgressDots(state.completedMissions, state.currentMissionIndex, TOTAL);
+    ui.renderProgressDots(state.completedMissions, state.currentMissionIndex, state.missionQueue.length);
     ui.updateStats(state.score, state.hintsLeft, state.attempts, state.currentMissionIndex + 1);
-    if (state.currentMissionIndex < TOTAL - 1) {
+
+    const newBadges = checkBadges(state, state.missionQueue.length);
+    newBadges.forEach(id => {
+      const def = BADGE_DEFS.find(b => b.id === id);
+      if (def) ui.showBadgeToast(def);
+    });
+
+    if (state.currentMissionIndex < state.missionQueue.length - 1) {
       ui.showNextButton(true);
     } else {
       setTimeout(() => ui.showWinModal(state.score), 550);
@@ -88,18 +130,18 @@ function checkAnswer() {
 function showHint() {
   if (state.hintsLeft <= 0) { ui.showError('No hints left. Try running a query and studying the result.'); return; }
   useHint();
-  ui.showHintMessage('💡 ' + missions[state.currentMissionIndex].hint);
+  ui.showHintMessage('💡 ' + state.missionQueue[state.currentMissionIndex].hint);
   ui.updateStats(state.score, state.hintsLeft, state.attempts, state.currentMissionIndex + 1);
   if (state.hintsLeft <= 0) document.getElementById('btnHint').disabled = true;
 }
 
 function showSolution() {
   state.solutionUsed = true;
-  ui.showSolutionBox(missions[state.currentMissionIndex].solutionSQL);
+  ui.showSolutionBox(state.missionQueue[state.currentMissionIndex].solutionSQL);
 }
 
 function resetEditor() {
-  document.getElementById('sqlInput').value = missions[state.currentMissionIndex].starterSQL;
+  document.getElementById('sqlInput').value = state.missionQueue[state.currentMissionIndex].starterSQL;
   state.lastResult = null;
   state.lastRunSQL = '';
   ui.hideMessages();
@@ -107,7 +149,9 @@ function resetEditor() {
 }
 
 function nextLevel() {
-  if (state.currentMissionIndex < TOTAL - 1) loadLevel(state.currentMissionIndex + 1);
+  if (state.currentMissionIndex < state.missionQueue.length - 1) {
+    loadLevel(state.currentMissionIndex + 1);
+  }
 }
 
 function openTutorial() {
@@ -117,6 +161,20 @@ function openTutorial() {
 
 function closeTutorial() {
   document.getElementById('tutorialModal').classList.remove('visible');
+}
+
+// ── Bootstrap ────────────────────────────────────────────────────────────────
+
+async function initGame() {
+  try {
+    await initEngine();
+    engineReady = true;
+    ['sqlInput', 'btnRun', 'btnCheck', 'btnHint', 'btnReset'].forEach(id => {
+      document.getElementById(id).disabled = false;
+    });
+  } catch (err) {
+    ui.showError('SQLite failed to load. Check your connection. ' + err.message);
+  }
 }
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -133,5 +191,6 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!document.getElementById('btnRun').disabled) runQuery();
     }
   });
+  initHomeScreen();
   initGame();
 });

@@ -41,9 +41,11 @@ export function renderProgressDots(completedMissions, currentIndex, total) {
   }).join('');
 }
 
-export function loadMission(mission, index) {
+export function loadMission(mission, index, briefing) {
   document.getElementById('missionTitle').textContent = mission.title;
   document.getElementById('missionDesc').textContent = mission.task;
+  const cfBox = document.getElementById('casefileBox');
+  if (cfBox) cfBox.textContent = briefing || '';
   document.getElementById('sqlInput').value = mission.starterSQL;
 
   const diff = mission.difficulty.toLowerCase();
@@ -173,6 +175,41 @@ export function launchConfetti() {
 export function showWinModal(score) {
   document.getElementById('finalScore').textContent = score;
   document.getElementById('winModal').classList.add('visible');
+}
+
+export function hideHomeScreen() {
+  const hs = document.getElementById('homeScreen');
+  if (hs) hs.style.display = 'none';
+  const gc = document.querySelector('.game-container');
+  if (gc) gc.style.display = 'grid';
+}
+
+export function showBadgeToast(badge) {
+  const toast = document.getElementById('badgeToast');
+  if (!toast) return;
+  toast.innerHTML =
+    `<span class="toast-icon">${badge.icon}</span>` +
+    `<div><div class="toast-label">Badge Unlocked: ${escapeHtml(badge.label)}</div>` +
+    `<div class="toast-desc">${escapeHtml(badge.desc)}</div></div>`;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+export function renderScenarioCards(scenarios, onClick) {
+  const grid = document.getElementById('scenarioGrid');
+  if (!grid) return;
+  grid.innerHTML = scenarios.map(sc =>
+    `<div class="scenario-card" data-scenario="${escapeHtml(sc.id)}" style="border-color:${sc.color}">` +
+    `<h4>${escapeHtml(sc.name)}</h4>` +
+    `<p>${escapeHtml(sc.description)}</p></div>`
+  ).join('');
+  grid.addEventListener('click', e => {
+    const card = e.target.closest('.scenario-card');
+    if (!card) return;
+    grid.querySelectorAll('.scenario-card').forEach(c => c.classList.remove('selected'));
+    card.classList.add('selected');
+    onClick(card.dataset.scenario);
+  });
 }
 
 export function renderTutorialCards(tutorials) {

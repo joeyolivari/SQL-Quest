@@ -9,7 +9,11 @@ export function compareResults(userResult, expectedResult, requiredColumns, orde
   const expectedRows = projectRows(expectedResult, expectedColNames);
 
   if (userRows.length !== expectedRows.length) {
-    return { ok: false, message: 'Expected ' + expectedRows.length + ' row(s), but your query returned ' + userRows.length + '.' };
+    const dir = userRows.length > expectedRows.length ? 'Too many rows' : 'Too few rows';
+    const tip = userRows.length > expectedRows.length
+      ? 'Check your WHERE clause — you may be returning extra rows.'
+      : 'Check your WHERE clause — you may be filtering too aggressively.';
+    return { ok: false, message: dir + ': expected ' + expectedRows.length + ', got ' + userRows.length + '. ' + tip };
   }
 
   const userComp = userRows.map(row => JSON.stringify(row));
@@ -21,8 +25,8 @@ export function compareResults(userResult, expectedResult, requiredColumns, orde
   return {
     ok,
     message: orderMatters
-      ? 'Rows or row order do not match. This mission requires the correct ORDER BY.'
-      : 'Rows do not match the expected compliance result set.'
+      ? 'Right rows, wrong order. Check your ORDER BY clause — this mission requires a specific sort.'
+      : 'Right row count, but values differ. Check column calculations, joins, or text casing.'
   };
 }
 

@@ -8,6 +8,8 @@ export const state = {
   solutionUsed: false,
   levelCompleted: false,
   completedMissions: new Set(),
+  earnedBadges: new Set(),
+  missionQueue: [],
   lastResult: null,
   lastRunSQL: '',
   unlockedConcepts: new Set()

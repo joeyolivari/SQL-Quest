@@ -19,7 +19,30 @@
   </div>
 </header>
 
-<div class="game-container">
+<div id="homeScreen" class="home-screen">
+  <div class="home-hero">
+    <h1 class="home-title">Compliance SQL Quest</h1>
+    <p class="home-tagline">Master SQL through real-world financial compliance investigations.</p>
+  </div>
+  <div class="home-section">
+    <h3>Difficulty</h3>
+    <div class="diff-row">
+      <button class="diff-btn beginner selected" data-diff="beginner">Beginner</button>
+      <button class="diff-btn intermediate" data-diff="intermediate">Intermediate</button>
+      <button class="diff-btn advanced" data-diff="advanced">Advanced</button>
+      <button class="diff-btn" data-diff="all">All Levels</button>
+    </div>
+  </div>
+  <div class="home-section">
+    <h3>Pick a Scenario <span class="home-hint">(or use the button below to play everything)</span></h3>
+    <div class="scenario-grid" id="scenarioGrid"></div>
+  </div>
+  <div class="home-footer">
+    <button class="btn-lg btn-primary" id="btnPlayAll">&#9654; Play All Missions</button>
+  </div>
+</div>
+
+<div class="game-container" style="display:none">
 
   <aside class="sidebar">
     <h3>Scenario</h3>
@@ -35,6 +58,7 @@
     <div class="mission-card">
       <h2 id="missionTitle">Loading SQLite engine...</h2>
       <p id="missionDesc">Please wait while the in-browser database starts.</p>
+      <p id="casefileBox" class="casefile-text"></p>
       <div class="badge-row" id="badgeRow"></div>
     </div>
 
@@ -91,6 +115,8 @@
     <button class="btn-primary" onclick="location.reload()">Play Again</button>
   </div>
 </div>
+
+<div id="badgeToast" class="badge-toast"></div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.12.0/sql-wasm.js"></script>
 <script type="module" src="js/app.js"></script>

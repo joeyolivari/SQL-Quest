@@ -608,3 +608,94 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   .mission-card h2 { font-size: 0.92rem; }
   .mission-card p { font-size: 0.8rem; }
 }
+
+/* ── Home Screen ────────────────────────────────────────────────────────── */
+.home-screen {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 48px 24px 64px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+.home-hero { text-align: center; }
+.home-title { font-size: 2rem; font-weight: 700; color: var(--accent); margin: 0 0 8px; }
+.home-tagline { color: var(--text-dim); font-size: 1rem; margin: 0; }
+.home-section h3 { font-size: 0.85rem; text-transform: uppercase; letter-spacing: .06em; color: var(--text-dim); margin: 0 0 12px; }
+.home-hint { font-size: 0.78rem; text-transform: none; letter-spacing: 0; color: var(--text-dim); font-weight: 400; }
+.diff-row { display: flex; gap: 10px; flex-wrap: wrap; }
+.diff-btn {
+  padding: 8px 20px;
+  border-radius: 6px;
+  border: 2px solid var(--border);
+  cursor: pointer;
+  font-size: 0.88rem;
+  font-weight: 600;
+  background: var(--surface);
+  color: var(--text);
+  transition: border-color .15s, background .15s;
+}
+.diff-btn.beginner       { border-color: #22c55e; }
+.diff-btn.intermediate   { border-color: #f59e0b; }
+.diff-btn.advanced       { border-color: #ef4444; }
+.diff-btn.selected       { background: var(--surface-2, #1e293b); }
+.diff-btn.beginner.selected     { background: #22c55e22; }
+.diff-btn.intermediate.selected { background: #f59e0b22; }
+.diff-btn.advanced.selected     { background: #ef444422; }
+.diff-btn:hover { background: var(--surface-2, #1e293b); }
+.scenario-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 12px;
+}
+.scenario-card {
+  background: var(--surface);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
+  cursor: pointer;
+  transition: border-color .15s, transform .1s;
+}
+.scenario-card:hover { transform: translateY(-2px); }
+.scenario-card.selected { box-shadow: 0 0 0 2px var(--accent); }
+.scenario-card h4 { margin: 0 0 6px; font-size: 0.9rem; }
+.scenario-card p  { margin: 0; font-size: 0.78rem; color: var(--text-dim); }
+.home-footer { text-align: center; }
+.btn-lg { padding: 12px 36px; font-size: 1rem; border-radius: 8px; font-weight: 700; }
+
+/* ── Casefile ────────────────────────────────────────────────────────────── */
+.casefile-text {
+  margin: 8px 0 2px;
+  padding: 8px 12px;
+  background: var(--surface-2, #1e293b);
+  border-left: 3px solid var(--accent);
+  border-radius: 4px;
+  font-size: 0.83rem;
+  color: var(--text-dim);
+  font-style: italic;
+}
+.casefile-text:empty { display: none; }
+
+/* ── Badge Toast ─────────────────────────────────────────────────────────── */
+.badge-toast {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 4px 24px #0006;
+  transform: translateY(24px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity .3s, transform .3s;
+  z-index: 9999;
+}
+.badge-toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+.toast-icon { font-size: 1.6rem; }
+.toast-label { font-size: 0.82rem; font-weight: 700; }
+.toast-desc  { font-size: 0.75rem; color: var(--text-dim); }
