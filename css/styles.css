@@ -15,7 +15,8 @@
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
-html, body { min-height: 100%; overflow-x: hidden; }
+html { min-height: 100%; }
+body { min-height: 100%; overflow-x: hidden; overflow-y: auto; }
 
 body {
   background: var(--bg);
@@ -620,6 +621,15 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   textarea { min-height: 180px; }
   .tutorial-grid { grid-template-columns: 1fr; }
   .modal--wide { max-height: 90vh; }
+
+  /* Home screen — tablet */
+  .home-screen { padding: 32px 16px 60px; gap: 28px; }
+  .home-title { font-size: 1.9rem; }
+  .diff-row { grid-template-columns: repeat(2, 1fr); }
+  .mission-list { max-height: none; }
+  .section-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .continue-section { flex-direction: column; align-items: flex-start; }
+  .continue-actions { width: 100%; }
 }
 
 @media (max-width: 480px) {
@@ -629,6 +639,26 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   button { padding: 7px 11px; font-size: 0.74rem; }
   .mission-card h2 { font-size: 0.92rem; }
   .mission-card p { font-size: 0.8rem; }
+
+  /* Home screen — phone */
+  .home-screen { padding: 24px 14px 56px; gap: 24px; }
+  .home-title { font-size: 1.6rem; }
+  .home-tagline { font-size: 0.9rem; }
+  .home-hero-badge { font-size: 0.64rem; }
+  .home-stat-chips { gap: 7px; }
+  .home-stat-chip { font-size: 0.72rem; padding: 4px 10px; }
+  .diff-row { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+  .diff-btn { padding: 14px 8px 11px; border-radius: 10px; }
+  .diff-icon { font-size: 1.25rem; }
+  .diff-label { font-size: 0.76rem; }
+  .diff-count { font-size: 0.62rem; }
+  .mission-list { max-height: none; }
+  .mission-item { padding: 9px 11px; gap: 9px; }
+  .mission-item-title { font-size: 0.79rem; }
+  .mission-concept { font-size: 0.57rem; }
+  .mission-item-badge { font-size: 0.59rem; padding: 2px 6px; }
+  .btn-lg { padding: 12px 28px; font-size: 0.92rem; }
+  .section-hint { display: none; }
 }
 
 /* ── Home Screen ────────────────────────────────────────────────────────── */
