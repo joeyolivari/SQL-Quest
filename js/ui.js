@@ -225,6 +225,7 @@ export function renderTutorialCards(tutorials) {
       <div class="tutorial-card">
         <h4>${escapeHtml(t.concept)}</h4>
         <p>${escapeHtml(t.summary)}</p>
+        <div class="eli12-box"><span class="eli12-label">ELI12</span>${escapeHtml(t.eli12)}</div>
         <pre>${escapeHtml(t.example)}</pre>
         <div class="compliance-use">${escapeHtml(t.complianceUse)}</div>
       </div>

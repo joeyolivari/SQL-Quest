@@ -137,7 +137,7 @@ export const missions = [
       'advisor_name', 'account_type', 'transaction_id', 'amount', 'flag_type', 'severity'
     ],
     orderMatters: false,
-    starterSQL: "-- Write your query here",
+    starterSQL: "",
     solutionSQL: "SELECT c.full_name AS client_name, ad.advisor_name, a.account_type,\n       t.transaction_id, t.amount, cf.flag_type, cf.severity\nFROM compliance_flags cf\nJOIN transactions t ON cf.transaction_id = t.transaction_id\nJOIN accounts a ON t.account_id = a.account_id\nJOIN clients c ON a.client_id = c.client_id\nJOIN advisors ad ON c.advisor_id = ad.advisor_id\nWHERE cf.reviewed = 0;",
     hint: 'Start from compliance_flags, join to transactions, accounts, clients, and advisors. Filter reviewed = 0.',
     explanation: "The final report combines source data into a compliance exception view. This mirrors real analyst work: connect clients, advisors, accounts, activity, and flags into one audit-ready output."
@@ -221,7 +221,7 @@ export const missions = [
     task: "Use a Common Table Expression to count compliance flags per account, then return only accounts with 2 or more flags. Return account_id and flag_count.",
     requiredColumns: ['account_id', 'flag_count'],
     orderMatters: false,
-    starterSQL: "-- Write your query here",
+    starterSQL: "",
     solutionSQL: "WITH flag_counts AS (\n  SELECT t.account_id, COUNT(*) AS flag_count\n  FROM compliance_flags cf\n  JOIN transactions t ON cf.transaction_id = t.transaction_id\n  GROUP BY t.account_id\n)\nSELECT account_id, flag_count\nFROM flag_counts\nWHERE flag_count >= 2;",
     hint: "Complete the CTE then add: SELECT account_id, flag_count FROM flag_counts WHERE flag_count >= 2.",
     explanation: "CTEs let you name an intermediate result and reference it like a table. Accounts with multiple flags indicate concentrated risk warranting prioritised review."
@@ -235,7 +235,7 @@ export const missions = [
     task: "Find high-risk clients who currently have at least one open compliance review. Return client_id, full_name, and risk_rating.",
     requiredColumns: ['client_id', 'full_name', 'risk_rating'],
     orderMatters: false,
-    starterSQL: "-- Write your query here",
+    starterSQL: "",
     solutionSQL: "SELECT c.client_id, c.full_name, c.risk_rating\nFROM clients c\nWHERE c.risk_rating = 'High'\n  AND EXISTS (\n    SELECT 1\n    FROM accounts a\n    JOIN compliance_reviews cr ON a.account_id = cr.account_id\n    WHERE a.client_id = c.client_id\n      AND cr.review_status = 'Open'\n  );",
     hint: "Use WHERE c.risk_rating = 'High' AND EXISTS (SELECT 1 FROM accounts a JOIN compliance_reviews cr ON a.account_id = cr.account_id WHERE a.client_id = c.client_id AND cr.review_status = 'Open').",
     explanation: "EXISTS returns true as soon as the correlated subquery finds one matching row. Combined with risk filters, it pinpoints the highest-priority clients requiring immediate compliance attention."
@@ -277,7 +277,7 @@ export const missions = [
     task: "Build an executive summary using a CTE. For each advisor, count open and in-progress compliance reviews by severity. Return advisor_name, severity, and issue_count ordered by advisor_name then severity.",
     requiredColumns: ['advisor_name', 'severity', 'issue_count'],
     orderMatters: true,
-    starterSQL: "-- Write your query here",
+    starterSQL: "",
     solutionSQL: "WITH advisor_issues AS (\n  SELECT ad.advisor_name, cr.severity, COUNT(*) AS issue_count\n  FROM advisors ad\n  JOIN clients c ON ad.advisor_id = c.advisor_id\n  JOIN accounts a ON c.client_id = a.client_id\n  JOIN compliance_reviews cr ON a.account_id = cr.account_id\n  WHERE cr.review_status IN ('Open', 'In Progress')\n  GROUP BY ad.advisor_name, cr.severity\n)\nSELECT advisor_name, severity, issue_count\nFROM advisor_issues\nORDER BY advisor_name, severity;",
     hint: "Complete the CTE by adding the remaining JOINs (accounts, compliance_reviews), filter WHERE review_status IN ('Open','In Progress'), GROUP BY both columns, then SELECT from it with ORDER BY.",
     explanation: "CTEs combined with multi-table JOINs produce executive dashboards from normalised data. This mirrors real compliance reporting: link advisors through clients and accounts to their open issues, aggregate by severity, sort for readability."
@@ -361,7 +361,7 @@ export const missions = [
     task: 'Use a CTE with ROW_NUMBER() to find the most recent transaction per account. Return account_id, transaction_id, transaction_date, and amount.',
     requiredColumns: ['account_id', 'transaction_id', 'transaction_date', 'amount'],
     orderMatters: false,
-    starterSQL: "-- Write your query here",
+    starterSQL: "",
     solutionSQL: "WITH ranked AS (\n  SELECT account_id, transaction_id, transaction_date, amount,\n    ROW_NUMBER() OVER (PARTITION BY account_id ORDER BY transaction_date DESC) AS rn\n  FROM transactions\n)\nSELECT account_id, transaction_id, transaction_date, amount\nFROM ranked\nWHERE rn = 1;",
     hint: "SELECT account_id, transaction_id, transaction_date, amount FROM ranked WHERE rn = 1.",
     explanation: "ROW_NUMBER() OVER (PARTITION BY ... ORDER BY ...) ranks rows within partitions without collapsing them. Filtering rn = 1 returns the top-ranked row per partition — here, the most recent transaction per account."
@@ -389,7 +389,7 @@ export const missions = [
     task: "Write a CTE to count open and in-progress compliance reviews per advisor. Return advisor_name and open_reviews, ordered from most to fewest then alphabetically.",
     requiredColumns: ['advisor_name', 'open_reviews'],
     orderMatters: true,
-    starterSQL: "-- Write your query here",
+    starterSQL: "",
     solutionSQL: "WITH advisor_load AS (\n  SELECT c.advisor_id, COUNT(*) AS open_reviews\n  FROM compliance_reviews cr\n  JOIN accounts a ON cr.account_id = a.account_id\n  JOIN clients c ON a.client_id = c.client_id\n  WHERE cr.review_status IN ('Open', 'In Progress')\n  GROUP BY c.advisor_id\n)\nSELECT ad.advisor_name, al.open_reviews\nFROM advisors ad\nJOIN advisor_load al ON ad.advisor_id = al.advisor_id\nORDER BY al.open_reviews DESC, ad.advisor_name;",
     hint: "Join advisors to advisor_load on advisor_id, then ORDER BY open_reviews DESC, advisor_name.",
     explanation: "CTEs pre-aggregate data and expose it like a table. A secondary sort by advisor_name after count produces a deterministic, reproducible workload report — essential for audit logs."
@@ -420,7 +420,7 @@ export const missions = [
       'advisor_name', 'account_type', 'severity', 'review_date'
     ],
     orderMatters: true,
-    starterSQL: "-- Write your query here",
+    starterSQL: "",
     solutionSQL: "SELECT c.full_name AS client_name, ad.advisor_name, a.account_type,\n       cr.severity, cr.review_date\nFROM compliance_reviews cr\nJOIN accounts a ON cr.account_id = a.account_id\nJOIN clients c ON a.client_id = c.client_id\nJOIN advisors ad ON c.advisor_id = ad.advisor_id\nWHERE cr.review_status IN ('Open', 'In Progress')\nORDER BY\n  CASE cr.severity WHEN 'High' THEN 1 WHEN 'Medium' THEN 2 ELSE 3 END,\n  cr.review_date;",
     hint: "Join from compliance_reviews through accounts, clients, and advisors. ORDER BY CASE cr.severity WHEN 'High' THEN 1 WHEN 'Medium' THEN 2 ELSE 3 END, cr.review_date.",
     explanation: "CASE inside ORDER BY enables custom sort sequences that override alphabetical order. Priority-sorted triage reports are a daily compliance deliverable — regulators expect them to be consistently reproducible."
