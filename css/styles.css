@@ -683,6 +683,23 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   transition: background .15s, color .15s;
 }
 .btn-schema-min:hover { background: var(--surface-2, #1e293b); color: var(--text); }
+#schemaBody.schema-collapsed { display: none; }
+
+/* ── Quote insert button ─────────────────────────────────────────────────── */
+.btn-quote {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 0.9rem;
+  font-family: monospace;
+  padding: 5px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background .15s;
+  letter-spacing: 2px;
+}
+.btn-quote:hover:not(:disabled) { background: var(--surface-2, #1e293b); }
+.btn-quote:disabled { opacity: 0.4; cursor: default; }
 
 /* ── Casefile ────────────────────────────────────────────────────────────── */
 .casefile-text {

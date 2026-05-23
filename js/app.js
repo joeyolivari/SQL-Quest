@@ -166,7 +166,7 @@ async function initGame() {
   try {
     await initEngine();
     engineReady = true;
-    ['sqlInput', 'btnRun', 'btnCheck', 'btnHint', 'btnReset'].forEach(id => {
+    ['sqlInput', 'btnRun', 'btnCheck', 'btnHint', 'btnReset', 'btnQuote'].forEach(id => {
       document.getElementById(id).disabled = false;
     });
   } catch (err) {
@@ -185,23 +185,20 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnHome').addEventListener('click', goHome);
   document.getElementById('btnCloseTutorial').addEventListener('click', closeTutorial);
 
-  document.getElementById('btnSchemaMin').addEventListener('click', () => {
+  document.getElementById('btnSchemaMin').addEventListener('click', function () {
     const body = document.getElementById('schemaBody');
-    const btn = document.getElementById('btnSchemaMin');
-    const hidden = body.style.display === 'none';
-    body.style.display = hidden ? 'block' : 'none';
-    btn.innerHTML = hidden ? '&#9660; Hide' : '&#9654; Show';
+    const collapsed = body.classList.toggle('schema-collapsed');
+    this.innerHTML = collapsed ? '&#9654; Show' : '&#9660; Hide';
   });
 
-  document.getElementById('sqlInput').addEventListener('keydown', e => {
-    if (e.key !== "'") return;
-    e.preventDefault();
-    const el = e.target;
+  document.getElementById('btnQuote').addEventListener('click', () => {
+    const el = document.getElementById('sqlInput');
     const s = el.selectionStart, end = el.selectionEnd;
     const val = el.value;
     el.value = val.slice(0, s) + "'" + val.slice(s, end) + "'" + val.slice(end);
     el.selectionStart = s + 1;
     el.selectionEnd = end + 1;
+    el.focus();
   });
 
   document.addEventListener('keydown', e => {
