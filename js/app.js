@@ -43,15 +43,28 @@ function stopTimer() {
 
 // ── Home screen ───────────────────────────────────────────────────────────────
 
+function renderHomeList() {
+  ui.renderMissionList(getMissionQueue(selectedDifficulty), (qIdx) => {
+    startGame(getMissionQueue(selectedDifficulty), null, qIdx);
+  });
+}
+
 function initHomeScreen() {
+  // Populate difficulty counts
+  const counts = { beginner: 0, intermediate: 0, advanced: 0, all: missions.length };
+  missions.forEach(m => { const d = m.difficulty.toLowerCase(); if (counts[d] !== undefined) counts[d]++; });
+  Object.entries(counts).forEach(([diff, n]) => {
+    const id = 'count' + diff.charAt(0).toUpperCase() + diff.slice(1);
+    const el = document.getElementById(id);
+    if (el) el.textContent = n + ' mission' + (n === 1 ? '' : 's');
+  });
+
   document.querySelectorAll('.diff-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       selectedDifficulty = btn.dataset.diff;
-      ui.renderMissionList(getMissionQueue(selectedDifficulty), (qIdx) => {
-        startGame(getMissionQueue(selectedDifficulty), null, qIdx);
-      });
+      renderHomeList();
     });
   });
 
@@ -60,9 +73,17 @@ function initHomeScreen() {
     startGame(getMissionQueue(selectedDifficulty), null, 0);
   });
 
+  const btnClear = document.getElementById('btnClearSave');
+  if (btnClear) {
+    btnClear.addEventListener('click', () => {
+      clearProgress();
+      const sec = document.getElementById('continueSection');
+      if (sec) sec.style.display = 'none';
+    });
+  }
+
   const saved = loadProgress();
   if (saved && saved.queueIds && saved.queueIds.length) {
-    const pct = Math.round((saved.completedMissions.length / saved.queueIds.length) * 100);
     ui.showContinueSection(
       `${saved.completedMissions.length}/${saved.queueIds.length} missions · ${saved.score} pts · ${ui.formatTime(saved.totalTime || 0)}`
     );
@@ -71,9 +92,7 @@ function initHomeScreen() {
     });
   }
 
-  ui.renderMissionList(getMissionQueue(selectedDifficulty), (qIdx) => {
-    startGame(getMissionQueue(selectedDifficulty), null, qIdx);
-  });
+  renderHomeList();
 }
 
 function getMissionQueue(difficulty) {
@@ -141,6 +160,31 @@ function goHome() {
   state.totalTime = 0;
   ui.updateTimer(0);
   ui.showHomeScreen();
+  renderHomeList();
+}
+
+// ── Mobile tabs ───────────────────────────────────────────────────────────────
+
+function isMobileLayout() {
+  return window.innerWidth <= 768;
+}
+
+function setMobileTab(name) {
+  const container = document.querySelector('.game-container');
+  if (!container) return;
+  container.classList.remove('tab-schema', 'tab-results');
+  if (name === 'schema') container.classList.add('tab-schema');
+  if (name === 'results') container.classList.add('tab-results');
+  document.querySelectorAll('.mobile-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === name);
+  });
+  window.scrollTo(0, 0);
+}
+
+function initMobileTabs() {
+  document.querySelectorAll('.mobile-tab').forEach(tab => {
+    tab.addEventListener('click', () => setMobileTab(tab.dataset.tab));
+  });
 }
 
 // ── Game loop ─────────────────────────────────────────────────────────────────
@@ -153,6 +197,7 @@ function loadLevel(index) {
   ui.renderProgressDots(state.completedMissions, index, state.missionQueue.length);
   startTimer();
   saveProgress();
+  if (isMobileLayout()) setMobileTab('mission');
 }
 
 function runQuery() {
@@ -164,6 +209,7 @@ function runQuery() {
     state.lastResult = executeQuery(sql);
     state.lastRunSQL = sql;
     ui.renderResults(state.lastResult);
+    if (isMobileLayout()) setMobileTab('results');
   } catch (err) {
     state.lastResult = null;
     state.lastRunSQL = '';
@@ -358,6 +404,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnSolution').addEventListener('click', showSolution);
   document.getElementById('btnNext').addEventListener('click', nextLevel);
   document.getElementById('btnTutorial').addEventListener('click', openTutorial);
+  const btnTutSchema = document.getElementById('btnTutorialSchema');
+  if (btnTutSchema) btnTutSchema.addEventListener('click', openTutorial);
   document.getElementById('btnHome').addEventListener('click', goHome);
   document.getElementById('btnCloseTutorial').addEventListener('click', closeTutorial);
   document.getElementById('btnTheme').addEventListener('click', toggleTheme);
@@ -381,6 +429,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  initMobileTabs();
   initHomeScreen();
   initGame();
 });

@@ -201,7 +201,7 @@ export function showWinModal(score, earnedBadges, total, totalTime, difficulty) 
 
 export function showContinueSection(info) {
   const sec = document.getElementById('continueSection');
-  if (sec) sec.style.display = 'block';
+  if (sec) sec.style.display = 'flex';
   const infoEl = document.getElementById('continueInfo');
   if (infoEl) infoEl.textContent = info;
 }
@@ -216,9 +216,14 @@ export function renderMissionList(missions, onClick) {
   if (!el) return;
   el.innerHTML = missions.map((m, i) => {
     const diff = m.difficulty.toLowerCase();
-    return `<button class="mission-item diff-${escapeHtml(diff)}" data-idx="${i}">
+    const concepts = m.concepts.slice(0, 3)
+      .map(c => `<span class="mission-concept">${escapeHtml(c)}</span>`).join('');
+    return `<button class="mission-item" data-idx="${i}">
       <span class="mission-item-num">${i + 1}</span>
-      <span class="mission-item-title">${escapeHtml(m.title)}</span>
+      <span class="mission-item-body">
+        <span class="mission-item-title">${escapeHtml(m.title)}</span>
+        <span class="mission-item-concepts">${concepts}</span>
+      </span>
       <span class="mission-item-badge ${escapeHtml(diff)}">${escapeHtml(m.difficulty)}</span>
     </button>`;
   }).join('');
@@ -247,6 +252,9 @@ export function hideHomeScreen() {
   if (hs) hs.style.display = 'none';
   const gc = document.querySelector('.game-container');
   if (gc) gc.style.display = 'grid';
+  // Let CSS control mobile tab bar visibility
+  const tabs = document.getElementById('mobileTabs');
+  if (tabs) tabs.style.removeProperty('display');
 }
 
 export function showHomeScreen() {
@@ -254,6 +262,10 @@ export function showHomeScreen() {
   if (hs) hs.style.display = 'flex';
   const gc = document.querySelector('.game-container');
   if (gc) gc.style.display = 'none';
+  // Always hide tab bar on home screen (it lives inside game-container
+  // but is position:fixed so CSS parent hiding doesn't apply)
+  const tabs = document.getElementById('mobileTabs');
+  if (tabs) tabs.style.display = 'none';
 }
 
 export function showBadgeToast(badge) {

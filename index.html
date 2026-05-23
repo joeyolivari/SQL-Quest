@@ -14,7 +14,7 @@
     <div class="stat">Level <span id="levelNum">1</span>/<span id="levelTotal">—</span></div>
     <div class="stat">Score <span id="score">0</span></div>
     <div class="stat">Hints <span id="hintsLeft">3</span></div>
-    <div class="stat">Attempts <span id="attempts">0</span></div>
+    <div class="stat stat-attempts">Attempts <span id="attempts">0</span></div>
     <div class="stat">&#128336; <span id="timer">0:00</span></div>
     <button class="btn-learn" id="btnTutorial">&#128218; Learn SQL</button>
     <button class="btn-theme" id="btnTheme" title="Toggle light/dark">&#9788;</button>
@@ -22,35 +22,73 @@
 </header>
 
 <div id="homeScreen" class="home-screen">
+
+  <!-- Hero -->
   <div class="home-hero">
-    <h1 class="home-title">Compliance SQL Quest</h1>
+    <div class="home-hero-badge">Financial Compliance Training</div>
+    <h1 class="home-title">Compliance <span>SQL Quest</span></h1>
     <p class="home-tagline">Master SQL through real-world financial compliance investigations.</p>
-  </div>
-
-  <div id="continueSection" style="display:none" class="continue-section">
-    <button class="btn-lg btn-continue" id="btnContinue">&#9654; Continue</button>
-    <div class="continue-info" id="continueInfo"></div>
-    <div id="homeError" class="home-error" style="display:none"></div>
-  </div>
-
-  <div class="home-section">
-    <h3>Difficulty</h3>
-    <div class="diff-row">
-      <button class="diff-btn beginner selected" data-diff="beginner">Beginner</button>
-      <button class="diff-btn intermediate" data-diff="intermediate">Intermediate</button>
-      <button class="diff-btn advanced" data-diff="advanced">Advanced</button>
-      <button class="diff-btn" data-diff="all">All Levels</button>
+    <div class="home-stat-chips">
+      <div class="home-stat-chip">&#128203; <strong>30</strong> Missions</div>
+      <div class="home-stat-chip">&#128449; <strong>5</strong> Scenarios</div>
+      <div class="home-stat-chip">&#127942; <strong>5</strong> Badges</div>
     </div>
   </div>
 
+  <!-- Continue Card -->
+  <div id="continueSection" style="display:none" class="continue-section">
+    <div class="continue-left">
+      <div class="continue-title">&#9654; Resume Progress</div>
+      <div class="continue-info" id="continueInfo"></div>
+      <div id="homeError" class="home-error" style="display:none"></div>
+    </div>
+    <div class="continue-actions">
+      <button class="btn-lg btn-continue" id="btnContinue">Resume</button>
+      <button class="btn-secondary btn-clear-save" id="btnClearSave">Clear Save</button>
+    </div>
+  </div>
+
+  <!-- Difficulty -->
   <div class="home-section">
-    <h3>Mission Select — click any to start from that mission</h3>
+    <h3>Select Difficulty</h3>
+    <div class="diff-row">
+      <button class="diff-btn beginner selected" data-diff="beginner">
+        <span class="diff-icon">&#127807;</span>
+        <span class="diff-label">Beginner</span>
+        <span class="diff-count" id="countBeginner"></span>
+      </button>
+      <button class="diff-btn intermediate" data-diff="intermediate">
+        <span class="diff-icon">&#9889;</span>
+        <span class="diff-label">Intermediate</span>
+        <span class="diff-count" id="countIntermediate"></span>
+      </button>
+      <button class="diff-btn advanced" data-diff="advanced">
+        <span class="diff-icon">&#128293;</span>
+        <span class="diff-label">Advanced</span>
+        <span class="diff-count" id="countAdvanced"></span>
+      </button>
+      <button class="diff-btn" data-diff="all">
+        <span class="diff-icon">&#11088;</span>
+        <span class="diff-label">All Levels</span>
+        <span class="diff-count" id="countAll"></span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Mission Select -->
+  <div class="home-section">
+    <div class="section-row">
+      <h3>Mission Select</h3>
+      <span class="section-hint">Click any mission to start from there</span>
+    </div>
     <div id="missionList" class="mission-list"></div>
   </div>
 
+  <!-- CTA -->
   <div class="home-footer">
     <button class="btn-lg btn-primary" id="btnPlayAll">&#9654; Start from Beginning</button>
   </div>
+
 </div>
 
 <div class="game-container" style="display:none">
@@ -58,6 +96,8 @@
   <aside class="sidebar">
     <h3>Scenario</h3>
     <div id="scenarioLabel" class="scenario-label">Loading...</div>
+    <!-- Shown only on mobile when Learn SQL is hidden from header -->
+    <button class="btn-learn btn-learn-schema" id="btnTutorialSchema">&#128218; Learn SQL</button>
     <div class="schema-heading">
       <h3>Database Schema</h3>
       <button class="btn-schema-min" id="btnSchemaMin">&#9660; Hide</button>
@@ -109,6 +149,22 @@
     </div>
     <div class="row-count" id="rowCount"></div>
   </aside>
+
+  <!-- Mobile tab bar — hidden on desktop via CSS -->
+  <nav class="mobile-tabs" id="mobileTabs">
+    <button class="mobile-tab active" data-tab="mission">
+      <span class="mobile-tab-icon">&#128203;</span>
+      Mission
+    </button>
+    <button class="mobile-tab" data-tab="schema">
+      <span class="mobile-tab-icon">&#128449;</span>
+      Schema
+    </button>
+    <button class="mobile-tab" data-tab="results">
+      <span class="mobile-tab-icon">&#128202;</span>
+      Results
+    </button>
+  </nav>
 
 </div>
 
