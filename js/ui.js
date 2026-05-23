@@ -216,9 +216,14 @@ export function renderMissionList(missions, onClick) {
   if (!el) return;
   el.innerHTML = missions.map((m, i) => {
     const diff = m.difficulty.toLowerCase();
-    return `<button class="mission-item diff-${escapeHtml(diff)}" data-idx="${i}">
+    const concepts = m.concepts.slice(0, 3)
+      .map(c => `<span class="mission-concept">${escapeHtml(c)}</span>`).join('');
+    return `<button class="mission-item" data-idx="${i}">
       <span class="mission-item-num">${i + 1}</span>
-      <span class="mission-item-title">${escapeHtml(m.title)}</span>
+      <span class="mission-item-body">
+        <span class="mission-item-title">${escapeHtml(m.title)}</span>
+        <span class="mission-item-concepts">${concepts}</span>
+      </span>
       <span class="mission-item-badge ${escapeHtml(diff)}">${escapeHtml(m.difficulty)}</span>
     </button>`;
   }).join('');
