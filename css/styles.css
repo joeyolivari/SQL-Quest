@@ -699,3 +699,16 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .toast-icon { font-size: 1.6rem; }
 .toast-label { font-size: 0.82rem; font-weight: 700; }
 .toast-desc  { font-size: 0.75rem; color: var(--text-dim); }
+
+/* ── Back to Menu button ────────────────────────────────────────────────── */
+.btn-home {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 0.8rem;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background .15s, color .15s;
+}
+.btn-home:hover { background: var(--surface-2, #1e293b); color: var(--text); }

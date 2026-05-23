@@ -9,6 +9,14 @@ import { compareResults } from './validation.js';
 import { state, resetForLevel, useHint, recordAttempt, completeCurrentMission } from './gameState.js';
 import * as ui from './ui.js';
 
+function goHome() {
+  state.missionQueue = [];
+  state.completedMissions.clear();
+  state.score = 0;
+  state.hintsLeft = 3;
+  ui.showHomeScreen();
+}
+
 let engineReady = false;
 let selectedDifficulty = 'beginner';
 
@@ -185,6 +193,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnSolution').addEventListener('click', showSolution);
   document.getElementById('btnNext').addEventListener('click', nextLevel);
   document.getElementById('btnTutorial').addEventListener('click', openTutorial);
+  document.getElementById('btnHome').addEventListener('click', goHome);
   document.getElementById('btnCloseTutorial').addEventListener('click', closeTutorial);
   document.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
