@@ -182,8 +182,6 @@ export function hideHomeScreen() {
   if (hs) hs.style.display = 'none';
   const gc = document.querySelector('.game-container');
   if (gc) gc.style.display = 'grid';
-  const btn = document.getElementById('btnHome');
-  if (btn) btn.style.display = 'inline-block';
 }
 
 export function showHomeScreen() {
@@ -191,8 +189,6 @@ export function showHomeScreen() {
   if (hs) hs.style.display = 'flex';
   const gc = document.querySelector('.game-container');
   if (gc) gc.style.display = 'none';
-  const btn = document.getElementById('btnHome');
-  if (btn) btn.style.display = 'none';
 }
 
 export function showBadgeToast(badge) {
