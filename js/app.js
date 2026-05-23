@@ -163,6 +163,30 @@ function goHome() {
   renderHomeList();
 }
 
+// ── Mobile tabs ───────────────────────────────────────────────────────────────
+
+function isMobileLayout() {
+  return window.innerWidth <= 768;
+}
+
+function setMobileTab(name) {
+  const container = document.querySelector('.game-container');
+  if (!container) return;
+  container.classList.remove('tab-schema', 'tab-results');
+  if (name === 'schema') container.classList.add('tab-schema');
+  if (name === 'results') container.classList.add('tab-results');
+  document.querySelectorAll('.mobile-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === name);
+  });
+  window.scrollTo(0, 0);
+}
+
+function initMobileTabs() {
+  document.querySelectorAll('.mobile-tab').forEach(tab => {
+    tab.addEventListener('click', () => setMobileTab(tab.dataset.tab));
+  });
+}
+
 // ── Game loop ─────────────────────────────────────────────────────────────────
 
 function loadLevel(index) {
@@ -173,6 +197,7 @@ function loadLevel(index) {
   ui.renderProgressDots(state.completedMissions, index, state.missionQueue.length);
   startTimer();
   saveProgress();
+  if (isMobileLayout()) setMobileTab('mission');
 }
 
 function runQuery() {
@@ -184,6 +209,7 @@ function runQuery() {
     state.lastResult = executeQuery(sql);
     state.lastRunSQL = sql;
     ui.renderResults(state.lastResult);
+    if (isMobileLayout()) setMobileTab('results');
   } catch (err) {
     state.lastResult = null;
     state.lastRunSQL = '';
@@ -378,6 +404,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnSolution').addEventListener('click', showSolution);
   document.getElementById('btnNext').addEventListener('click', nextLevel);
   document.getElementById('btnTutorial').addEventListener('click', openTutorial);
+  const btnTutSchema = document.getElementById('btnTutorialSchema');
+  if (btnTutSchema) btnTutSchema.addEventListener('click', openTutorial);
   document.getElementById('btnHome').addEventListener('click', goHome);
   document.getElementById('btnCloseTutorial').addEventListener('click', closeTutorial);
   document.getElementById('btnTheme').addEventListener('click', toggleTheme);
@@ -401,6 +429,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  initMobileTabs();
   initHomeScreen();
   initGame();
 });

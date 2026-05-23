@@ -14,7 +14,7 @@
     <div class="stat">Level <span id="levelNum">1</span>/<span id="levelTotal">—</span></div>
     <div class="stat">Score <span id="score">0</span></div>
     <div class="stat">Hints <span id="hintsLeft">3</span></div>
-    <div class="stat">Attempts <span id="attempts">0</span></div>
+    <div class="stat stat-attempts">Attempts <span id="attempts">0</span></div>
     <div class="stat">&#128336; <span id="timer">0:00</span></div>
     <button class="btn-learn" id="btnTutorial">&#128218; Learn SQL</button>
     <button class="btn-theme" id="btnTheme" title="Toggle light/dark">&#9788;</button>
@@ -96,6 +96,8 @@
   <aside class="sidebar">
     <h3>Scenario</h3>
     <div id="scenarioLabel" class="scenario-label">Loading...</div>
+    <!-- Shown only on mobile when Learn SQL is hidden from header -->
+    <button class="btn-learn btn-learn-schema" id="btnTutorialSchema">&#128218; Learn SQL</button>
     <div class="schema-heading">
       <h3>Database Schema</h3>
       <button class="btn-schema-min" id="btnSchemaMin">&#9660; Hide</button>
@@ -147,6 +149,22 @@
     </div>
     <div class="row-count" id="rowCount"></div>
   </aside>
+
+  <!-- Mobile tab bar — hidden on desktop via CSS -->
+  <nav class="mobile-tabs" id="mobileTabs">
+    <button class="mobile-tab active" data-tab="mission">
+      <span class="mobile-tab-icon">&#128203;</span>
+      Mission
+    </button>
+    <button class="mobile-tab" data-tab="schema">
+      <span class="mobile-tab-icon">&#128449;</span>
+      Schema
+    </button>
+    <button class="mobile-tab" data-tab="results">
+      <span class="mobile-tab-icon">&#128202;</span>
+      Results
+    </button>
+  </nav>
 
 </div>
 

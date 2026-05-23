@@ -252,6 +252,9 @@ export function hideHomeScreen() {
   if (hs) hs.style.display = 'none';
   const gc = document.querySelector('.game-container');
   if (gc) gc.style.display = 'grid';
+  // Let CSS control mobile tab bar visibility
+  const tabs = document.getElementById('mobileTabs');
+  if (tabs) tabs.style.removeProperty('display');
 }
 
 export function showHomeScreen() {
@@ -259,6 +262,10 @@ export function showHomeScreen() {
   if (hs) hs.style.display = 'flex';
   const gc = document.querySelector('.game-container');
   if (gc) gc.style.display = 'none';
+  // Always hide tab bar on home screen (it lives inside game-container
+  // but is position:fixed so CSS parent hiding doesn't apply)
+  const tabs = document.getElementById('mobileTabs');
+  if (tabs) tabs.style.display = 'none';
 }
 
 export function showBadgeToast(badge) {
