@@ -172,7 +172,7 @@ async function initGame() {
   try {
     await initEngine();
     engineReady = true;
-    ['sqlInput', 'btnRun', 'btnCheck', 'btnHint', 'btnReset', 'btnQuote', 'btnSolution'].forEach(id => {
+    ['sqlInput', 'btnRun', 'btnCheck', 'btnHint', 'btnReset', 'btnQuote', 'btnParen', 'btnSolution'].forEach(id => {
       document.getElementById(id).disabled = false;
     });
   } catch (err) {
@@ -188,7 +188,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnSolution').addEventListener('click', showSolution);
   document.getElementById('btnNext').addEventListener('click', nextLevel);
   document.getElementById('btnTutorial').addEventListener('click', openTutorial);
-  document.getElementById('btnTutorialHome').addEventListener('click', openTutorial);
   document.getElementById('btnHome').addEventListener('click', goHome);
   document.getElementById('btnCloseTutorial').addEventListener('click', closeTutorial);
 
@@ -220,6 +219,30 @@ document.addEventListener('DOMContentLoaded', () => {
       } else {
         // No word — insert empty quotes, cursor inside
         el.value = val.slice(0, s) + "''" + val.slice(s);
+        el.selectionStart = el.selectionEnd = s + 1;
+      }
+    }
+    el.focus();
+  });
+
+  document.getElementById('btnParen').addEventListener('click', () => {
+    const el = document.getElementById('sqlInput');
+    const s = el.selectionStart, end = el.selectionEnd;
+    const val = el.value;
+    if (s !== end) {
+      el.value = val.slice(0, s) + '(' + val.slice(s, end) + ')' + val.slice(end);
+      el.selectionStart = s;
+      el.selectionEnd = end + 2;
+    } else {
+      let ws = s, we = s;
+      while (ws > 0 && /\w/.test(val[ws - 1])) ws--;
+      while (we < val.length && /\w/.test(val[we])) we++;
+      if (ws < we) {
+        el.value = val.slice(0, ws) + '(' + val.slice(ws, we) + ')' + val.slice(we);
+        el.selectionStart = ws;
+        el.selectionEnd = we + 2;
+      } else {
+        el.value = val.slice(0, s) + '()' + val.slice(s);
         el.selectionStart = el.selectionEnd = s + 1;
       }
     }

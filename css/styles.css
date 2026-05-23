@@ -683,16 +683,8 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .scenario-card.selected { box-shadow: 0 0 0 2px var(--accent); }
 .scenario-card h4 { margin: 0 0 6px; font-size: 0.9rem; }
 .scenario-card p  { margin: 0; font-size: 0.78rem; color: var(--text-dim); }
-.home-footer { text-align: center; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; }
+.home-footer { text-align: center; }
 .btn-lg { padding: 12px 36px; font-size: 1rem; border-radius: 8px; font-weight: 700; }
-.btn-learn-home {
-  background: rgba(56, 189, 248, 0.12);
-  border: 2px solid rgba(56, 189, 248, 0.5);
-  color: var(--accent);
-  cursor: pointer;
-  transition: background .15s;
-}
-.btn-learn-home:hover { background: rgba(56, 189, 248, 0.22); }
 
 /* ── Schema minimize ─────────────────────────────────────────────────────── */
 .schema-heading {
