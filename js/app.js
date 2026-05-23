@@ -5,21 +5,43 @@ import { briefings } from './casefiles.js';
 import { checkBadges, BADGE_DEFS } from './badges.js';
 import { initEngine, executeQuery, isSafeQuery } from './sqlEngine.js';
 import { compareResults } from './validation.js';
-import { state, resetForLevel, useHint, recordAttempt, completeCurrentMission } from './gameState.js';
+import { state, resetForLevel, useHint, recordAttempt, completeCurrentMission,
+         saveProgress, loadProgress, clearProgress } from './gameState.js';
 import * as ui from './ui.js';
-
-function goHome() {
-  state.missionQueue = [];
-  state.completedMissions.clear();
-  state.score = 0;
-  state.hintsLeft = 3;
-  ui.showHomeScreen();
-}
 
 let engineReady = false;
 let selectedDifficulty = 'beginner';
+let timerInterval = null;
 
-// ── Home screen ──────────────────────────────────────────────────────────────
+// ── Theme ─────────────────────────────────────────────────────────────────────
+
+function applyTheme(theme) {
+  document.body.classList.toggle('light', theme === 'light');
+  const btn = document.getElementById('btnTheme');
+  if (btn) btn.textContent = theme === 'light' ? '🌙' : '☀️';
+  try { localStorage.setItem('csq_theme', theme); } catch (e) {}
+}
+
+function toggleTheme() {
+  const isLight = document.body.classList.contains('light');
+  applyTheme(isLight ? 'dark' : 'light');
+}
+
+// ── Timer ─────────────────────────────────────────────────────────────────────
+
+function startTimer() {
+  stopTimer();
+  timerInterval = setInterval(() => {
+    state.totalTime++;
+    ui.updateTimer(state.totalTime);
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+
+// ── Home screen ───────────────────────────────────────────────────────────────
 
 function initHomeScreen() {
   document.querySelectorAll('.diff-btn').forEach(btn => {
@@ -27,11 +49,30 @@ function initHomeScreen() {
       document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       selectedDifficulty = btn.dataset.diff;
+      ui.renderMissionList(getMissionQueue(selectedDifficulty), (qIdx) => {
+        startGame(getMissionQueue(selectedDifficulty), null, qIdx);
+      });
     });
   });
 
   document.getElementById('btnPlayAll').addEventListener('click', () => {
-    startGame(getMissionQueue(selectedDifficulty), null);
+    clearProgress();
+    startGame(getMissionQueue(selectedDifficulty), null, 0);
+  });
+
+  const saved = loadProgress();
+  if (saved && saved.queueIds && saved.queueIds.length) {
+    const pct = Math.round((saved.completedMissions.length / saved.queueIds.length) * 100);
+    ui.showContinueSection(
+      `${saved.completedMissions.length}/${saved.queueIds.length} missions · ${saved.score} pts · ${ui.formatTime(saved.totalTime || 0)}`
+    );
+    document.getElementById('btnContinue').addEventListener('click', () => {
+      restoreProgress(saved);
+    });
+  }
+
+  ui.renderMissionList(getMissionQueue(selectedDifficulty), (qIdx) => {
+    startGame(getMissionQueue(selectedDifficulty), null, qIdx);
   });
 }
 
@@ -41,23 +82,68 @@ function getMissionQueue(difficulty) {
   return filtered.length ? filtered : [...missions];
 }
 
-function startGame(queue, scenarioId) {
-  if (!engineReady) {
-    ui.showError('SQL engine is still loading. Please wait a moment.');
-    return;
-  }
+function restoreProgress(saved) {
+  if (!engineReady) { ui.showHomeError('SQL engine is still loading. Please wait.'); return; }
+  const queue = saved.queueIds.map(id => missions.find(m => m.id === id)).filter(Boolean);
+  if (!queue.length) { clearProgress(); return; }
+
   state.missionQueue = queue;
-  state.selectedScenario = scenarioId;
+  state.score = saved.score;
+  state.hintsLeft = saved.hintsLeft;
+  state.completedMissions = new Set(saved.completedMissions);
+  state.earnedBadges = new Set(saved.earnedBadges);
+  state.missionAttempts = saved.missionAttempts || {};
+  state.totalTime = saved.totalTime || 0;
+  state.selectedDifficulty = saved.selectedDifficulty || 'beginner';
+
   ui.hideHomeScreen();
   ui.renderSchema(schema);
   const totalEl = document.getElementById('levelTotal');
   if (totalEl) totalEl.textContent = queue.length;
   const winCount = document.getElementById('winModalCount');
   if (winCount) winCount.textContent = queue.length;
-  loadLevel(0);
+  const idx = Math.min(saved.currentMissionIndex || 0, queue.length - 1);
+  loadLevel(idx);
 }
 
-// ── Game loop ────────────────────────────────────────────────────────────────
+function startGame(queue, scenarioId, startIndex = 0) {
+  if (!engineReady) {
+    ui.showError('SQL engine is still loading. Please wait a moment.');
+    return;
+  }
+  state.missionQueue = queue;
+  state.selectedScenario = scenarioId;
+  state.score = 0;
+  state.hintsLeft = 3;
+  state.completedMissions = new Set();
+  state.earnedBadges = new Set();
+  state.missionAttempts = {};
+  state.totalTime = 0;
+  state.selectedDifficulty = selectedDifficulty;
+
+  ui.hideHomeScreen();
+  ui.renderSchema(schema);
+  const totalEl = document.getElementById('levelTotal');
+  if (totalEl) totalEl.textContent = queue.length;
+  const winCount = document.getElementById('winModalCount');
+  if (winCount) winCount.textContent = queue.length;
+  loadLevel(startIndex);
+}
+
+function goHome() {
+  stopTimer();
+  saveProgress();
+  state.missionQueue = [];
+  state.completedMissions = new Set();
+  state.score = 0;
+  state.hintsLeft = 3;
+  state.missionAttempts = {};
+  state.totalTime = 0;
+  ui.updateTimer(0);
+  ui.showHomeScreen();
+}
+
+// ── Game loop ─────────────────────────────────────────────────────────────────
 
 function loadLevel(index) {
   const mission = state.missionQueue[index];
@@ -65,6 +151,8 @@ function loadLevel(index) {
   ui.loadMission(mission, index, briefings[mission.id]);
   ui.updateStats(state.score, state.hintsLeft, state.attempts, index + 1);
   ui.renderProgressDots(state.completedMissions, index, state.missionQueue.length);
+  startTimer();
+  saveProgress();
 }
 
 function runQuery() {
@@ -101,12 +189,14 @@ function checkAnswer() {
   }
   const result = compareResults(state.lastResult, expected, mission.requiredColumns, mission.orderMatters);
   if (result.ok) {
+    stopTimer();
     const points = completeCurrentMission();
     ui.showSuccess(`&#10003; <strong>Mission complete.</strong> +${points} points.`);
     ui.showExplanation(mission.explanation);
     document.getElementById('btnCheck').disabled = true;
     ui.renderProgressDots(state.completedMissions, state.currentMissionIndex, state.missionQueue.length);
     ui.updateStats(state.score, state.hintsLeft, state.attempts, state.currentMissionIndex + 1);
+    saveProgress();
 
     const newBadges = checkBadges(state, state.missionQueue.length);
     newBadges.forEach(id => {
@@ -117,7 +207,7 @@ function checkAnswer() {
     if (state.currentMissionIndex < state.missionQueue.length - 1) {
       ui.showNextButton(true);
     } else {
-      setTimeout(() => ui.showWinModal(state.score), 550);
+      setTimeout(() => ui.showWinModal(state.score, state.earnedBadges, state.missionQueue.length, state.totalTime, state.selectedDifficulty), 550);
     }
     ui.launchConfetti();
   } else {
@@ -166,7 +256,81 @@ function closeTutorial() {
   document.getElementById('tutorialModal').classList.remove('visible');
 }
 
-// ── Bootstrap ────────────────────────────────────────────────────────────────
+// ── Keyword bar ───────────────────────────────────────────────────────────────
+
+const SQL_KEYWORDS = [
+  { label: 'SELECT',    insert: 'SELECT ' },
+  { label: 'FROM',      insert: 'FROM ' },
+  { label: 'WHERE',     insert: 'WHERE ' },
+  { label: 'AND',       insert: 'AND ' },
+  { label: 'OR',        insert: 'OR ' },
+  { label: 'NOT',       insert: 'NOT ' },
+  { label: 'IN',        insert: 'IN ', cursor: null },
+  { label: 'JOIN',      insert: 'JOIN ' },
+  { label: 'LEFT JOIN', insert: 'LEFT JOIN ' },
+  { label: 'ON',        insert: 'ON ' },
+  { label: 'AS',        insert: 'AS ' },
+  { label: 'GROUP BY',  insert: 'GROUP BY ' },
+  { label: 'ORDER BY',  insert: 'ORDER BY ' },
+  { label: 'HAVING',    insert: 'HAVING ' },
+  { label: 'DISTINCT',  insert: 'DISTINCT ' },
+  { label: 'COUNT(*)',  insert: 'COUNT(*)', cursor: null },
+  { label: 'SUM()',     insert: 'SUM()', cursorBack: 1 },
+  { label: 'AVG()',     insert: 'AVG()', cursorBack: 1 },
+  { label: 'ROUND()',   insert: 'ROUND()', cursorBack: 1 },
+  { label: 'CASE',      insert: 'CASE ' },
+  { label: 'WHEN',      insert: 'WHEN ' },
+  { label: 'THEN',      insert: 'THEN ' },
+  { label: 'ELSE',      insert: 'ELSE ' },
+  { label: 'END',       insert: 'END' },
+  { label: 'WITH',      insert: 'WITH ' },
+  { label: 'IS NULL',   insert: 'IS NULL' },
+  { label: 'BETWEEN',   insert: 'BETWEEN ' },
+  { label: 'LIKE',      insert: 'LIKE ' },
+  { label: 'EXISTS',    insert: 'EXISTS ' },
+  { label: 'DESC',      insert: 'DESC' },
+  { label: 'ASC',       insert: 'ASC' },
+];
+
+function insertKeyword(kw) {
+  const el = document.getElementById('sqlInput');
+  const pos = el.selectionStart;
+  const val = el.value;
+  const before = val.slice(0, pos);
+  const after = val.slice(pos);
+  const needsSpace = before.length > 0 && !/[\s(]$/.test(before);
+  const text = (needsSpace ? ' ' : '') + kw.insert;
+  el.value = before + text + after;
+  const newPos = pos + text.length - (kw.cursorBack || 0);
+  el.selectionStart = el.selectionEnd = newPos;
+  el.focus();
+}
+
+// ── Wrap helpers (quote / paren) ──────────────────────────────────────────────
+
+function wrapCursor(open, close) {
+  const el = document.getElementById('sqlInput');
+  const s = el.selectionStart, end = el.selectionEnd;
+  const val = el.value;
+  if (s !== end) {
+    el.value = val.slice(0, s) + open + val.slice(s, end) + close + val.slice(end);
+    el.selectionStart = s; el.selectionEnd = end + 2;
+  } else {
+    let ws = s, we = s;
+    while (ws > 0 && /\w/.test(val[ws - 1])) ws--;
+    while (we < val.length && /\w/.test(val[we])) we++;
+    if (ws < we) {
+      el.value = val.slice(0, ws) + open + val.slice(ws, we) + close + val.slice(we);
+      el.selectionStart = ws; el.selectionEnd = we + 2;
+    } else {
+      el.value = val.slice(0, s) + open + close + val.slice(s);
+      el.selectionStart = el.selectionEnd = s + 1;
+    }
+  }
+  el.focus();
+}
+
+// ── Bootstrap ─────────────────────────────────────────────────────────────────
 
 async function initGame() {
   try {
@@ -181,6 +345,12 @@ async function initGame() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Restore saved theme
+  try {
+    const savedTheme = localStorage.getItem('csq_theme');
+    if (savedTheme) applyTheme(savedTheme);
+  } catch (e) {}
+
   document.getElementById('btnRun').addEventListener('click', runQuery);
   document.getElementById('btnCheck').addEventListener('click', checkAnswer);
   document.getElementById('btnHint').addEventListener('click', showHint);
@@ -190,6 +360,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnTutorial').addEventListener('click', openTutorial);
   document.getElementById('btnHome').addEventListener('click', goHome);
   document.getElementById('btnCloseTutorial').addEventListener('click', closeTutorial);
+  document.getElementById('btnTheme').addEventListener('click', toggleTheme);
+  document.getElementById('btnCopyScore').addEventListener('click', copyScore);
 
   document.getElementById('btnSchemaMin').addEventListener('click', function () {
     const body = document.getElementById('schemaBody');
@@ -197,63 +369,27 @@ document.addEventListener('DOMContentLoaded', () => {
     this.innerHTML = collapsed ? '&#9654; Show' : '&#9660; Hide';
   });
 
-  document.getElementById('btnQuote').addEventListener('click', () => {
-    const el = document.getElementById('sqlInput');
-    const s = el.selectionStart, end = el.selectionEnd;
-    const val = el.value;
-    if (s !== end) {
-      // Wrap selection in quotes
-      el.value = val.slice(0, s) + "'" + val.slice(s, end) + "'" + val.slice(end);
-      el.selectionStart = s;
-      el.selectionEnd = end + 2;
-    } else {
-      // Find word boundaries at cursor
-      let ws = s, we = s;
-      while (ws > 0 && /\w/.test(val[ws - 1])) ws--;
-      while (we < val.length && /\w/.test(val[we])) we++;
-      if (ws < we) {
-        // Wrap word
-        el.value = val.slice(0, ws) + "'" + val.slice(ws, we) + "'" + val.slice(we);
-        el.selectionStart = ws;
-        el.selectionEnd = we + 2;
-      } else {
-        // No word — insert empty quotes, cursor inside
-        el.value = val.slice(0, s) + "''" + val.slice(s);
-        el.selectionStart = el.selectionEnd = s + 1;
-      }
-    }
-    el.focus();
-  });
+  document.getElementById('btnQuote').addEventListener('click', () => wrapCursor("'", "'"));
+  document.getElementById('btnParen').addEventListener('click', () => wrapCursor('(', ')'));
 
-  document.getElementById('btnParen').addEventListener('click', () => {
-    const el = document.getElementById('sqlInput');
-    const s = el.selectionStart, end = el.selectionEnd;
-    const val = el.value;
-    if (s !== end) {
-      el.value = val.slice(0, s) + '(' + val.slice(s, end) + ')' + val.slice(end);
-      el.selectionStart = s;
-      el.selectionEnd = end + 2;
-    } else {
-      let ws = s, we = s;
-      while (ws > 0 && /\w/.test(val[ws - 1])) ws--;
-      while (we < val.length && /\w/.test(val[we])) we++;
-      if (ws < we) {
-        el.value = val.slice(0, ws) + '(' + val.slice(ws, we) + ')' + val.slice(we);
-        el.selectionStart = ws;
-        el.selectionEnd = we + 2;
-      } else {
-        el.value = val.slice(0, s) + '()' + val.slice(s);
-        el.selectionStart = el.selectionEnd = s + 1;
-      }
-    }
-    el.focus();
-  });
+  // Keyword bar
+  ui.renderKeywordBar(SQL_KEYWORDS, insertKeyword);
 
   document.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       if (!document.getElementById('btnRun').disabled) runQuery();
     }
   });
+
   initHomeScreen();
   initGame();
 });
+
+function copyScore() {
+  const mission = state.missionQueue;
+  const badges = [...state.earnedBadges].join(', ') || 'none';
+  const text = `Compliance SQL Quest\nScore: ${state.score}\nMissions: ${state.completedMissions.size}/${mission.length}\nTime: ${ui.formatTime(state.totalTime)}\nBadges: ${badges}`;
+  navigator.clipboard.writeText(text).catch(() => {});
+  const btn = document.getElementById('btnCopyScore');
+  if (btn) { btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = '📋 Copy Results'; }, 2000); }
+}

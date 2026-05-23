@@ -171,9 +171,75 @@ export function launchConfetti() {
   setTimeout(() => { container.style.display = 'none'; container.innerHTML = ''; }, 3200);
 }
 
-export function showWinModal(score) {
+export function formatTime(secs) {
+  const m = Math.floor(secs / 60), s = secs % 60;
+  return m + ':' + String(s).padStart(2, '0');
+}
+
+export function updateTimer(secs) {
+  const el = document.getElementById('timer');
+  if (el) el.textContent = formatTime(secs);
+}
+
+export function showWinModal(score, earnedBadges, total, totalTime, difficulty) {
   document.getElementById('finalScore').textContent = score;
+  const timeEl = document.getElementById('certTime');
+  if (timeEl) timeEl.textContent = formatTime(totalTime || 0);
+  const diffEl = document.getElementById('certDifficulty');
+  if (diffEl) diffEl.textContent = difficulty ? difficulty.charAt(0).toUpperCase() + difficulty.slice(1) : '—';
+  const totalEl2 = document.getElementById('certTotal');
+  if (totalEl2) totalEl2.textContent = total;
+  const badgesEl = document.getElementById('certBadges');
+  if (badgesEl && earnedBadges) {
+    const ICONS = { 'first-case': '🗂️', 'no-mistakes': '🎯', 'clean-hands': '🧤', 'halfway': '⚡', 'audit-ready': '🏆' };
+    badgesEl.textContent = earnedBadges.size
+      ? [...earnedBadges].map(id => ICONS[id] || '🏅').join(' ')
+      : '—';
+  }
   document.getElementById('winModal').classList.add('visible');
+}
+
+export function showContinueSection(info) {
+  const sec = document.getElementById('continueSection');
+  if (sec) sec.style.display = 'block';
+  const infoEl = document.getElementById('continueInfo');
+  if (infoEl) infoEl.textContent = info;
+}
+
+export function showHomeError(msg) {
+  const el = document.getElementById('homeError');
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+
+export function renderMissionList(missions, onClick) {
+  const el = document.getElementById('missionList');
+  if (!el) return;
+  el.innerHTML = missions.map((m, i) => {
+    const diff = m.difficulty.toLowerCase();
+    return `<button class="mission-item diff-${escapeHtml(diff)}" data-idx="${i}">
+      <span class="mission-item-num">${i + 1}</span>
+      <span class="mission-item-title">${escapeHtml(m.title)}</span>
+      <span class="mission-item-badge ${escapeHtml(diff)}">${escapeHtml(m.difficulty)}</span>
+    </button>`;
+  }).join('');
+  el.onclick = e => {
+    const btn = e.target.closest('.mission-item');
+    if (btn) onClick(parseInt(btn.dataset.idx, 10));
+  };
+}
+
+export function renderKeywordBar(keywords, onInsert) {
+  const el = document.getElementById('keywordBar');
+  if (!el) return;
+  el.innerHTML = keywords.map(kw =>
+    `<button class="kw-chip" data-kw="${escapeHtml(kw.label)}">${escapeHtml(kw.label)}</button>`
+  ).join('');
+  el.addEventListener('click', e => {
+    const chip = e.target.closest('.kw-chip');
+    if (!chip) return;
+    const kw = keywords.find(k => k.label === chip.dataset.kw);
+    if (kw) onInsert(kw);
+  });
 }
 
 export function hideHomeScreen() {

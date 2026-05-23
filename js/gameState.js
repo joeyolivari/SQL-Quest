@@ -12,8 +12,40 @@ export const state = {
   missionQueue: [],
   lastResult: null,
   lastRunSQL: '',
-  unlockedConcepts: new Set()
+  unlockedConcepts: new Set(),
+  missionAttempts: {},
+  totalTime: 0,
+  selectedDifficulty: 'beginner',
 };
+
+const SAVE_KEY = 'csq_v2';
+
+export function saveProgress() {
+  try {
+    localStorage.setItem(SAVE_KEY, JSON.stringify({
+      score: state.score,
+      hintsLeft: state.hintsLeft,
+      completedMissions: [...state.completedMissions],
+      earnedBadges: [...state.earnedBadges],
+      currentMissionIndex: state.currentMissionIndex,
+      missionAttempts: state.missionAttempts,
+      totalTime: state.totalTime,
+      selectedDifficulty: state.selectedDifficulty,
+      queueIds: state.missionQueue.map(m => m.id),
+    }));
+  } catch (e) {}
+}
+
+export function loadProgress() {
+  try {
+    const raw = localStorage.getItem(SAVE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch { return null; }
+}
+
+export function clearProgress() {
+  try { localStorage.removeItem(SAVE_KEY); } catch (e) {}
+}
 
 export function resetForLevel(index) {
   state.currentMissionIndex = index;
@@ -40,6 +72,7 @@ export function completeCurrentMission() {
   if (state.levelCompleted) return 0;
   state.levelCompleted = true;
   state.completedMissions.add(state.currentMissionIndex);
+  state.missionAttempts[state.currentMissionIndex] = state.attempts;
   let points = 100 - state.attempts * 15;
   if (state.levelHintUsed) points -= 10;
   if (state.solutionUsed) points -= 35;

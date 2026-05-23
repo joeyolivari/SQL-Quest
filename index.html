@@ -15,7 +15,9 @@
     <div class="stat">Score <span id="score">0</span></div>
     <div class="stat">Hints <span id="hintsLeft">3</span></div>
     <div class="stat">Attempts <span id="attempts">0</span></div>
+    <div class="stat">&#128336; <span id="timer">0:00</span></div>
     <button class="btn-learn" id="btnTutorial">&#128218; Learn SQL</button>
+    <button class="btn-theme" id="btnTheme" title="Toggle light/dark">&#9788;</button>
   </div>
 </header>
 
@@ -24,6 +26,13 @@
     <h1 class="home-title">Compliance SQL Quest</h1>
     <p class="home-tagline">Master SQL through real-world financial compliance investigations.</p>
   </div>
+
+  <div id="continueSection" style="display:none" class="continue-section">
+    <button class="btn-lg btn-continue" id="btnContinue">&#9654; Continue</button>
+    <div class="continue-info" id="continueInfo"></div>
+    <div id="homeError" class="home-error" style="display:none"></div>
+  </div>
+
   <div class="home-section">
     <h3>Difficulty</h3>
     <div class="diff-row">
@@ -33,8 +42,14 @@
       <button class="diff-btn" data-diff="all">All Levels</button>
     </div>
   </div>
+
+  <div class="home-section">
+    <h3>Mission Select — click any to start from that mission</h3>
+    <div id="missionList" class="mission-list"></div>
+  </div>
+
   <div class="home-footer">
-    <button class="btn-lg btn-primary" id="btnPlayAll">&#9654; Start</button>
+    <button class="btn-lg btn-primary" id="btnPlayAll">&#9654; Start from Beginning</button>
   </div>
 </div>
 
@@ -72,6 +87,7 @@
 
     <div class="editor-wrap">
       <div class="editor-label">SQL Editor — type a real SELECT query</div>
+      <div class="keyword-bar" id="keywordBar"></div>
       <textarea id="sqlInput" spellcheck="false" disabled>-- Loading SQL engine...</textarea>
       <div class="btn-row">
         <button class="btn-primary" id="btnRun" disabled>&#9654; Run Query</button>
@@ -109,14 +125,23 @@
   </div>
 </div>
 
-<!-- Win modal -->
+<!-- Win / Certificate modal -->
 <div class="modal-overlay" id="winModal">
   <div class="modal">
     <h2>&#127942; Audit Ready</h2>
-    <p>You completed all <span id="winModalCount">20</span> compliance SQL investigations.</p>
+    <p>All <span id="winModalCount">20</span> compliance SQL investigations complete.</p>
     <div class="final-score" id="finalScore">0</div>
     <p>final score</p>
-    <button class="btn-primary" onclick="location.reload()">Play Again</button>
+    <div class="cert-grid">
+      <div class="cert-item"><div class="cert-label">Difficulty</div><div class="cert-val" id="certDifficulty">—</div></div>
+      <div class="cert-item"><div class="cert-label">Missions</div><div class="cert-val"><span id="certTotal">—</span></div></div>
+      <div class="cert-item"><div class="cert-label">Time</div><div class="cert-val" id="certTime">—</div></div>
+      <div class="cert-item"><div class="cert-label">Badges</div><div class="cert-val" id="certBadges">—</div></div>
+    </div>
+    <div class="cert-actions">
+      <button class="btn-primary" id="btnCopyScore">&#128203; Copy Results</button>
+      <button class="btn-secondary" onclick="location.reload()">Play Again</button>
+    </div>
   </div>
 </div>
 

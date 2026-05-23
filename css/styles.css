@@ -767,11 +767,174 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   margin-bottom: 12px;
   background: transparent;
   border: 1px solid var(--border);
-  color: var(--text-dim);
+  color: var(--muted);
   font-size: 0.8rem;
   padding: 6px 14px;
   border-radius: 6px;
   cursor: pointer;
   transition: background .15s, color .15s;
 }
-.btn-home:hover { background: var(--surface-2, #1e293b); color: var(--text); }
+.btn-home:hover { background: var(--panel2); color: var(--text); }
+
+/* ── Theme toggle ────────────────────────────────────────────────────────── */
+.btn-theme {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  font-size: 1rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  line-height: 1;
+}
+.btn-theme:hover { color: var(--text); border-color: var(--text); }
+
+/* ── Light theme ─────────────────────────────────────────────────────────── */
+body.light {
+  --bg: #f0f4f8;
+  --panel: #ffffff;
+  --panel2: #f1f5f9;
+  --panel3: #e2e8f0;
+  --text: #1e293b;
+  --muted: #475569;
+  --border: #cbd5e1;
+}
+body.light .schema-header { color: #0369a1; }
+body.light .mission-card { background: linear-gradient(135deg, #f8fafc 0%, #fff 100%); }
+body.light textarea { color: #1e293b; }
+body.light .result-panel th { color: #0369a1; }
+body.light .eli12-box { background: #dbeafe; color: #1e40af; }
+body.light .eli12-label { background: #2563eb; color: #fff; }
+
+/* ── Continue section ────────────────────────────────────────────────────── */
+.continue-section {
+  background: rgba(56, 189, 248, 0.06);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+}
+.btn-continue {
+  background: var(--accent);
+  color: #062033;
+  border: none;
+  cursor: pointer;
+}
+.btn-continue:hover { background: #7dd3fc; }
+.continue-info {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+.home-error {
+  font-size: 0.8rem;
+  color: var(--danger);
+}
+
+/* ── Mission list (home) ─────────────────────────────────────────────────── */
+.mission-list {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.mission-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  cursor: pointer;
+  text-align: left;
+  font-size: 0.82rem;
+  color: var(--text);
+  font-weight: 400;
+  transition: background .12s, border-color .12s;
+}
+.mission-item:hover { background: var(--panel2); border-color: var(--accent); }
+.mission-item-num {
+  min-width: 22px;
+  font-weight: 700;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+.mission-item-title { flex: 1; }
+.mission-item-badge {
+  font-size: 0.65rem;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.mission-item-badge.beginner     { color: #22c55e; background: rgba(34,197,94,.12); border: 1px solid rgba(34,197,94,.3); }
+.mission-item-badge.intermediate { color: #f59e0b; background: rgba(245,158,11,.12); border: 1px solid rgba(245,158,11,.3); }
+.mission-item-badge.advanced     { color: #ef4444; background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.3); }
+
+/* ── Keyword bar ─────────────────────────────────────────────────────────── */
+.keyword-bar {
+  display: flex;
+  gap: 5px;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  padding: 4px 0 6px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border) transparent;
+  flex-shrink: 0;
+}
+.keyword-bar::-webkit-scrollbar { height: 4px; }
+.keyword-bar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+.kw-chip {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  color: var(--accent);
+  font-size: 0.72rem;
+  font-family: var(--font-mono);
+  padding: 3px 9px;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+  font-weight: 600;
+  flex-shrink: 0;
+  transition: background .12s, border-color .12s;
+}
+.kw-chip:hover { background: var(--panel3); border-color: var(--accent); }
+
+/* ── Certificate (win modal) ─────────────────────────────────────────────── */
+.cert-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin: 14px 0;
+  text-align: left;
+}
+.cert-item {
+  background: var(--panel2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+}
+.cert-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--muted);
+  margin-bottom: 4px;
+}
+.cert-val {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.cert-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  margin-top: 14px;
+  flex-wrap: wrap;
+}
