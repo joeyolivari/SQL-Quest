@@ -28,6 +28,7 @@
 
 /* ── Light theme ───────────────────────────────────────────────────────────────────────────── */
 body.light {
+  background-image: none;
   --bg: #f0f4f8;
   --panel: #ffffff;
   --panel2: #f1f5f9;

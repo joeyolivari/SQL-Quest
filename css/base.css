@@ -3,7 +3,13 @@ html { min-height: 100%; }
 body { min-height: 100%; overflow-x: hidden; overflow-y: auto; }
 
 body {
-  background: var(--bg);
+  background-color: var(--bg);
+  background-image:
+    linear-gradient(rgba(11, 17, 32, 0.72), rgba(11, 17, 32, 0.82)),
+    url('../assets/images/backgrounds/hero-command-center.png');
+  background-size: cover;
+  background-position: center top;
+  background-repeat: no-repeat;
   color: var(--text);
   font-family: var(--font-sans);
   display: flex;
