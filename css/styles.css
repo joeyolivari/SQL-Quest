@@ -663,6 +663,27 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .home-footer { text-align: center; }
 .btn-lg { padding: 12px 36px; font-size: 1rem; border-radius: 8px; font-weight: 700; }
 
+/* ── Schema minimize ─────────────────────────────────────────────────────── */
+.schema-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 12px 0 6px;
+}
+.schema-heading h3 { margin: 0; }
+.btn-schema-min {
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text-dim);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: background .15s, color .15s;
+}
+.btn-schema-min:hover { background: var(--surface-2, #1e293b); color: var(--text); }
+
 /* ── Casefile ────────────────────────────────────────────────────────────── */
 .casefile-text {
   margin: 8px 0 2px;

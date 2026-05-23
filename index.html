@@ -33,12 +33,8 @@
       <button class="diff-btn" data-diff="all">All Levels</button>
     </div>
   </div>
-  <div class="home-section">
-    <h3>Pick a Scenario <span class="home-hint">(or use the button below to play everything)</span></h3>
-    <div class="scenario-grid" id="scenarioGrid"></div>
-  </div>
   <div class="home-footer">
-    <button class="btn-lg btn-primary" id="btnPlayAll">&#9654; Play All Missions</button>
+    <button class="btn-lg btn-primary" id="btnPlayAll">&#9654; Start</button>
   </div>
 </div>
 
@@ -47,9 +43,14 @@
   <aside class="sidebar">
     <h3>Scenario</h3>
     <div id="scenarioLabel" class="scenario-label">Loading...</div>
-    <h3>Database Schema</h3>
-    <div class="disclaimer">All client, account, transaction, and compliance records are synthetic and created for learning purposes only.</div>
-    <div id="schemaPanel"></div>
+    <div class="schema-heading">
+      <h3>Database Schema</h3>
+      <button class="btn-schema-min" id="btnSchemaMin">&#9660; Hide</button>
+    </div>
+    <div id="schemaBody">
+      <div class="disclaimer">All client, account, transaction, and compliance records are synthetic and created for learning purposes only.</div>
+      <div id="schemaPanel"></div>
+    </div>
     <h3>Mission Progress</h3>
     <div class="level-progress" id="progressDots"></div>
   </aside>

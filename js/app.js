@@ -1,5 +1,4 @@
 import { missions } from './missions.js';
-import { scenarios } from './scenarios.js';
 import { schema } from './schema.js';
 import { tutorials } from './tutorial.js';
 import { briefings } from './casefiles.js';
@@ -23,10 +22,6 @@ let selectedDifficulty = 'beginner';
 // ── Home screen ──────────────────────────────────────────────────────────────
 
 function initHomeScreen() {
-  ui.renderScenarioCards(scenarios, (scenarioId) => {
-    startGame(getMissionQueue(selectedDifficulty, scenarioId), scenarioId);
-  });
-
   document.querySelectorAll('.diff-btn').forEach(btn => {
     btn.addEventListener('click', () => {
       document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
@@ -36,20 +31,14 @@ function initHomeScreen() {
   });
 
   document.getElementById('btnPlayAll').addEventListener('click', () => {
-    startGame(getMissionQueue(selectedDifficulty, null), null);
+    startGame(getMissionQueue(selectedDifficulty), null);
   });
 }
 
-function getMissionQueue(difficulty, scenarioId) {
-  let queue = [...missions];
-  if (scenarioId) {
-    const sc = scenarios.find(s => s.id === scenarioId);
-    if (sc) queue = queue.filter(m => sc.missionIds.includes(m.id));
-  }
-  if (difficulty !== 'all') {
-    queue = queue.filter(m => m.difficulty.toLowerCase() === difficulty);
-  }
-  return queue.length ? queue : [...missions];
+function getMissionQueue(difficulty) {
+  if (difficulty === 'all') return [...missions];
+  const filtered = missions.filter(m => m.difficulty.toLowerCase() === difficulty);
+  return filtered.length ? filtered : [...missions];
 }
 
 function startGame(queue, scenarioId) {
@@ -195,6 +184,26 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnTutorial').addEventListener('click', openTutorial);
   document.getElementById('btnHome').addEventListener('click', goHome);
   document.getElementById('btnCloseTutorial').addEventListener('click', closeTutorial);
+
+  document.getElementById('btnSchemaMin').addEventListener('click', () => {
+    const body = document.getElementById('schemaBody');
+    const btn = document.getElementById('btnSchemaMin');
+    const hidden = body.style.display === 'none';
+    body.style.display = hidden ? 'block' : 'none';
+    btn.innerHTML = hidden ? '&#9660; Hide' : '&#9654; Show';
+  });
+
+  document.getElementById('sqlInput').addEventListener('keydown', e => {
+    if (e.key !== "'") return;
+    e.preventDefault();
+    const el = e.target;
+    const s = el.selectionStart, end = el.selectionEnd;
+    const val = el.value;
+    el.value = val.slice(0, s) + "'" + val.slice(s, end) + "'" + val.slice(end);
+    el.selectionStart = s + 1;
+    el.selectionEnd = end + 1;
+  });
+
   document.addEventListener('keydown', e => {
     if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
       if (!document.getElementById('btnRun').disabled) runQuery();
