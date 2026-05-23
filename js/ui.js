@@ -59,7 +59,6 @@ export function loadMission(mission, index, briefing) {
 
   hideMessages();
   hideSolutionBox();
-  document.getElementById('btnSolution').disabled = true;
   document.getElementById('btnCheck').disabled = false;
   showNextButton(false);
   renderEmptyResults();

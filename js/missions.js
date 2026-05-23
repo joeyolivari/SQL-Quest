@@ -80,7 +80,7 @@ export const missions = [
     orderMatters: false,
     starterSQL: "SELECT ad.advisor_name, COUNT(*) AS open_issue_count\nFROM compliance_reviews cr\nJOIN accounts a ON cr.account_id = a.account_id\n",
     solutionSQL: "SELECT ad.advisor_name, COUNT(*) AS open_issue_count\nFROM compliance_reviews cr\nJOIN accounts a ON cr.account_id = a.account_id\nJOIN clients c ON a.client_id = c.client_id\nJOIN advisors ad ON c.advisor_id = ad.advisor_id\nWHERE cr.review_status IN ('Open', 'In Progress')\nGROUP BY ad.advisor_name\nHAVING COUNT(*) > 1;",
-    hint: 'Use the same query as Mission 5, then add HAVING COUNT(*) > 1 after GROUP BY.',
+    hint: "Join reviews → accounts → clients → advisors, filter review_status IN ('Open','In Progress'), GROUP BY advisor_name, then add HAVING COUNT(*) > 1.",
     explanation: "WHERE filters rows before grouping. HAVING filters grouped results after aggregation. That is useful when reporting only material risk concentrations."
   },
   {
@@ -122,7 +122,7 @@ export const missions = [
     orderMatters: false,
     starterSQL: "SELECT transaction_id, amount,\n  CASE\n    WHEN amount < 5000 THEN 'Low'\n",
     solutionSQL: "SELECT transaction_id, amount,\n  CASE\n    WHEN amount < 5000 THEN 'Low'\n    WHEN amount >= 5000 AND amount < 10000 THEN 'Medium'\n    ELSE 'High'\n  END AS risk_band\nFROM transactions;",
-    hint: "Use CASE WHEN amount < 5000 THEN 'Low' WHEN amount < 10000 THEN 'Medium' ELSE 'High' END AS risk_band.",
+    hint: "Add WHEN amount >= 5000 AND amount < 10000 THEN 'Medium' ELSE 'High' END AS risk_band after the Low branch.",
     explanation: "CASE statements turn raw numbers into business labels. This is how analysts create risk bands, priority flags, and dashboard categories."
   },
   {

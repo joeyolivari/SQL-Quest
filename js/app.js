@@ -123,7 +123,6 @@ function checkAnswer() {
   } else {
     recordAttempt();
     ui.updateStats(state.score, state.hintsLeft, state.attempts, state.currentMissionIndex + 1);
-    if (state.attempts >= 2) document.getElementById('btnSolution').disabled = false;
     ui.showError(result.message || 'Almost there. Your result set does not match the mission output yet.');
   }
 }
@@ -138,7 +137,11 @@ function showHint() {
 
 function showSolution() {
   state.solutionUsed = true;
-  ui.showSolutionBox(state.missionQueue[state.currentMissionIndex].solutionSQL);
+  const sql = state.missionQueue[state.currentMissionIndex].solutionSQL;
+  ui.showSolutionBox(sql);
+  document.getElementById('sqlInput').value = sql;
+  state.lastResult = null;
+  state.lastRunSQL = '';
 }
 
 function resetEditor() {
@@ -170,7 +173,7 @@ async function initGame() {
   try {
     await initEngine();
     engineReady = true;
-    ['sqlInput', 'btnRun', 'btnCheck', 'btnHint', 'btnReset', 'btnQuote'].forEach(id => {
+    ['sqlInput', 'btnRun', 'btnCheck', 'btnHint', 'btnReset', 'btnQuote', 'btnSolution'].forEach(id => {
       document.getElementById(id).disabled = false;
     });
   } catch (err) {
