@@ -86,7 +86,7 @@ function renderHomeList() {
 function initHomeScreen() {
   // Populate difficulty counts
   const counts = { beginner: 0, intermediate: 0, advanced: 0, all: missions.length };
-  missions.forEach(m => { const d = m.difficulty.toLowerCase(); if (counts[d] !== undefined) counts[d]++; });
+  missions.forEach(m => { const d = m.difficulty?.toLowerCase(); if (d && counts[d] !== undefined) counts[d]++; });
   Object.entries(counts).forEach(([diff, n]) => {
     const id = 'count' + diff.charAt(0).toUpperCase() + diff.slice(1);
     const el = document.getElementById(id);
@@ -132,7 +132,7 @@ function initHomeScreen() {
 
 function getMissionsByDifficulty(difficulty) {
   if (difficulty === 'all') return [...missions];
-  const filtered = missions.filter(m => m.difficulty.toLowerCase() === difficulty);
+  const filtered = missions.filter(m => m.difficulty?.toLowerCase() === difficulty);
   return filtered.length ? filtered : [...missions];
 }
 
