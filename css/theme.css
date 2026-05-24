@@ -22,6 +22,12 @@
   --glow-success-sm: 0 0 16px rgba(34, 197, 94, 0.22);
   --glow-warning-sm: 0 0 16px rgba(245, 158, 11, 0.22);
   --glow-danger-sm: 0 0 16px rgba(239, 68, 68, 0.22);
+  --glow-green-md: 0 0 28px rgba(34, 197, 94, 0.32);
+  --glow-amber-md: 0 0 28px rgba(245, 158, 11, 0.32);
+  --glow-danger-md: 0 0 28px rgba(239, 68, 68, 0.32);
+  --diff-purple: #a855f7;
+  --glow-purple-sm: 0 0 16px rgba(168, 85, 247, 0.22);
+  --glow-purple-md: 0 0 28px rgba(168, 85, 247, 0.32);
   --shadow-card: 0 4px 20px rgba(0, 0, 0, 0.35);
   --shadow-lift: 0 8px 32px rgba(0, 0, 0, 0.45);
 }
