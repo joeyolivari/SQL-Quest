@@ -124,10 +124,23 @@ export function showExplanation(text) {
 }
 
 export function hideMessages(includeHint = true) {
-  ['errorBox', 'successBox', 'learnBox'].forEach(id =>
+  ['errorBox', 'successBox', 'learnBox', 'summaryPanel'].forEach(id =>
     document.getElementById(id).classList.remove('visible')
   );
   if (includeHint) document.getElementById('hintBox').classList.remove('visible');
+}
+
+export function showSummaryPanel({ rating, points, attempts, hintsUsed, timeTaken, concepts }) {
+  const panel = document.getElementById('summaryPanel');
+  panel.dataset.rating = rating;
+  document.getElementById('summaryRating').textContent = rating;
+  document.getElementById('summaryPoints').textContent = '+' + points;
+  document.getElementById('summaryAttempts').textContent = attempts;
+  document.getElementById('summaryHints').textContent = hintsUsed;
+  document.getElementById('summaryTime').textContent = formatTime(timeTaken);
+  document.getElementById('summaryConcepts').innerHTML =
+    concepts.map(c => `<span class="summary-concept">${escapeHtml(c)}</span>`).join('');
+  panel.classList.add('visible');
 }
 
 export function showSolutionBox(sql) {

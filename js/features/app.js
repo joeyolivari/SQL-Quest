@@ -18,6 +18,13 @@ import { getRecommendedMission } from '../learning/adaptiveQueue.js';
 let engineReady = false;
 let selectedDifficulty = 'beginner';
 let timerInterval = null;
+let missionStartTime = 0;
+
+function getMissionRating(attempts, levelHintUsed) {
+  if (attempts === 0 && !levelHintUsed) return 'Perfect';
+  if (attempts >= 3) return 'Needs Review';
+  return 'Good';
+}
 
 // ── Theme ─────────────────────────────────────────────────────────────────────
 
@@ -206,6 +213,7 @@ function initMobileTabs() {
 function loadLevel(index) {
   const mission = state.missionQueue[index];
   resetForLevel(index);
+  missionStartTime = state.totalTime;
   ui.loadMission(mission, index, briefings[mission.id]);
   ui.updateStats(state.score, state.hintsLeft, state.attempts, index + 1);
   ui.renderProgressDots(state.completedMissions, index, state.missionQueue.length);
@@ -252,8 +260,16 @@ function checkAnswer() {
   if (result.ok) {
     recordMasterySuccess(mission.concepts);
     stopTimer();
+    const rating = getMissionRating(state.attempts, state.levelHintUsed);
     const points = completeCurrentMission();
-    ui.showSuccess(`&#10003; <strong>Mission complete.</strong> +${points} points.`);
+    ui.showSummaryPanel({
+      rating,
+      points,
+      attempts: state.attempts + 1,
+      hintsUsed: state.levelHintUsed ? 1 : 0,
+      timeTaken: state.totalTime - missionStartTime,
+      concepts: mission.concepts,
+    });
     ui.showExplanation(mission.explanation);
     document.getElementById('btnCheck').disabled = true;
     ui.renderProgressDots(state.completedMissions, state.currentMissionIndex, state.missionQueue.length);

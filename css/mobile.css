@@ -223,6 +223,9 @@
   .mission-concept { font-size: 0.64rem; }
   .mission-item-badge { font-size: 0.6rem; padding: 2px 6px; }
 
+  /* Summary panel — 2-column grid on phones */
+  .summary-grid { grid-template-columns: repeat(2, 1fr); }
+
   /* Modals — bottom-sheet style on phone */
   .modal-overlay { align-items: flex-end; }
   .modal { padding: 20px 16px; max-width: calc(100vw - 24px); border-radius: 14px; }
