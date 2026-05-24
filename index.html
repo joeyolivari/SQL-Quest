@@ -130,10 +130,22 @@
       <div class="keyword-bar" id="keywordBar"></div>
       <textarea id="sqlInput" spellcheck="false" disabled>-- Loading SQL engine...</textarea>
       <div class="btn-row">
-        <button class="btn-primary" id="btnRun" disabled>&#9654; Run Query</button>
-        <button class="btn-success" id="btnCheck" disabled>&#10003; Check Answer</button>
-        <button class="btn-hint" id="btnHint" disabled>&#128161; Hint</button>
-        <button class="btn-secondary" id="btnReset" disabled>&#8635; Reset</button>
+        <button class="btn-img btn-img-run" id="btnRun" disabled aria-label="Run Query">
+          <img src="assets/images/buttons/btn-run-query.png" alt="" aria-hidden="true">
+          <span class="btn-img-label">Run Query</span>
+        </button>
+        <button class="btn-img btn-img-check" id="btnCheck" disabled aria-label="Check Answer">
+          <img src="assets/images/buttons/btn-check-answer.png" alt="" aria-hidden="true">
+          <span class="btn-img-label">Check Answer</span>
+        </button>
+        <button class="btn-img btn-img-hint" id="btnHint" disabled aria-label="Hint">
+          <img src="assets/images/buttons/btn-hint.png" alt="" aria-hidden="true">
+          <span class="btn-img-label">Hint</span>
+        </button>
+        <button class="btn-img btn-img-reset" id="btnReset" disabled aria-label="Reset">
+          <img src="assets/images/buttons/btn-reset.png" alt="" aria-hidden="true">
+          <span class="btn-img-label">Reset</span>
+        </button>
         <button class="btn-secondary" id="btnSolution" disabled>&#128275; Solve for Me</button>
         <button class="btn-quote" id="btnQuote" disabled title="Wrap in quotes">&#x27;&thinsp;&#x27;</button>
         <button class="btn-quote" id="btnParen" disabled title="Wrap in parentheses">(&thinsp;)</button>
