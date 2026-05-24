@@ -112,6 +112,11 @@ export const missions = [
     starterSQL: 'SELECT DISTINCT ',
     solutionSQL: 'SELECT DISTINCT review_reason\nFROM compliance_reviews;',
     hint: 'Use SELECT DISTINCT review_reason FROM compliance_reviews.',
+    hintSteps: [
+      'DISTINCT removes duplicate values from a result set.',
+      'Select only review_reason from compliance_reviews and make it unique.',
+      'Use SELECT DISTINCT review_reason FROM compliance_reviews.'
+    ],
     explanation: 'DISTINCT removes duplicates from your result. In audit work, this is useful for cataloguing what categories of issues have been flagged — giving a fast summary without counting or grouping.'
   },
   {
@@ -127,6 +132,11 @@ export const missions = [
     starterSQL: 'SELECT account_id, client_id, account_type, current_balance\nFROM accounts\nWHERE current_balance ',
     solutionSQL: 'SELECT account_id, client_id, account_type, current_balance\nFROM accounts\nWHERE current_balance BETWEEN 30000 AND 100000;',
     hint: 'Use WHERE current_balance BETWEEN 30000 AND 100000.',
+    hintSteps: [
+      'BETWEEN checks whether a value falls inside an inclusive range.',
+      'Filter accounts with a WHERE clause on current_balance.',
+      'Use WHERE current_balance BETWEEN 30000 AND 100000.'
+    ],
     explanation: 'BETWEEN is inclusive on both ends. In compliance, banding account balances helps analysts focus on a specific risk tier — for example, accounts large enough to matter but below high-net-worth monitoring thresholds.'
   },
   {
@@ -142,6 +152,11 @@ export const missions = [
     starterSQL: 'SELECT flag_id, transaction_id, flag_type, severity\nFROM compliance_flags\nWHERE resolved ',
     solutionSQL: 'SELECT flag_id, transaction_id, flag_type, severity\nFROM compliance_flags\nWHERE resolved NOT IN (1);',
     hint: 'Use WHERE resolved NOT IN (1) to exclude resolved flags.',
+    hintSteps: [
+      'NOT IN excludes rows that match one or more listed values.',
+      'Filter compliance_flags so rows with resolved = 1 are not returned.',
+      'Use WHERE resolved NOT IN (1).'
+    ],
     explanation: 'NOT IN is a readable alternative to != for lists. In compliance dashboards, filtering out resolved items helps analysts focus attention on open items that still require action.'
   },
   {
@@ -157,6 +172,11 @@ export const missions = [
     starterSQL: "SELECT 'transaction' AS source, transaction_id AS id\nFROM transactions\nWHERE status = 'Pending'\nUNION\n",
     solutionSQL: "SELECT 'transaction' AS source, transaction_id AS id\nFROM transactions\nWHERE status = 'Pending'\nUNION\nSELECT 'review' AS source, account_id AS id\nFROM compliance_reviews\nWHERE review_status = 'Open';",
     hint: "UNION combines results. Add SELECT 'review' AS source, account_id AS id FROM compliance_reviews WHERE review_status = 'Open'.",
+    hintSteps: [
+      'UNION stacks two SELECT results that have matching columns.',
+      'Build one SELECT for pending transactions and another SELECT for open reviews.',
+      "Add SELECT 'review' AS source, account_id AS id FROM compliance_reviews WHERE review_status = 'Open'."
+    ],
     explanation: "UNION stacks result sets vertically. In compliance work, you often need to surface items from different tables into one unified action list — UNION makes that possible without a complex JOIN."
   },
   {
@@ -172,6 +192,11 @@ export const missions = [
     starterSQL: 'SELECT client_id, full_name\nFROM clients\nWHERE client_id IN (\n  SELECT client_id FROM accounts WHERE account_id IN (\n    ',
     solutionSQL: 'SELECT client_id, full_name\nFROM clients\nWHERE client_id IN (\n  SELECT client_id FROM accounts WHERE account_id IN (\n    SELECT account_id FROM transactions WHERE transaction_id IN (\n      SELECT transaction_id FROM compliance_flags\n    )\n  )\n);',
     hint: 'Nest subqueries: compliance_flags → transactions → accounts → clients.',
+    hintSteps: [
+      'A subquery can filter one table using IDs found in another table.',
+      'Trace flagged rows from compliance_flags to transactions, then accounts, then clients.',
+      'Use nested IN clauses along compliance_flags → transactions → accounts → clients.'
+    ],
     explanation: 'Subqueries let you filter based on data in another table without an explicit JOIN. In compliance, chaining subqueries is common when tracing a flag back through transactions, accounts, and ultimately to a client.'
   },
   {
@@ -187,6 +212,11 @@ export const missions = [
     starterSQL: "WITH recent_flags AS (\n  SELECT flag_id, transaction_id, flag_type\n  FROM compliance_flags\n  WHERE ",
     solutionSQL: "WITH recent_flags AS (\n  SELECT flag_id, transaction_id, flag_type\n  FROM compliance_flags\n  WHERE flagged_date >= '2026-01-01'\n)\nSELECT flag_id, transaction_id, flag_type\nFROM recent_flags;",
     hint: "In the CTE WHERE clause, filter flagged_date >= '2026-01-01'. Then SELECT from recent_flags.",
+    hintSteps: [
+      'A CTE names a temporary result with WITH so the final SELECT is cleaner.',
+      'Define recent_flags first, then select flag_id, transaction_id, and flag_type from it.',
+      "Inside the CTE, use WHERE flagged_date >= '2026-01-01'."
+    ],
     explanation: "CTEs (Common Table Expressions) use WITH to name a temporary result set. They improve readability for complex queries — especially in compliance reports where you want to isolate a filtered subset before further analysis."
   },
   {
@@ -202,6 +232,11 @@ export const missions = [
     starterSQL: "SELECT c.client_id, c.full_name\nFROM clients c\nWHERE EXISTS (\n  ",
     solutionSQL: "SELECT c.client_id, c.full_name\nFROM clients c\nWHERE EXISTS (\n  SELECT 1 FROM accounts a\n  JOIN compliance_reviews cr ON a.account_id = cr.account_id\n  WHERE a.client_id = c.client_id\n    AND cr.review_status = 'Open'\n);",
     hint: "Inside EXISTS, join accounts to compliance_reviews on account_id. Filter where a.client_id = c.client_id and review_status = 'Open'.",
+    hintSteps: [
+      'EXISTS checks whether the related subquery finds at least one row.',
+      'The subquery should connect accounts to reviews and relate accounts back to the outer client.',
+      "Filter inside EXISTS with a.client_id = c.client_id and cr.review_status = 'Open'."
+    ],
     explanation: "EXISTS returns true if the subquery finds any row. It's often faster than IN for large datasets. In compliance, EXISTS is ideal for asking 'does this client have at least one open issue?' without counting or listing all of them."
   },
   {
@@ -217,6 +252,11 @@ export const missions = [
     starterSQL: 'SELECT a.account_type, ROUND(AVG(t.amount), 2) AS avg_amount\nFROM transactions t\nJOIN accounts a ON ',
     solutionSQL: 'SELECT a.account_type, ROUND(AVG(t.amount), 2) AS avg_amount\nFROM transactions t\nJOIN accounts a ON t.account_id = a.account_id\nGROUP BY a.account_type;',
     hint: 'JOIN on t.account_id = a.account_id, then GROUP BY a.account_type.',
+    hintSteps: [
+      'Averages by category need a JOIN plus GROUP BY.',
+      'Join transactions to accounts so each transaction has an account_type.',
+      'Use ROUND(AVG(t.amount), 2) and GROUP BY a.account_type.'
+    ],
     explanation: 'AVG with ROUND gives clean numeric summaries. Comparing average transaction amounts across account types helps identify outliers — for example, if Non-Registered accounts average much higher than RRSPs, that pattern may be worth investigating.'
   },
   {
@@ -232,6 +272,11 @@ export const missions = [
     starterSQL: "SELECT transaction_id, account_id, transaction_date, amount\nFROM transactions\nWHERE transaction_date ",
     solutionSQL: "SELECT transaction_id, account_id, transaction_date, amount\nFROM transactions\nWHERE transaction_date BETWEEN '2026-01-01' AND '2026-01-31';",
     hint: "Use BETWEEN '2026-01-01' AND '2026-01-31'.",
+    hintSteps: [
+      'Date filters work like other range filters when dates use YYYY-MM-DD text.',
+      'Filter transaction_date with a WHERE clause for January 2026.',
+      "Use transaction_date BETWEEN '2026-01-01' AND '2026-01-31'."
+    ],
     explanation: "Date filtering is fundamental in audit work. Compliance reviews are often scoped to a reporting period — and being able to precisely isolate date ranges is essential for producing accurate extracts."
   },
   {
@@ -247,6 +292,11 @@ export const missions = [
     starterSQL: "SELECT adv.advisor_id, adv.advisor_name, COUNT(cr.review_id) AS open_review_count\nFROM advisors adv\nJOIN clients c ON ",
     solutionSQL: "SELECT adv.advisor_id, adv.advisor_name, COUNT(cr.review_id) AS open_review_count\nFROM advisors adv\nJOIN clients c ON adv.advisor_id = c.advisor_id\nJOIN accounts a ON c.client_id = a.client_id\nJOIN compliance_reviews cr ON a.account_id = cr.account_id\nWHERE cr.review_status = 'Open'\nGROUP BY adv.advisor_id, adv.advisor_name\nORDER BY open_review_count DESC;",
     hint: "Chain joins: advisors → clients → accounts → compliance_reviews. Filter review_status = 'Open', then GROUP BY advisor.",
+    hintSteps: [
+      'Multi-join reports follow the relationship path between tables.',
+      'Join advisors to clients, clients to accounts, and accounts to compliance_reviews.',
+      "Filter cr.review_status = 'Open', group by advisor, and order by open_review_count DESC."
+    ],
     explanation: "Multi-table joins power executive dashboards. This query mirrors what a compliance officer actually runs before a review meeting — surfacing which advisors have the most open items so attention can be directed appropriately."
   },
   {
@@ -262,6 +312,11 @@ export const missions = [
     starterSQL: 'SELECT transaction_id, amount,\n  CASE\n    WHEN ',
     solutionSQL: "SELECT transaction_id, amount,\n  CASE\n    WHEN amount > 80000 THEN 'High'\n    WHEN amount > 20000 THEN 'Medium'\n    ELSE 'Low'\n  END AS risk_label\nFROM transactions;",
     hint: "CASE WHEN amount > 80000 THEN 'High' WHEN amount > 20000 THEN 'Medium' ELSE 'Low' END AS risk_label.",
+    hintSteps: [
+      'CASE creates a calculated label from conditional rules.',
+      'Add a CASE expression after amount in the SELECT list.',
+      "Use WHEN amount > 80000 THEN 'High', WHEN amount > 20000 THEN 'Medium', ELSE 'Low' END AS risk_label."
+    ],
     explanation: "CASE lets you classify rows dynamically. In compliance, risk tiering is common — you often need to label transactions or clients into bands so downstream filters and reports can act on them."
   },
   {
@@ -277,6 +332,11 @@ export const missions = [
     starterSQL: 'SELECT account_id, transaction_id, transaction_date, amount,\n  SUM(amount) OVER (PARTITION BY ',
     solutionSQL: 'SELECT account_id, transaction_id, transaction_date, amount,\n  SUM(amount) OVER (PARTITION BY account_id ORDER BY transaction_date) AS running_total\nFROM transactions;',
     hint: 'PARTITION BY account_id ORDER BY transaction_date gives a per-account running total.',
+    hintSteps: [
+      'Window functions calculate across related rows without grouping them away.',
+      'Use SUM(amount) OVER (...) and keep each account in its own partition.',
+      'Inside OVER, use PARTITION BY account_id ORDER BY transaction_date.'
+    ],
     explanation: 'Window functions compute across rows related to the current row without collapsing them. A running balance per account is a core compliance tool — it lets you see the exact balance at each point in time, which is critical for investigating suspicious patterns.'
   },
   {
@@ -292,6 +352,11 @@ export const missions = [
     starterSQL: "SELECT advisor_id, advisor_name, high_risk_count,\n  RANK() OVER (ORDER BY high_risk_count DESC) AS risk_rank\nFROM (\n  SELECT adv.advisor_id, adv.advisor_name, COUNT(c.client_id) AS high_risk_count\n  FROM advisors adv\n  JOIN clients c ON ",
     solutionSQL: "SELECT advisor_id, advisor_name, high_risk_count,\n  RANK() OVER (ORDER BY high_risk_count DESC) AS risk_rank\nFROM (\n  SELECT adv.advisor_id, adv.advisor_name, COUNT(c.client_id) AS high_risk_count\n  FROM advisors adv\n  JOIN clients c ON adv.advisor_id = c.advisor_id\n  WHERE c.risk_level = 'High'\n  GROUP BY adv.advisor_id, adv.advisor_name\n) sub;",
     hint: "Inner query: JOIN advisors to clients, filter risk_level = 'High', COUNT and GROUP BY. Outer query: RANK() OVER (ORDER BY high_risk_count DESC).",
+    hintSteps: [
+      'RANK is a window function that orders rows by a calculated value.',
+      'First build a grouped subquery that counts high-risk clients per advisor.',
+      'In the outer SELECT, use RANK() OVER (ORDER BY high_risk_count DESC) AS risk_rank.'
+    ],
     explanation: "RANK() assigns a position to each row based on an order. Here it surfaces which advisors carry the most concentrated high-risk client exposure — a key input in regulatory stress testing or targeted reviews."
   },
   {
@@ -307,6 +372,11 @@ export const missions = [
     starterSQL: 'SELECT t1.transaction_id AS txn1, t2.transaction_id AS txn2, t1.account_id, t1.amount\nFROM transactions t1\nJOIN transactions t2 ON ',
     solutionSQL: 'SELECT t1.transaction_id AS txn1, t2.transaction_id AS txn2, t1.account_id, t1.amount\nFROM transactions t1\nJOIN transactions t2 ON t1.account_id = t2.account_id\n  AND t1.amount = t2.amount\n  AND t1.transaction_date != t2.transaction_date\n  AND t1.transaction_id < t2.transaction_id;',
     hint: 'Self-join on account_id and amount, different dates, and t1.transaction_id < t2.transaction_id to avoid duplicate pairs.',
+    hintSteps: [
+      'A self-join compares rows from the same table by using two aliases.',
+      'Join transactions t1 to transactions t2 on matching account_id and amount.',
+      'Add different dates and t1.transaction_id < t2.transaction_id to keep each pair once.'
+    ],
     explanation: 'A self-join compares rows within the same table. Detecting duplicate transactions is a classic fraud pattern — the same amount appearing twice on the same account on different dates is a common structuring or error signal.'
   },
   {
@@ -322,6 +392,11 @@ export const missions = [
     starterSQL: 'WITH RECURSIVE reg_chain AS (\n  SELECT 1 AS level, update_id, regulator, topic\n  FROM regulatory_updates\n  WHERE update_id = (SELECT MIN(update_id) FROM regulatory_updates)\n  UNION ALL\n  SELECT rc.level + 1, ru.update_id, ru.regulator, ru.topic\n  FROM regulatory_updates ru\n  JOIN reg_chain rc ON ',
     solutionSQL: 'WITH RECURSIVE reg_chain AS (\n  SELECT 1 AS level, update_id, regulator, topic\n  FROM regulatory_updates\n  WHERE update_id = (SELECT MIN(update_id) FROM regulatory_updates)\n  UNION ALL\n  SELECT rc.level + 1, ru.update_id, ru.regulator, ru.topic\n  FROM regulatory_updates ru\n  JOIN reg_chain rc ON ru.update_id = rc.update_id + 1\n)\nSELECT level, update_id, regulator, topic\nFROM reg_chain;',
     hint: 'In the recursive part, JOIN reg_chain rc ON ru.update_id = rc.update_id + 1.',
+    hintSteps: [
+      'A recursive CTE has an anchor query and a recursive step.',
+      'Start at the lowest update_id, then repeatedly join to the next update.',
+      'In the recursive step, use JOIN reg_chain rc ON ru.update_id = rc.update_id + 1.'
+    ],
     explanation: 'Recursive CTEs process hierarchical or sequential data by repeatedly referencing themselves. In compliance, this pattern is useful for tracing chains of events, organizational hierarchies, or sequential regulatory requirements — anywhere you need to walk a path row by row.'
   },
   {
@@ -337,6 +412,11 @@ export const missions = [
     starterSQL: 'SELECT account_id, account_type,\n  COALESCE(',
     solutionSQL: 'SELECT account_id, account_type,\n  COALESCE(CASE WHEN current_balance < 0 THEN 0 ELSE current_balance END, 0) AS current_balance\nFROM accounts;',
     hint: 'Use COALESCE with a CASE to replace NULLs and negatives with 0.',
+    hintSteps: [
+      'COALESCE handles NULL values, while CASE handles conditional replacements.',
+      'Use CASE to turn negative balances into 0, then COALESCE to handle NULL.',
+      'Use COALESCE(CASE WHEN current_balance < 0 THEN 0 ELSE current_balance END, 0) AS current_balance.'
+    ],
     explanation: 'COALESCE returns the first non-NULL value. Combining it with CASE lets you handle both NULLs and invalid values in one pass — important when preparing clean data for compliance reports or regulatory submissions.'
   },
   {
@@ -352,6 +432,11 @@ export const missions = [
     starterSQL: "SELECT client_id, full_name\nFROM clients\nWHERE full_name ",
     solutionSQL: "SELECT client_id, full_name\nFROM clients\nWHERE full_name LIKE '%son%';",
     hint: "Use LIKE '%son%' to match any name containing 'son'.",
+    hintSteps: [
+      'LIKE searches text patterns, and % means any characters.',
+      'Filter clients where full_name contains the letters son.',
+      "Use WHERE full_name LIKE '%son%'."
+    ],
     explanation: "LIKE with % wildcards enables partial text matching. In compliance systems, name searches are a daily tool — for KYC verification, sanctions screening, or simply finding a client record when the exact name is uncertain."
   },
   {
@@ -367,6 +452,11 @@ export const missions = [
     starterSQL: 'SELECT account_type,\n  MAX(current_balance) AS max_balance,\n  MIN(current_balance) AS min_balance\nFROM accounts\nGROUP BY ',
     solutionSQL: 'SELECT account_type,\n  MAX(current_balance) AS max_balance,\n  MIN(current_balance) AS min_balance\nFROM accounts\nGROUP BY account_type;',
     hint: 'GROUP BY account_type, then use MAX and MIN on current_balance.',
+    hintSteps: [
+      'MAX and MIN summarize the highest and lowest values in each group.',
+      'Group accounts by account_type before calculating the balance range.',
+      'Select account_type, MAX(current_balance) AS max_balance, and MIN(current_balance) AS min_balance.'
+    ],
     explanation: 'MAX and MIN in a GROUP BY give you the range within each category. This is useful for understanding how spread out values are — a very wide range might indicate data quality issues or outliers worth investigating.'
   },
   {
@@ -382,6 +472,11 @@ export const missions = [
     starterSQL: 'SELECT c.client_id, c.full_name, a.account_id\nFROM clients c\nJOIN accounts a ON c.client_id = a.client_id\nLEFT JOIN compliance_reviews cr ON ',
     solutionSQL: 'SELECT c.client_id, c.full_name, a.account_id\nFROM clients c\nJOIN accounts a ON c.client_id = a.client_id\nLEFT JOIN compliance_reviews cr ON a.account_id = cr.account_id\nWHERE cr.review_id IS NULL;',
     hint: 'LEFT JOIN compliance_reviews on account_id, then filter WHERE cr.review_id IS NULL.',
+    hintSteps: [
+      'A LEFT JOIN keeps rows even when the right table has no match.',
+      'Join clients to accounts, then left join compliance_reviews by account_id.',
+      'Filter for missing reviews with WHERE cr.review_id IS NULL.'
+    ],
     explanation: 'LEFT JOIN keeps all rows from the left table even with no match. Filtering on IS NULL after a LEFT JOIN finds the gaps — here, accounts that have never been reviewed. That gap list is often more valuable than the reviewed list.'
   },
   {
@@ -397,6 +492,11 @@ export const missions = [
     starterSQL: 'SELECT client_id, full_name, province,\n  SUBSTR(',
     solutionSQL: 'SELECT client_id, full_name, province,\n  SUBSTR(province, 1, 2) AS short_province\nFROM clients;',
     hint: 'Use SUBSTR(province, 1, 2) to get the first 2 characters.',
+    hintSteps: [
+      'String functions can extract part of a text value.',
+      'Add a calculated column that takes the first two characters of province.',
+      'Use SUBSTR(province, 1, 2) AS short_province.'
+    ],
     explanation: 'SUBSTR extracts a portion of a string. Province codes are a common normalization step before joining with external reference tables — regulators and reporting systems often use 2-letter codes rather than full names.'
   },
   {
@@ -412,6 +512,11 @@ export const missions = [
     starterSQL: 'SELECT transaction_id, account_id, amount\nFROM transactions t1\nWHERE amount > (\n  SELECT AVG(amount) FROM transactions t2 WHERE ',
     solutionSQL: 'SELECT transaction_id, account_id, amount\nFROM transactions t1\nWHERE amount > (\n  SELECT AVG(amount) FROM transactions t2 WHERE t2.account_id = t1.account_id\n);',
     hint: 'The subquery should reference t1.account_id: WHERE t2.account_id = t1.account_id.',
+    hintSteps: [
+      'A correlated subquery references the outer query row.',
+      'Compare each transaction amount to AVG(amount) from transactions for the same account.',
+      'Inside the subquery, use WHERE t2.account_id = t1.account_id.'
+    ],
     explanation: 'A correlated subquery references the outer query. Here it computes a per-account average on the fly. This pattern detects spikes within a single account — a transaction that is large relative to that account\'s own history, rather than globally.'
   },
   {
@@ -427,6 +532,11 @@ export const missions = [
     starterSQL: 'SELECT c.client_id, c.full_name,\n  SUM(a.current_balance) AS total_balance,\n  DENSE_RANK() OVER (ORDER BY ',
     solutionSQL: 'SELECT c.client_id, c.full_name,\n  SUM(a.current_balance) AS total_balance,\n  DENSE_RANK() OVER (ORDER BY SUM(a.current_balance) DESC) AS balance_rank\nFROM clients c\nJOIN accounts a ON c.client_id = a.client_id\nGROUP BY c.client_id, c.full_name;',
     hint: 'DENSE_RANK() OVER (ORDER BY SUM(a.current_balance) DESC). Include GROUP BY c.client_id, c.full_name.',
+    hintSteps: [
+      'DENSE_RANK assigns ranks without gaps when there are ties.',
+      'Join clients to accounts, group by client, and sum each client balance.',
+      'Use DENSE_RANK() OVER (ORDER BY SUM(a.current_balance) DESC) AS balance_rank.'
+    ],
     explanation: 'DENSE_RANK skips no rank numbers after ties, unlike RANK. Ranking clients by total balance helps segment the book for tiered compliance treatment — high-balance clients often face stricter review requirements.'
   },
   {
@@ -442,6 +552,11 @@ export const missions = [
     starterSQL: "SELECT account_id,\n  SUM(CASE WHEN transaction_type = 'Deposit' THEN amount ELSE 0 END) AS total_deposit,\n  SUM(CASE WHEN transaction_type = ",
     solutionSQL: "SELECT account_id,\n  SUM(CASE WHEN transaction_type = 'Deposit' THEN amount ELSE 0 END) AS total_deposit,\n  SUM(CASE WHEN transaction_type = 'Withdrawal' THEN amount ELSE 0 END) AS total_withdrawal,\n  SUM(CASE WHEN transaction_type = 'Transfer' THEN amount ELSE 0 END) AS total_transfer\nFROM transactions\nGROUP BY account_id;",
     hint: "Complete the CASE statements for 'Withdrawal' and 'Transfer'. Don't forget GROUP BY account_id.",
+    hintSteps: [
+      'Conditional aggregation uses CASE inside SUM to create separate totals.',
+      'Create one SUM(CASE...) column for each transaction_type.',
+      "Complete Withdrawal and Transfer CASE sums, then GROUP BY account_id."
+    ],
     explanation: 'Conditional aggregation with CASE inside SUM simulates a pivot table. This is the SQL way to produce a wide-format summary — each transaction type becomes a column. Auditors often request exactly this format for cross-account comparison.'
   },
   {
@@ -457,6 +572,11 @@ export const missions = [
     starterSQL: 'SELECT account_id, transaction_id, transaction_date, amount,\n  LAG(amount) OVER (PARTITION BY ',
     solutionSQL: 'SELECT account_id, transaction_id, transaction_date, amount,\n  LAG(amount) OVER (PARTITION BY account_id ORDER BY transaction_date) AS prev_amount\nFROM transactions;',
     hint: 'LAG(amount) OVER (PARTITION BY account_id ORDER BY transaction_date) AS prev_amount.',
+    hintSteps: [
+      'LAG reads a value from the previous row in a window.',
+      'Partition by account_id so previous transactions are compared within the same account.',
+      'Use LAG(amount) OVER (PARTITION BY account_id ORDER BY transaction_date) AS prev_amount.'
+    ],
     explanation: 'LAG accesses the previous row in a window. Comparing a transaction to the one before it on the same account helps identify sudden large withdrawals or unusual reversals — signals that are invisible when looking at each transaction in isolation.'
   },
   {
@@ -472,6 +592,11 @@ export const missions = [
     starterSQL: "WITH advisor_stats AS (\n  SELECT\n    adv.advisor_id,\n    adv.advisor_name,\n    COUNT(DISTINCT c.client_id) AS total_clients,\n    SUM(CASE WHEN c.risk_level = 'High' THEN 1 ELSE 0 END) AS high_risk_clients,\n    COUNT(DISTINCT CASE WHEN cr.review_status = 'Open' THEN cr.review_id END) AS open_reviews\n  FROM advisors adv\n  JOIN clients c ON adv.advisor_id = c.advisor_id\n  LEFT JOIN accounts a ON c.client_id = a.client_id\n  LEFT JOIN compliance_reviews cr ON a.account_id = cr.account_id\n  GROUP BY adv.advisor_id, adv.advisor_name\n)\nSELECT\n  advisor_id, advisor_name, total_clients, high_risk_clients, open_reviews,\n  CASE\n    WHEN ",
     solutionSQL: "WITH advisor_stats AS (\n  SELECT\n    adv.advisor_id,\n    adv.advisor_name,\n    COUNT(DISTINCT c.client_id) AS total_clients,\n    SUM(CASE WHEN c.risk_level = 'High' THEN 1 ELSE 0 END) AS high_risk_clients,\n    COUNT(DISTINCT CASE WHEN cr.review_status = 'Open' THEN cr.review_id END) AS open_reviews\n  FROM advisors adv\n  JOIN clients c ON adv.advisor_id = c.advisor_id\n  LEFT JOIN accounts a ON c.client_id = a.client_id\n  LEFT JOIN compliance_reviews cr ON a.account_id = cr.account_id\n  GROUP BY adv.advisor_id, adv.advisor_name\n)\nSELECT\n  advisor_id, advisor_name, total_clients, high_risk_clients, open_reviews,\n  CASE\n    WHEN open_reviews > 3 THEN 'Critical'\n    WHEN open_reviews > 1 THEN 'Elevated'\n    ELSE 'Normal'\n  END AS risk_tier\nFROM advisor_stats\nWHERE open_reviews >= 1\nORDER BY open_reviews DESC;",
     hint: "Complete the CASE: WHEN open_reviews > 3 THEN 'Critical' WHEN open_reviews > 1 THEN 'Elevated' ELSE 'Normal' END AS risk_tier. Add WHERE open_reviews >= 1 and ORDER BY open_reviews DESC.",
+    hintSteps: [
+      'This final report combines a CTE, grouped advisor stats, CASE, filtering, and ordering.',
+      'Use the provided advisor_stats CTE, then finish the outer SELECT with a risk_tier CASE.',
+      "Add CASE WHEN open_reviews > 3 THEN 'Critical' WHEN open_reviews > 1 THEN 'Elevated' ELSE 'Normal' END, filter open_reviews >= 1, and order by open_reviews DESC."
+    ],
     explanation: 'This final boss combines CTEs, multi-table joins, conditional aggregation, CASE expressions, and filtering. It mirrors a real-world compliance dashboard query — the kind a data analyst would run before a regulatory examination to summarize advisor-level risk exposure across the entire book of business.'
   }
 ];
