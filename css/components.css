@@ -1097,9 +1097,36 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 }
 
 /* ── Difficulty card image skins ─────────────────────────────────────────────────────────────── */
-/* New PNGs have real alpha transparency — outer corners are transparent, neon border is at the  */
-/* image edge. aspect-ratio matches the 1672×941 image so 100%×100% fills with zero distortion. */
+/* Real RGBA PNGs — transparent rounded corners, neon border at image edge.                      */
+/* Per-card aspect-ratio sizes the button to exactly match each image so cover has nothing       */
+/* to crop and the neon border sits flush with the button boundary.                              */
 
+.diff-btn.beginner,
+.diff-btn.beginner:hover,
+.diff-btn.beginner.selected {
+  background-image: url('../assets/images/difficulty/beginner-card.png');
+  aspect-ratio: 1588 / 554;
+}
+.diff-btn.intermediate,
+.diff-btn.intermediate:hover,
+.diff-btn.intermediate.selected {
+  background-image: url('../assets/images/difficulty/intermediate-card.png');
+  aspect-ratio: 1628 / 589;
+}
+.diff-btn.advanced,
+.diff-btn.advanced:hover,
+.diff-btn.advanced.selected {
+  background-image: url('../assets/images/difficulty/advanced-card.png');
+  aspect-ratio: 1513 / 562;
+}
+.diff-btn[data-diff="all"],
+.diff-btn[data-diff="all"]:hover,
+.diff-btn[data-diff="all"].selected {
+  background-image: url('../assets/images/difficulty/all-levels-card.png');
+  aspect-ratio: 1589 / 561;
+}
+
+/* Shared skin props — applied after per-card rules so they don't fight specificity */
 .diff-btn.beginner,
 .diff-btn.beginner:hover,
 .diff-btn.beginner.selected,
@@ -1113,34 +1140,19 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .diff-btn[data-diff="all"]:hover,
 .diff-btn[data-diff="all"].selected {
   background-color: transparent;
-  background-size: 100% 100%;
+  background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   border-color: transparent;
-  aspect-ratio: 1672 / 941;
 }
 
-.diff-btn.beginner,
+/* Hover / selected glow */
 .diff-btn.beginner:hover,
-.diff-btn.beginner.selected      { background-image: url('../assets/images/difficulty/beginner-card.png'); }
-.diff-btn.beginner:hover,
-.diff-btn.beginner.selected      { filter: brightness(1.15); box-shadow: var(--shadow-lift), var(--glow-green-md); }
-
-.diff-btn.intermediate,
+.diff-btn.beginner.selected     { filter: brightness(1.15); box-shadow: var(--shadow-lift), var(--glow-green-md); }
 .diff-btn.intermediate:hover,
-.diff-btn.intermediate.selected  { background-image: url('../assets/images/difficulty/intermediate-card.png'); }
-.diff-btn.intermediate:hover,
-.diff-btn.intermediate.selected  { filter: brightness(1.15); box-shadow: var(--shadow-lift), var(--glow-amber-md); }
-
-.diff-btn.advanced,
+.diff-btn.intermediate.selected { filter: brightness(1.15); box-shadow: var(--shadow-lift), var(--glow-amber-md); }
 .diff-btn.advanced:hover,
-.diff-btn.advanced.selected      { background-image: url('../assets/images/difficulty/advanced-card.png'); }
-.diff-btn.advanced:hover,
-.diff-btn.advanced.selected      { filter: brightness(1.15); box-shadow: var(--shadow-lift), var(--glow-danger-md); }
-
-.diff-btn[data-diff="all"],
-.diff-btn[data-diff="all"]:hover,
-.diff-btn[data-diff="all"].selected { background-image: url('../assets/images/difficulty/all-levels-card.png'); }
+.diff-btn.advanced.selected     { filter: brightness(1.15); box-shadow: var(--shadow-lift), var(--glow-danger-md); }
 .diff-btn[data-diff="all"]:hover,
 .diff-btn[data-diff="all"].selected { filter: brightness(1.15); box-shadow: var(--shadow-lift), var(--glow-purple-md); }
 
