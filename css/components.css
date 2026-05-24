@@ -302,49 +302,80 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .btn-success { background: var(--success); color: #052e16; }
 .btn-success:hover:not(:disabled) { background: #4ade80; box-shadow: 0 0 16px rgba(34, 197, 94, 0.35); }
 
-/* ── Image-skin action buttons ──────────────────────────────── */
-.btn-img {
-  background: transparent;
-  border: 0;
-  padding: 0;
-  border-radius: 0;
-  width: 160px;
-  height: 52px;
-  flex-shrink: 0;
+/* ── Cyber HUD action buttons ────────────────────────────────
+   Two-layer technique:
+   ::before = neon border (full background, clipped to shape)
+   ::after  = dark glass  (inset 1.5px, slightly smaller clip)
+   filter: drop-shadow on the element follows the clipped shape
+──────────────────────────────────────────────────────────── */
+.btn-cyber {
+  --cr: 56, 189, 248;
+  position: relative;
   display: inline-flex;
   align-items: center;
-  justify-content: center;
+  gap: 7px;
+  padding: 0 20px 0 14px;
+  height: 44px;
+  border: none;
+  background: transparent;
   cursor: pointer;
-  position: relative;
-  overflow: visible;
-}
-
-.btn-img img {
-  display: block;
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  pointer-events: none;
-  transition: filter 0.18s ease, transform 0.12s ease;
-}
-
-/* visually hidden label for accessibility */
-.btn-img-label {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0 0 0 0);
   white-space: nowrap;
-  border: 0;
+  font-family: var(--font-sans);
+  font-weight: 800;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: rgb(var(--cr));
+  filter: drop-shadow(0 0 4px rgba(var(--cr), 0.45));
+  transition: filter 0.18s ease, transform 0.12s ease;
+  isolation: isolate;
 }
 
-.btn-img:hover:not(:disabled) img { filter: brightness(1.25) saturate(1.1); }
-.btn-img:active:not(:disabled) img { filter: brightness(0.85); transform: scale(0.96); }
-.btn-img:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn-img:disabled img { filter: grayscale(50%); }
+.btn-cyber::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(var(--cr), 0.7);
+  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  transition: background 0.18s ease;
+  z-index: -2;
+}
+
+.btn-cyber::after {
+  content: '';
+  position: absolute;
+  inset: 1.5px;
+  background: linear-gradient(135deg, rgba(5, 8, 20, 0.92) 0%, rgba(var(--cr), 0.09) 100%);
+  clip-path: polygon(0 0, calc(100% - 10.5px) 0, 100% 10.5px, 100% 100%, 10.5px 100%, 0 calc(100% - 10.5px));
+  transition: background 0.18s ease;
+  z-index: -1;
+}
+
+.btn-cyber-run   { --cr: 56, 189, 248;  }
+.btn-cyber-check { --cr: 34, 197, 94;   }
+.btn-cyber-hint  { --cr: 245, 158, 11;  }
+.btn-cyber-reset { --cr: 239, 68, 68;   }
+
+.btn-cyber:hover:not(:disabled) {
+  filter: drop-shadow(0 0 8px rgba(var(--cr), 0.85)) drop-shadow(0 0 20px rgba(var(--cr), 0.35));
+}
+.btn-cyber:hover:not(:disabled)::before { background: rgba(var(--cr), 0.9); }
+.btn-cyber:hover:not(:disabled)::after  {
+  background: linear-gradient(135deg, rgba(5, 8, 20, 0.82) 0%, rgba(var(--cr), 0.16) 100%);
+}
+
+.btn-cyber:active:not(:disabled) {
+  transform: scale(0.95);
+  filter: drop-shadow(0 0 4px rgba(var(--cr), 0.5));
+}
+
+.btn-cyber:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  filter: grayscale(55%) brightness(0.55);
+}
+
+.btn-cyber-icon { font-size: 0.9rem; line-height: 1; flex-shrink: 0; }
 
 /* ──────────────────────────────────────────────────────────── */
 
