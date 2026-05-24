@@ -5,6 +5,7 @@ import { briefings } from '../data/casefiles.js';
 import { checkBadges, BADGE_DEFS } from './badges.js';
 import { initEngine, executeQuery, isSafeQuery } from '../core/sqlEngine.js';
 import { compareResults } from '../core/validation.js';
+import { getDiagnosticMessage } from '../core/diagnostics.js';
 import { state, resetForLevel, useHint, recordAttempt, completeCurrentMission,
          saveProgress, loadProgress, clearProgress } from '../core/gameState.js';
 import { getNextHint, resetHintLadder } from '../learning/hintEngine.js';
@@ -261,7 +262,13 @@ function checkAnswer() {
   } else {
     recordAttempt();
     ui.updateStats(state.score, state.hintsLeft, state.attempts, state.currentMissionIndex + 1);
-    ui.showError(result.message || 'Almost there. Your result set does not match the mission output yet.');
+    ui.showError(getDiagnosticMessage({
+      sql: currentSQL,
+      mission,
+      userResult: state.lastResult,
+      expectedResult: expected,
+      validationMessage: result.message || 'Almost there. Your result set does not match the mission output yet.'
+    }));
   }
 }
 
