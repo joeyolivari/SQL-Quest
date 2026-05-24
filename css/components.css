@@ -1095,3 +1095,80 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   box-shadow: 0 0 48px rgba(56, 189, 248, 0.58), 0 0 80px rgba(56, 189, 248, 0.22), var(--shadow-lift);
   transform: translateY(-2px);
 }
+
+/* ── Difficulty card image skins ─────────────────────────────────────────────────────────────── */
+/* Last in the file so cascade wins over earlier gradient/border rules without !important.       */
+/* Explicit background-* props override the shorthand in hover rules above.                      */
+
+.diff-btn.beginner,
+.diff-btn.beginner:hover,
+.diff-btn.beginner.selected {
+  background-image: url('../assets/images/difficulty/beginner-card.png');
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: transparent;
+  border-color: transparent;
+}
+.diff-btn.beginner:hover,
+.diff-btn.beginner.selected {
+  filter: brightness(1.12);
+  box-shadow: var(--shadow-lift), var(--glow-green-md);
+}
+
+.diff-btn.intermediate,
+.diff-btn.intermediate:hover,
+.diff-btn.intermediate.selected {
+  background-image: url('../assets/images/difficulty/intermediate-card.png');
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: transparent;
+  border-color: transparent;
+}
+.diff-btn.intermediate:hover,
+.diff-btn.intermediate.selected {
+  filter: brightness(1.12);
+  box-shadow: var(--shadow-lift), var(--glow-amber-md);
+}
+
+.diff-btn.advanced,
+.diff-btn.advanced:hover,
+.diff-btn.advanced.selected {
+  background-image: url('../assets/images/difficulty/advanced-card.png');
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: transparent;
+  border-color: transparent;
+}
+.diff-btn.advanced:hover,
+.diff-btn.advanced.selected {
+  filter: brightness(1.12);
+  box-shadow: var(--shadow-lift), var(--glow-danger-md);
+}
+
+.diff-btn[data-diff="all"],
+.diff-btn[data-diff="all"]:hover,
+.diff-btn[data-diff="all"].selected {
+  background-image: url('../assets/images/difficulty/all-levels-card.png');
+  background-size: 100% 100%;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: transparent;
+  border-color: transparent;
+}
+.diff-btn[data-diff="all"]:hover,
+.diff-btn[data-diff="all"].selected {
+  filter: brightness(1.12);
+  box-shadow: var(--shadow-lift), var(--glow-purple-md);
+}
+
+/* Hide emoji icons — card images already contain the icon graphic */
+.diff-btn.beginner .diff-icon,
+.diff-btn.intermediate .diff-icon,
+.diff-btn.advanced .diff-icon,
+.diff-btn[data-diff="all"] .diff-icon {
+  opacity: 0;
+  pointer-events: none;
+}
