@@ -172,16 +172,12 @@ function isMobileLayout() {
 function setMobileTab(name) {
   const container = document.querySelector('.game-container');
   if (!container) return;
-  container.classList.remove('tab-schema', 'tab-results');
+  container.classList.remove('tab-schema');
   if (name === 'schema') container.classList.add('tab-schema');
   document.querySelectorAll('.mobile-tab').forEach(t => {
     t.classList.toggle('active', t.dataset.tab === name);
   });
-  if (name === 'results') {
-    document.querySelector('.right-panel')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
-  } else {
-    window.scrollTo(0, 0);
-  }
+  window.scrollTo(0, 0);
 }
 
 function initMobileTabs() {
