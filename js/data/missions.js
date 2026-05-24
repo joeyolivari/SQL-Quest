@@ -11,6 +11,11 @@ export const missions = [
     starterSQL: "SELECT client_id, full_name, kyc_status\nFROM clients\nWHERE ",
     solutionSQL: "SELECT client_id, full_name, kyc_status\nFROM clients\nWHERE kyc_status IN ('pending', 'expired');",
     hint: "Use WHERE kyc_status IN ('pending', 'expired').",
+    hintSteps: [
+      'Start by filtering rows in the clients table with WHERE.',
+      "You need two possible kyc_status values: 'pending' and 'expired'.",
+      "Use IN: WHERE kyc_status IN ('pending', 'expired')."
+    ],
     explanation: "KYC filtering is the first step in compliance monitoring. A simple WHERE clause helps isolate incomplete or expired client documentation before it becomes an audit issue."
   },
   {
@@ -25,6 +30,11 @@ export const missions = [
     starterSQL: "SELECT c.client_id, c.full_name, a.account_id, a.account_type, a.account_status\nFROM clients c\nJOIN accounts a ON ",
     solutionSQL: "SELECT c.client_id, c.full_name, a.account_id, a.account_type, a.account_status\nFROM clients c\nJOIN accounts a ON c.client_id = a.client_id\nWHERE c.kyc_status = 'pending'\n  AND a.account_status = 'Active';",
     hint: "Join clients to accounts using client_id, then filter kyc_status = 'pending' and account_status = 'Active'.",
+    hintSteps: [
+      'Join clients to accounts so each client can be matched to their accounts.',
+      'The join condition should connect c.client_id to a.client_id.',
+      "After the join, filter for c.kyc_status = 'pending' and a.account_status = 'Active'."
+    ],
     explanation: "JOINs connect business entities. In compliance work, the risk is rarely in one table. You often need client data plus account status to identify real operational exposure."
   },
   {
@@ -39,6 +49,11 @@ export const missions = [
     starterSQL: 'SELECT transaction_id, account_id, amount, transaction_type\nFROM transactions\nORDER BY ',
     solutionSQL: 'SELECT transaction_id, account_id, amount, transaction_type\nFROM transactions\nORDER BY amount DESC;',
     hint: 'Use ORDER BY amount DESC to sort from largest to smallest.',
+    hintSteps: [
+      'Use ORDER BY to control the order of the result rows.',
+      'The mission asks for the largest amounts first.',
+      'Sort by amount DESC.'
+    ],
     explanation: 'Sorting by amount descending is a classic first pass in transaction monitoring. High-value items float to the top for immediate review without any thresholds or filters.'
   },
   {
@@ -53,6 +68,11 @@ export const missions = [
     starterSQL: 'SELECT account_id, COUNT(*) AS transaction_count\nFROM transactions\nGROUP BY ',
     solutionSQL: 'SELECT account_id, COUNT(*) AS transaction_count\nFROM transactions\nGROUP BY account_id\nORDER BY transaction_count DESC;',
     hint: 'GROUP BY account_id, then use COUNT(*) and alias it transaction_count.',
+    hintSteps: [
+      'Group the transactions by account_id so each account gets one result row.',
+      'Use COUNT(*) to count how many transactions are in each group.',
+      'Alias the count as transaction_count and order by transaction_count DESC.'
+    ],
     explanation: 'Grouping by account helps surface concentration of activity. Accounts with unusually high transaction counts may warrant a deeper review for layering or structuring patterns.'
   },
   {
@@ -67,6 +87,11 @@ export const missions = [
     starterSQL: "SELECT account_id, SUM(amount) AS total_deposited\nFROM transactions\nWHERE transaction_type = 'Deposit'\nGROUP BY account_id\nHAVING ",
     solutionSQL: "SELECT account_id, SUM(amount) AS total_deposited\nFROM transactions\nWHERE transaction_type = 'Deposit'\nGROUP BY account_id\nHAVING SUM(amount) > 50000;",
     hint: 'Use HAVING SUM(amount) > 50000 after GROUP BY.',
+    hintSteps: [
+      "First filter the rows to deposits with WHERE transaction_type = 'Deposit'.",
+      'Group deposits by account_id and calculate SUM(amount) AS total_deposited.',
+      'Use HAVING SUM(amount) > 50000 to keep only high-volume accounts.'
+    ],
     explanation: 'HAVING filters after aggregation. This is essential in AML monitoring — you often need to find clients whose cumulative activity crosses a regulatory threshold, not just individual transactions.'
   },
   {

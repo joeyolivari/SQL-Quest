@@ -7,6 +7,7 @@ import { initEngine, executeQuery, isSafeQuery } from '../core/sqlEngine.js';
 import { compareResults } from '../core/validation.js';
 import { state, resetForLevel, useHint, recordAttempt, completeCurrentMission,
          saveProgress, loadProgress, clearProgress } from '../core/gameState.js';
+import { getNextHint, resetHintLadder } from '../learning/hintEngine.js';
 import * as ui from '../ui/ui.js';
 
 let engineReady = false;
@@ -191,8 +192,10 @@ function initMobileTabs() {
 function loadLevel(index) {
   const mission = state.missionQueue[index];
   resetForLevel(index);
+  resetHintLadder(mission.id);
   ui.loadMission(mission, index, briefings[mission.id]);
   ui.updateStats(state.score, state.hintsLeft, state.attempts, index + 1);
+  document.getElementById('btnHint').disabled = state.hintsLeft <= 0;
   ui.renderProgressDots(state.completedMissions, index, state.missionQueue.length);
   startTimer();
   saveProgress();
@@ -264,8 +267,18 @@ function checkAnswer() {
 
 function showHint() {
   if (state.hintsLeft <= 0) { ui.showError('No hints left. Try running a query and studying the result.'); return; }
-  useHint();
-  ui.showHintMessage('💡 ' + state.missionQueue[state.currentMissionIndex].hint);
+  const hint = getNextHint(state.missionQueue[state.currentMissionIndex]);
+  if (!hint.text) { ui.showError('No hint is available for this mission.'); return; }
+  if (hint.shouldConsume) {
+    if (hint.isProgressive) {
+      state.hintsLeft--;
+      state.levelHintUsed = true;
+    } else {
+      useHint();
+    }
+  }
+  const label = hint.isProgressive ? `Hint ${hint.step}/${hint.total}: ` : 'Hint: ';
+  ui.showHintMessage(label + hint.text);
   ui.updateStats(state.score, state.hintsLeft, state.attempts, state.currentMissionIndex + 1);
   if (state.hintsLeft <= 0) document.getElementById('btnHint').disabled = true;
 }
