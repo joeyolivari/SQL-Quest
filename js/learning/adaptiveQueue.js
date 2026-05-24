@@ -3,7 +3,7 @@ const REVIEW_SCORE_THRESHOLD = 0.6;
 
 function getMissionsByDifficulty(allMissions, difficulty) {
   if (difficulty === 'all') return [...allMissions];
-  const filtered = allMissions.filter(m => m.difficulty.toLowerCase() === difficulty);
+  const filtered = allMissions.filter(m => m.difficulty?.toLowerCase() === difficulty);
   return filtered.length ? filtered : [...allMissions];
 }
 
@@ -12,7 +12,7 @@ function collectByConceptRank(allMissions, rankedConcepts) {
   const queue = [];
   for (const concept of rankedConcepts) {
     allMissions
-      .filter(m => m.concepts.includes(concept) && !seen.has(m.id))
+      .filter(m => m.concepts?.includes(concept) && !seen.has(m.id))
       .sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 3) - (DIFF_ORDER[b.difficulty] ?? 3))
       .forEach(m => { seen.add(m.id); queue.push(m); });
   }
@@ -92,7 +92,7 @@ export function getRecommendedMission(missions, masteryProgress) {
 
   // Missions that cover the weak concept, sorted easiest first
   const related = missions
-    .filter(m => m.concepts.includes(weakConcept))
+    .filter(m => m.concepts?.includes(weakConcept))
     .sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 3) - (DIFF_ORDER[b.difficulty] ?? 3));
 
   if (!related.length) return null;

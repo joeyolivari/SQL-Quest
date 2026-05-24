@@ -35,6 +35,7 @@ function ensureConcept(concept) {
 }
 
 function forEachConcept(concepts, fn) {
+  if (!concepts?.length) return;
   concepts.forEach(c => { ensureConcept(c); fn(mastery[c]); });
 }
 
