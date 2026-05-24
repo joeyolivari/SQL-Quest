@@ -89,7 +89,11 @@ export function renderResults(result) {
 }
 
 export function renderEmptyResults() {
-  document.getElementById('resultPanel').innerHTML = '<div class="empty-state">Run a query to see results.</div>';
+  document.getElementById('resultPanel').innerHTML =
+    '<table class="results-placeholder-table">' +
+      '<thead><tr><th>Result</th><th>Status</th></tr></thead>' +
+      '<tbody><tr><td>Waiting for query</td><td>Run Query</td></tr></tbody>' +
+    '</table>';
   document.getElementById('rowCount').textContent = '';
 }
 

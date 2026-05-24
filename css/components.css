@@ -496,6 +496,9 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 
 .result-panel tr:nth-child(even) td { background: rgba(255, 255, 255, 0.016); }
 .result-panel tr:hover td { background: rgba(56, 189, 248, 0.07); }
+.results-placeholder-table td {
+  color: var(--muted);
+}
 
 .empty-state, .loading {
   color: var(--muted);
