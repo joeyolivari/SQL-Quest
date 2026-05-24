@@ -151,6 +151,9 @@
   .section-row { flex-direction: column; align-items: flex-start; gap: 4px; }
   .continue-section { flex-direction: column; align-items: flex-start; }
   .continue-actions { width: 100%; }
+  .learning-summary,
+  .learning-columns,
+  .mastery-list { grid-template-columns: 1fr; }
 }
 
 /* ── Small phones: 480px and below ─────────────────────────────────────────────────────── */
@@ -218,6 +221,13 @@
 
   /* Mission list — more breathing room */
   .mission-list { max-height: none; }
+  .learning-dashboard { padding: 13px; border-radius: 12px; }
+  .learning-summary { gap: 8px; margin-bottom: 12px; }
+  .learning-metric,
+  .learning-recommendation { padding: 11px; }
+  .learning-metric strong { font-size: 1.25rem; }
+  .skill-pill { font-size: 0.72rem; padding: 7px 8px; }
+  .mastery-row-top { font-size: 0.68rem; }
   .mission-item { padding: 11px 12px; gap: 10px; }
   .mission-item-title { font-size: 0.82rem; white-space: normal; line-height: 1.35; }
   .mission-concept { font-size: 0.64rem; }

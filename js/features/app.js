@@ -9,6 +9,7 @@ import { getDiagnosticMessage } from '../core/diagnostics.js';
 import { state, resetForLevel, useHint, recordAttempt, completeCurrentMission,
          saveProgress, loadProgress, clearProgress } from '../core/gameState.js';
 import { getNextHint, resetHintLadder } from '../learning/hintEngine.js';
+import { buildLearningDashboard } from '../learning/dashboard.js';
 import * as ui from '../ui/ui.js';
 
 let engineReady = false;
@@ -51,6 +52,10 @@ function renderHomeList() {
   });
 }
 
+function renderLearningDashboard() {
+  ui.renderLearningDashboard(buildLearningDashboard(missions, loadProgress()));
+}
+
 function initHomeScreen() {
   // Populate difficulty counts
   const counts = { beginner: 0, intermediate: 0, advanced: 0, all: missions.length };
@@ -81,6 +86,7 @@ function initHomeScreen() {
       clearProgress();
       const sec = document.getElementById('continueSection');
       if (sec) sec.style.display = 'none';
+      renderLearningDashboard();
     });
   }
 
@@ -94,6 +100,7 @@ function initHomeScreen() {
     });
   }
 
+  renderLearningDashboard();
   renderHomeList();
 }
 
@@ -162,6 +169,7 @@ function goHome() {
   state.totalTime = 0;
   ui.updateTimer(0);
   ui.showHomeScreen();
+  renderLearningDashboard();
   renderHomeList();
 }
 

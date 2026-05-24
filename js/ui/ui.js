@@ -211,6 +211,62 @@ export function showHomeError(msg) {
   if (el) { el.textContent = msg; el.style.display = 'block'; }
 }
 
+export function renderLearningDashboard(summary) {
+  const el = document.getElementById('learningDashboard');
+  if (!el || !summary) return;
+
+  const strongest = renderSkillList(summary.strongest, 'No completed skills yet');
+  const weakest = renderSkillList(summary.weakest, 'Complete a mission to reveal weak spots');
+  const skills = summary.skills.map(skill => `
+    <div class="mastery-row">
+      <div class="mastery-row-top">
+        <span>${escapeHtml(skill.label)}</span>
+        <strong>${skill.mastery}%</strong>
+      </div>
+      <div class="mastery-track"><span style="width:${skill.mastery}%"></span></div>
+    </div>
+  `).join('');
+
+  el.innerHTML = `
+    <div class="learning-summary">
+      <div class="learning-metric">
+        <span>Total Completed</span>
+        <strong>${summary.totalCompleted}/${summary.totalMissions}</strong>
+      </div>
+      <div class="learning-recommendation">
+        <span>Recommended Next Review</span>
+        <strong>${escapeHtml(summary.recommended.skillLabel)}</strong>
+        <small>${summary.recommended.missionId ? 'Mission ' + summary.recommended.missionId + ': ' : ''}${escapeHtml(summary.recommended.missionTitle)}</small>
+      </div>
+    </div>
+    <div class="learning-columns">
+      <div>
+        <h4>Strongest Skills</h4>
+        ${strongest}
+      </div>
+      <div>
+        <h4>Weakest Skills</h4>
+        ${weakest}
+      </div>
+    </div>
+    <div class="mastery-list">
+      <h4>Mastery By Skill</h4>
+      ${skills}
+    </div>
+  `;
+}
+
+function renderSkillList(skills, emptyText) {
+  if (!skills.length) return `<p class="learning-empty">${escapeHtml(emptyText)}</p>`;
+
+  return `<div class="skill-pill-list">${skills.map(skill => `
+    <div class="skill-pill">
+      <span>${escapeHtml(skill.label)}</span>
+      <strong>${skill.mastery}%</strong>
+    </div>
+  `).join('')}</div>`;
+}
+
 export function renderMissionList(missions, onClick) {
   const el = document.getElementById('missionList');
   if (!el) return;
