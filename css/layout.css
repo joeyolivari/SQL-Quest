@@ -39,7 +39,7 @@ header {
   flex: 1;
   height: calc(100vh - 58px);
   display: grid;
-  grid-template-columns: 270px minmax(0, 1fr) 340px;
+  grid-template-columns: 290px minmax(0, 1fr) 340px;
   overflow: hidden;
   min-height: 0;
 }
@@ -81,7 +81,7 @@ header {
 .center {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 14px;
   padding: 16px;
   overflow: hidden;
   min-width: 0;
