@@ -57,7 +57,16 @@
 
   /* Default tab = Mission: show center, hide sidebar + right-panel */
   .sidebar     { display: none; }
-  .right-panel { display: none; }
+  .right-panel {
+    display: flex;
+    min-height: 280px;
+    margin: 0 14px;
+    border-left: 0;
+    border-top: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    background: rgba(17, 24, 39, 0.92);
+  }
   .center      { overflow: visible; padding: 14px; width: 100%; }
 
   /* Schema tab ─ show sidebar only */
@@ -72,14 +81,6 @@
   .game-container.tab-schema .right-panel { display: none; }
 
   /* Results tab ─ show right-panel only */
-  .game-container.tab-results .right-panel {
-    display: flex;
-    min-height: 60vh;
-    border-left: 0;
-    border-top: 1px solid var(--border);
-    padding: 14px;
-  }
-  .game-container.tab-results .center  { display: none; }
   .game-container.tab-results .sidebar { display: none; }
 
   /* Fixed bottom tab bar — height auto for safe-area / notch support */
@@ -126,7 +127,8 @@
   .badge-toast { bottom: calc(68px + env(safe-area-inset-bottom, 0px)); right: 12px; }
 
   /* Misc game elements */
-  textarea { min-height: 160px; }
+  textarea { min-height: 150px; height: 170px; }
+  .result-panel { min-height: 190px; height: auto; max-height: 52vh; }
   .btn-row { gap: 6px; }
   .tutorial-grid { grid-template-columns: 1fr; }
   .modal--wide { max-height: 92vh; padding: 16px; }
@@ -179,8 +181,9 @@
   button { padding: 7px 10px; font-size: 0.74rem; }
   .mission-card h2 { font-size: 0.9rem; }
   .mission-card p  { font-size: 0.8rem; }
-  textarea { min-height: 110px; }
-  .mission-card { padding: 14px 16px; }
+  textarea { min-height: 110px; height: 118px; }
+  .mission-card { max-height: none; padding: 12px 14px; }
+  .casefile-text { max-height: 92px; overflow-y: auto; }
   .mobile-tab { font-size: 0.6rem; }
   .mobile-tab-icon { font-size: 1rem; }
 

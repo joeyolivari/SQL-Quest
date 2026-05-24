@@ -172,9 +172,8 @@ function isMobileLayout() {
 function setMobileTab(name) {
   const container = document.querySelector('.game-container');
   if (!container) return;
-  container.classList.remove('tab-schema', 'tab-results');
+  container.classList.remove('tab-schema');
   if (name === 'schema') container.classList.add('tab-schema');
-  if (name === 'results') container.classList.add('tab-results');
   document.querySelectorAll('.mobile-tab').forEach(t => {
     t.classList.toggle('active', t.dataset.tab === name);
   });
@@ -209,7 +208,7 @@ function runQuery() {
     state.lastResult = executeQuery(sql);
     state.lastRunSQL = sql;
     ui.renderResults(state.lastResult);
-    if (isMobileLayout()) setMobileTab('results');
+    if (isMobileLayout()) document.querySelector('.right-panel')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
   } catch (err) {
     state.lastResult = null;
     state.lastRunSQL = '';
