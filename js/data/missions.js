@@ -103,12 +103,12 @@ export const missions = [
     difficulty: 'Beginner',
     scenario: 'Audit Trail Review',
     concepts: ['NOT IN', 'WHERE'],
-    task: 'Find all compliance flags that are unresolved — exclude any row where resolved = 1. Return flag_id, transaction_id, flag_type, and severity.',
+    task: 'Find all compliance flags that are unresolved — exclude any row where reviewed = 1. Return flag_id, transaction_id, flag_type, and severity.',
     requiredColumns: ['flag_id', 'transaction_id', 'flag_type', 'severity'],
     orderMatters: false,
-    starterSQL: 'SELECT flag_id, transaction_id, flag_type, severity\nFROM compliance_flags\nWHERE resolved ',
-    solutionSQL: 'SELECT flag_id, transaction_id, flag_type, severity\nFROM compliance_flags\nWHERE resolved NOT IN (1);',
-    hint: 'Use WHERE resolved NOT IN (1) to exclude resolved flags.',
+    starterSQL: 'SELECT flag_id, transaction_id, flag_type, severity\nFROM compliance_flags\nWHERE reviewed ',
+    solutionSQL: 'SELECT flag_id, transaction_id, flag_type, severity\nFROM compliance_flags\nWHERE reviewed NOT IN (1);',
+    hint: 'Use WHERE reviewed NOT IN (1) to exclude resolved flags.',
     explanation: 'NOT IN is a readable alternative to != for lists. In compliance dashboards, filtering out resolved items helps analysts focus attention on open items that still require action.'
   },
   {
@@ -120,8 +120,8 @@ export const missions = [
     task: "Build a combined action list using UNION. First, select transaction_id AS id labeled source = 'transaction' for all Pending transactions. Second, select account_id AS id labeled source = 'review' for all Open compliance reviews. Return source and id.",
     requiredColumns: ['source', 'id'],
     orderMatters: false,
-    starterSQL: "SELECT 'transaction' AS source, transaction_id AS id\nFROM transactions\nWHERE status = 'Pending'\nUNION\n",
-    solutionSQL: "SELECT 'transaction' AS source, transaction_id AS id\nFROM transactions\nWHERE status = 'Pending'\nUNION\nSELECT 'review' AS source, account_id AS id\nFROM compliance_reviews\nWHERE review_status = 'Open';",
+    starterSQL: "SELECT 'transaction' AS source, transaction_id AS id\nFROM transactions\nWHERE transaction_status = 'Pending'\nUNION\n",
+    solutionSQL: "SELECT 'transaction' AS source, transaction_id AS id\nFROM transactions\nWHERE transaction_status = 'Pending'\nUNION\nSELECT 'review' AS source, account_id AS id\nFROM compliance_reviews\nWHERE review_status = 'Open';",
     hint: "UNION combines results. Add SELECT 'review' AS source, account_id AS id FROM compliance_reviews WHERE review_status = 'Open'.",
     explanation: "UNION stacks result sets vertically. In compliance work, you often need to surface items from different tables into one unified action list — UNION makes that possible without a complex JOIN."
   },
@@ -145,12 +145,12 @@ export const missions = [
     difficulty: 'Intermediate',
     scenario: 'Suspicious Activity Detection',
     concepts: ['WITH', 'CTE', 'WHERE'],
-    task: "Define a CTE named recent_flags that selects flag_id, transaction_id, and flag_type from compliance_flags where flagged_date >= '2026-01-01'. Then SELECT all three columns from recent_flags.",
+    task: "Define a CTE named recent_flags that selects flag_id, transaction_id, and flag_type from compliance_flags where created_date >= '2026-01-01'. Then SELECT all three columns from recent_flags.",
     requiredColumns: ['flag_id', 'transaction_id', 'flag_type'],
     orderMatters: false,
     starterSQL: "WITH recent_flags AS (\n  SELECT flag_id, transaction_id, flag_type\n  FROM compliance_flags\n  WHERE ",
-    solutionSQL: "WITH recent_flags AS (\n  SELECT flag_id, transaction_id, flag_type\n  FROM compliance_flags\n  WHERE flagged_date >= '2026-01-01'\n)\nSELECT flag_id, transaction_id, flag_type\nFROM recent_flags;",
-    hint: "In the CTE WHERE clause, filter flagged_date >= '2026-01-01'. Then SELECT from recent_flags.",
+    solutionSQL: "WITH recent_flags AS (\n  SELECT flag_id, transaction_id, flag_type\n  FROM compliance_flags\n  WHERE created_date >= '2026-01-01'\n)\nSELECT flag_id, transaction_id, flag_type\nFROM recent_flags;",
+    hint: "In the CTE WHERE clause, filter created_date >= '2026-01-01'. Then SELECT from recent_flags.",
     explanation: "CTEs (Common Table Expressions) use WITH to name a temporary result set. They improve readability for complex queries — especially in compliance reports where you want to isolate a filtered subset before further analysis."
   },
   {
@@ -243,12 +243,12 @@ export const missions = [
     difficulty: 'Advanced',
     scenario: 'Suspicious Activity Detection',
     concepts: ['RANK', 'Window Function', 'COUNT', 'GROUP BY'],
-    task: "In a subquery, join advisors to clients and count clients with risk_level = 'High' per advisor as high_risk_count. In the outer query, apply RANK() OVER (ORDER BY high_risk_count DESC) as risk_rank. Return advisor_id, advisor_name, high_risk_count, and risk_rank.",
+    task: "In a subquery, join advisors to clients and count clients with risk_rating = 'High' per advisor as high_risk_count. In the outer query, apply RANK() OVER (ORDER BY high_risk_count DESC) as risk_rank. Return advisor_id, advisor_name, high_risk_count, and risk_rank.",
     requiredColumns: ['advisor_id', 'advisor_name', 'high_risk_count', 'risk_rank'],
     orderMatters: false,
     starterSQL: "SELECT advisor_id, advisor_name, high_risk_count,\n  RANK() OVER (ORDER BY high_risk_count DESC) AS risk_rank\nFROM (\n  SELECT adv.advisor_id, adv.advisor_name, COUNT(c.client_id) AS high_risk_count\n  FROM advisors adv\n  JOIN clients c ON ",
-    solutionSQL: "SELECT advisor_id, advisor_name, high_risk_count,\n  RANK() OVER (ORDER BY high_risk_count DESC) AS risk_rank\nFROM (\n  SELECT adv.advisor_id, adv.advisor_name, COUNT(c.client_id) AS high_risk_count\n  FROM advisors adv\n  JOIN clients c ON adv.advisor_id = c.advisor_id\n  WHERE c.risk_level = 'High'\n  GROUP BY adv.advisor_id, adv.advisor_name\n) sub;",
-    hint: "Inner query: JOIN advisors to clients, filter risk_level = 'High', COUNT and GROUP BY. Outer query: RANK() OVER (ORDER BY high_risk_count DESC).",
+    solutionSQL: "SELECT advisor_id, advisor_name, high_risk_count,\n  RANK() OVER (ORDER BY high_risk_count DESC) AS risk_rank\nFROM (\n  SELECT adv.advisor_id, adv.advisor_name, COUNT(c.client_id) AS high_risk_count\n  FROM advisors adv\n  JOIN clients c ON adv.advisor_id = c.advisor_id\n  WHERE c.risk_rating = 'High'\n  GROUP BY adv.advisor_id, adv.advisor_name\n) sub;",
+    hint: "Inner query: JOIN advisors to clients, filter risk_rating = 'High', COUNT and GROUP BY. Outer query: RANK() OVER (ORDER BY high_risk_count DESC).",
     explanation: "RANK() assigns a position to each row based on an order. Here it surfaces which advisors carry the most concentrated high-risk client exposure — a key input in regulatory stress testing or targeted reviews."
   },
   {
@@ -289,7 +289,7 @@ export const missions = [
     requiredColumns: ['account_id', 'account_type', 'current_balance'],
     orderMatters: false,
     starterSQL: 'SELECT account_id, account_type,\n  COALESCE(',
-    solutionSQL: 'SELECT account_id, account_type,\n  COALESCE(CASE WHEN current_balance < 0 THEN 0 ELSE current_balance END, 0) AS current_balance\nFROM accounts;',
+    solutionSQL: 'SELECT account_id, account_type,\n  COALESCE(CASE WHEN balance < 0 THEN 0 ELSE balance END, 0) AS current_balance\nFROM accounts;',
     hint: 'Use COALESCE with a CASE to replace NULLs and negatives with 0.',
     explanation: 'COALESCE returns the first non-NULL value. Combining it with CASE lets you handle both NULLs and invalid values in one pass — important when preparing clean data for compliance reports or regulatory submissions.'
   },
@@ -313,12 +313,12 @@ export const missions = [
     difficulty: 'Beginner',
     scenario: 'Transaction Monitoring',
     concepts: ['MAX', 'MIN', 'GROUP BY'],
-    task: 'For each account_type, find the highest and lowest current_balance. Return account_type, max_balance, and min_balance.',
+    task: 'For each account_type, find the highest and lowest balance. Return account_type, max_balance, and min_balance.',
     requiredColumns: ['account_type', 'max_balance', 'min_balance'],
     orderMatters: false,
-    starterSQL: 'SELECT account_type,\n  MAX(current_balance) AS max_balance,\n  MIN(current_balance) AS min_balance\nFROM accounts\nGROUP BY ',
-    solutionSQL: 'SELECT account_type,\n  MAX(current_balance) AS max_balance,\n  MIN(current_balance) AS min_balance\nFROM accounts\nGROUP BY account_type;',
-    hint: 'GROUP BY account_type, then use MAX and MIN on current_balance.',
+    starterSQL: 'SELECT account_type,\n  MAX(balance) AS max_balance,\n  MIN(balance) AS min_balance\nFROM accounts\nGROUP BY ',
+    solutionSQL: 'SELECT account_type,\n  MAX(balance) AS max_balance,\n  MIN(balance) AS min_balance\nFROM accounts\nGROUP BY account_type;',
+    hint: 'GROUP BY account_type, then use MAX and MIN on balance.',
     explanation: 'MAX and MIN in a GROUP BY give you the range within each category. This is useful for understanding how spread out values are — a very wide range might indicate data quality issues or outliers worth investigating.'
   },
   {
@@ -369,12 +369,12 @@ export const missions = [
     difficulty: 'Advanced',
     scenario: 'Client Documentation Review',
     concepts: ['DENSE_RANK', 'Window Function', 'JOIN'],
-    task: 'Rank all clients by their total account balance (sum of current_balance). Return client_id, full_name, total_balance, and balance_rank. Use DENSE_RANK.',
+    task: 'Rank all clients by their total account balance (sum of balance). Return client_id, full_name, total_balance, and balance_rank. Use DENSE_RANK.',
     requiredColumns: ['client_id', 'full_name', 'total_balance', 'balance_rank'],
     orderMatters: false,
-    starterSQL: 'SELECT c.client_id, c.full_name,\n  SUM(a.current_balance) AS total_balance,\n  DENSE_RANK() OVER (ORDER BY ',
-    solutionSQL: 'SELECT c.client_id, c.full_name,\n  SUM(a.current_balance) AS total_balance,\n  DENSE_RANK() OVER (ORDER BY SUM(a.current_balance) DESC) AS balance_rank\nFROM clients c\nJOIN accounts a ON c.client_id = a.client_id\nGROUP BY c.client_id, c.full_name;',
-    hint: 'DENSE_RANK() OVER (ORDER BY SUM(a.current_balance) DESC). Include GROUP BY c.client_id, c.full_name.',
+    starterSQL: 'SELECT c.client_id, c.full_name,\n  SUM(a.balance) AS total_balance,\n  DENSE_RANK() OVER (ORDER BY ',
+    solutionSQL: 'SELECT c.client_id, c.full_name,\n  SUM(a.balance) AS total_balance,\n  DENSE_RANK() OVER (ORDER BY SUM(a.balance) DESC) AS balance_rank\nFROM clients c\nJOIN accounts a ON c.client_id = a.client_id\nGROUP BY c.client_id, c.full_name;',
+    hint: 'DENSE_RANK() OVER (ORDER BY SUM(a.balance) DESC). Include GROUP BY c.client_id, c.full_name.',
     explanation: 'DENSE_RANK skips no rank numbers after ties, unlike RANK. Ranking clients by total balance helps segment the book for tiered compliance treatment — high-balance clients often face stricter review requirements.'
   },
   {
@@ -414,8 +414,8 @@ export const missions = [
     task: "Complete the outer SELECT using the provided CTE. Add a risk_tier column: 'Critical' if open_reviews > 3, 'Elevated' if open_reviews > 1, else 'Normal'. Filter to advisors with at least 1 open review. Order results by open_reviews descending. Return advisor_id, advisor_name, total_clients, high_risk_clients, open_reviews, and risk_tier.",
     requiredColumns: ['advisor_id', 'advisor_name', 'total_clients', 'high_risk_clients', 'open_reviews', 'risk_tier'],
     orderMatters: true,
-    starterSQL: "WITH advisor_stats AS (\n  SELECT\n    adv.advisor_id,\n    adv.advisor_name,\n    COUNT(DISTINCT c.client_id) AS total_clients,\n    SUM(CASE WHEN c.risk_level = 'High' THEN 1 ELSE 0 END) AS high_risk_clients,\n    COUNT(DISTINCT CASE WHEN cr.review_status = 'Open' THEN cr.review_id END) AS open_reviews\n  FROM advisors adv\n  JOIN clients c ON adv.advisor_id = c.advisor_id\n  LEFT JOIN accounts a ON c.client_id = a.client_id\n  LEFT JOIN compliance_reviews cr ON a.account_id = cr.account_id\n  GROUP BY adv.advisor_id, adv.advisor_name\n)\nSELECT\n  advisor_id, advisor_name, total_clients, high_risk_clients, open_reviews,\n  CASE\n    WHEN ",
-    solutionSQL: "WITH advisor_stats AS (\n  SELECT\n    adv.advisor_id,\n    adv.advisor_name,\n    COUNT(DISTINCT c.client_id) AS total_clients,\n    SUM(CASE WHEN c.risk_level = 'High' THEN 1 ELSE 0 END) AS high_risk_clients,\n    COUNT(DISTINCT CASE WHEN cr.review_status = 'Open' THEN cr.review_id END) AS open_reviews\n  FROM advisors adv\n  JOIN clients c ON adv.advisor_id = c.advisor_id\n  LEFT JOIN accounts a ON c.client_id = a.client_id\n  LEFT JOIN compliance_reviews cr ON a.account_id = cr.account_id\n  GROUP BY adv.advisor_id, adv.advisor_name\n)\nSELECT\n  advisor_id, advisor_name, total_clients, high_risk_clients, open_reviews,\n  CASE\n    WHEN open_reviews > 3 THEN 'Critical'\n    WHEN open_reviews > 1 THEN 'Elevated'\n    ELSE 'Normal'\n  END AS risk_tier\nFROM advisor_stats\nWHERE open_reviews >= 1\nORDER BY open_reviews DESC;",
+    starterSQL: "WITH advisor_stats AS (\n  SELECT\n    adv.advisor_id,\n    adv.advisor_name,\n    COUNT(DISTINCT c.client_id) AS total_clients,\n    SUM(CASE WHEN c.risk_rating = 'High' THEN 1 ELSE 0 END) AS high_risk_clients,\n    COUNT(DISTINCT CASE WHEN cr.review_status = 'Open' THEN cr.review_id END) AS open_reviews\n  FROM advisors adv\n  JOIN clients c ON adv.advisor_id = c.advisor_id\n  LEFT JOIN accounts a ON c.client_id = a.client_id\n  LEFT JOIN compliance_reviews cr ON a.account_id = cr.account_id\n  GROUP BY adv.advisor_id, adv.advisor_name\n)\nSELECT\n  advisor_id, advisor_name, total_clients, high_risk_clients, open_reviews,\n  CASE\n    WHEN ",
+    solutionSQL: "WITH advisor_stats AS (\n  SELECT\n    adv.advisor_id,\n    adv.advisor_name,\n    COUNT(DISTINCT c.client_id) AS total_clients,\n    SUM(CASE WHEN c.risk_rating = 'High' THEN 1 ELSE 0 END) AS high_risk_clients,\n    COUNT(DISTINCT CASE WHEN cr.review_status = 'Open' THEN cr.review_id END) AS open_reviews\n  FROM advisors adv\n  JOIN clients c ON adv.advisor_id = c.advisor_id\n  LEFT JOIN accounts a ON c.client_id = a.client_id\n  LEFT JOIN compliance_reviews cr ON a.account_id = cr.account_id\n  GROUP BY adv.advisor_id, adv.advisor_name\n)\nSELECT\n  advisor_id, advisor_name, total_clients, high_risk_clients, open_reviews,\n  CASE\n    WHEN open_reviews > 3 THEN 'Critical'\n    WHEN open_reviews > 1 THEN 'Elevated'\n    ELSE 'Normal'\n  END AS risk_tier\nFROM advisor_stats\nWHERE open_reviews >= 1\nORDER BY open_reviews DESC;",
     hint: "Complete the CASE: WHEN open_reviews > 3 THEN 'Critical' WHEN open_reviews > 1 THEN 'Elevated' ELSE 'Normal' END AS risk_tier. Add WHERE open_reviews >= 1 and ORDER BY open_reviews DESC.",
     explanation: 'This final boss combines CTEs, multi-table joins, conditional aggregation, CASE expressions, and filtering. It mirrors a real-world compliance dashboard query — the kind a data analyst would run before a regulatory examination to summarize advisor-level risk exposure across the entire book of business.'
   }
