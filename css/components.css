@@ -316,8 +316,7 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   justify-content: center;
   cursor: pointer;
   position: relative;
-  overflow: hidden;
-  transition: filter 0.18s ease, transform 0.12s ease, opacity 0.18s ease;
+  overflow: visible;
 }
 
 .btn-img img {
@@ -325,9 +324,8 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   width: 100%;
   height: 100%;
   object-fit: contain;
-  mix-blend-mode: screen;
   pointer-events: none;
-  transition: filter 0.18s ease;
+  transition: filter 0.18s ease, transform 0.12s ease;
 }
 
 /* visually hidden label for accessibility */
@@ -344,17 +342,9 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 }
 
 .btn-img:hover:not(:disabled) img { filter: brightness(1.25) saturate(1.1); }
-.btn-img:active:not(:disabled) { transform: scale(0.96); }
-.btn-img:active:not(:disabled) img { filter: brightness(0.85); }
+.btn-img:active:not(:disabled) img { filter: brightness(0.85); transform: scale(0.96); }
 .btn-img:disabled { opacity: 0.4; cursor: not-allowed; }
 .btn-img:disabled img { filter: grayscale(50%); }
-
-/* light theme: give a dark background so the neon glows remain visible */
-body.light .btn-img {
-  background: #0b0e17;
-  border-radius: 8px;
-}
-body.light .btn-img img { mix-blend-mode: normal; }
 
 /* ──────────────────────────────────────────────────────────── */
 
