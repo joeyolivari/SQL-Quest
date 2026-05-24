@@ -223,6 +223,16 @@
   .mission-concept { font-size: 0.64rem; }
   .mission-item-badge { font-size: 0.6rem; padding: 2px 6px; }
 
+  /* Learning mode row — single column on phones */
+  .mode-row { grid-template-columns: 1fr; gap: 8px; }
+  .mode-btn { flex-direction: row; align-items: center; gap: 12px; padding: 12px 14px; }
+  .mode-icon { font-size: 1.1rem; flex-shrink: 0; margin-bottom: 0; }
+  .mode-label { font-size: 0.82rem; }
+  .mode-desc { font-size: 0.7rem; }
+
+  /* Summary panel — 2-column grid on phones */
+  .summary-grid { grid-template-columns: repeat(2, 1fr); }
+
   /* Modals — bottom-sheet style on phone */
   .modal-overlay { align-items: flex-end; }
   .modal { padding: 20px 16px; max-width: calc(100vw - 24px); border-radius: 14px; }
