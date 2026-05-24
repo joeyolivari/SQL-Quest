@@ -75,12 +75,12 @@ export const missions = [
     difficulty: 'Beginner',
     scenario: 'Audit Trail Review',
     concepts: ['DISTINCT'],
-    task: 'Find all unique review_reason values from the compliance_reviews table.',
-    requiredColumns: ['review_reason'],
+    task: 'Find all unique issue_type values from the compliance_reviews table.',
+    requiredColumns: ['issue_type'],
     orderMatters: false,
     starterSQL: 'SELECT DISTINCT ',
-    solutionSQL: 'SELECT DISTINCT review_reason\nFROM compliance_reviews;',
-    hint: 'Use SELECT DISTINCT review_reason FROM compliance_reviews.',
+    solutionSQL: 'SELECT DISTINCT issue_type\nFROM compliance_reviews;',
+    hint: 'Use SELECT DISTINCT issue_type FROM compliance_reviews.',
     explanation: 'DISTINCT removes duplicates from your result. In audit work, this is useful for cataloguing what categories of issues have been flagged — giving a fast summary without counting or grouping.'
   },
   {
