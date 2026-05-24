@@ -86,6 +86,8 @@
   box-shadow: var(--shadow-card);
   position: relative;
   overflow: hidden;
+  max-height: 30vh;
+  overflow-y: auto;
 }
 
 .mission-card::before {
@@ -213,7 +215,7 @@
 }
 
 .editor-wrap {
-  flex: 1;
+  flex: 0 1 auto;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -240,8 +242,9 @@
 }
 
 textarea {
-  flex: 1;
+  flex: 0 1 auto;
   min-height: 130px;
+  height: clamp(180px, 34vh, 310px);
   background: var(--panel3);
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -451,8 +454,9 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .btn-learn:hover { background: rgba(56, 189, 248, 0.22); box-shadow: var(--glow-sm); }
 
 .result-panel {
-  flex: 1;
+  flex: 0 1 auto;
   min-height: 120px;
+  height: clamp(220px, 55dvh, 460px);
   background: var(--panel3);
   border: 1px solid var(--border);
   border-radius: 10px;
@@ -933,14 +937,14 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 /* ── Casefile ─────────────────────────────────────────────────────────────────────────────────────────────────────── */
 .casefile-text {
   margin: 8px 0 2px;
-  padding: 8px 12px;
+  padding: 7px 10px;
   background: rgba(15, 23, 42, 0.6);
   border-left: 3px solid var(--accent);
   border-radius: 4px;
   font-size: 0.83rem;
   color: var(--text-dim);
   font-style: italic;
-  line-height: 1.55;
+  line-height: 1.45;
 }
 .casefile-text:empty { display: none; }
 
