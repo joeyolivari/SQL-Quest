@@ -1,5 +1,5 @@
 :root {
-  --bg: #0b1120;
+  --bg: #04060e;
   --panel: #111827;
   --panel2: #1e293b;
   --panel3: #0f172a;
@@ -35,6 +35,7 @@
 /* ── Light theme ───────────────────────────────────────────────────────────────────────────── */
 body.light {
   background-image: none;
+  background-color: #f0f4f8;
   --bg: #f0f4f8;
   --panel: #ffffff;
   --panel2: #f1f5f9;
