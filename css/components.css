@@ -302,80 +302,142 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .btn-success { background: var(--success); color: #052e16; }
 .btn-success:hover:not(:disabled) { background: #4ade80; box-shadow: 0 0 16px rgba(34, 197, 94, 0.35); }
 
-/* ── Cyber HUD action buttons ────────────────────────────────
-   Two-layer technique:
-   ::before = neon border (full background, clipped to shape)
-   ::after  = dark glass  (inset 1.5px, slightly smaller clip)
-   filter: drop-shadow on the element follows the clipped shape
+/* ── Cyber HUD action buttons ─────────────────────────────────
+   border         → neon outline (clipped to shape)
+   background     → dark glass + top/bottom colour tint
+   box-shadow     → inset inner glow + top highlight bar
+   ::before       → diagonal scanline shimmer on hover
+   ::after        → top-left + bottom-right circuit traces
+   filter         → external neon glow (applied after clip-path)
 ──────────────────────────────────────────────────────────── */
 .btn-cyber {
   --cr: 56, 189, 248;
   position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  padding: 0 20px 0 14px;
-  height: 44px;
-  border: none;
-  background: transparent;
+  gap: 8px;
+  padding: 0 22px 0 16px;
+  height: 56px;
+  min-width: 120px;
+  border: 1.5px solid rgba(var(--cr), 0.72);
+  background: linear-gradient(180deg,
+    rgba(var(--cr), 0.11)  0%,
+    rgba(5, 8, 22,  0.93) 28%,
+    rgba(5, 8, 22,  0.93) 72%,
+    rgba(var(--cr), 0.07) 100%);
+  box-shadow:
+    inset 0 0 24px rgba(var(--cr), 0.08),
+    inset 0  1px 0  rgba(var(--cr), 0.28);
+  clip-path: polygon(0 0, calc(100% - 14px) 0, 100% 14px,
+                     100% 100%, 14px 100%, 0 calc(100% - 14px));
+  overflow: hidden;
   cursor: pointer;
   white-space: nowrap;
   font-family: var(--font-sans);
-  font-weight: 800;
-  font-size: 0.78rem;
+  font-weight: 900;
+  font-size: 0.82rem;
   text-transform: uppercase;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.1em;
   color: rgb(var(--cr));
-  filter: drop-shadow(0 0 4px rgba(var(--cr), 0.45));
-  transition: filter 0.18s ease, transform 0.12s ease;
+  text-shadow: 0 0 10px rgba(var(--cr), 0.65);
+  filter: drop-shadow(0 0 5px rgba(var(--cr), 0.32));
+  transition: filter 0.2s ease, transform 0.1s ease,
+              box-shadow 0.2s ease, background 0.2s ease,
+              border-color 0.2s ease;
   isolation: isolate;
 }
 
+/* Scanline shimmer: starts offscreen-left, sweeps right on hover */
 .btn-cyber::before {
   content: '';
   position: absolute;
-  inset: 0;
-  background: rgba(var(--cr), 0.7);
-  clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
-  transition: background 0.18s ease;
-  z-index: -2;
+  top: 0; bottom: 0;
+  left: -90%;
+  width: 55%;
+  background: linear-gradient(90deg,
+    transparent 0%, rgba(255,255,255,0.09) 50%, transparent 100%);
+  transform: skewX(-18deg);
+  pointer-events: none;
+  z-index: 1;
+  transition: none;
+}
+.btn-cyber:hover:not(:disabled)::before {
+  left: 140%;
+  transition: left 0.55s ease;
 }
 
+/* Circuit traces: top-left segment + bottom-right segment */
 .btn-cyber::after {
   content: '';
   position: absolute;
-  inset: 1.5px;
-  background: linear-gradient(135deg, rgba(5, 8, 20, 0.92) 0%, rgba(var(--cr), 0.09) 100%);
-  clip-path: polygon(0 0, calc(100% - 10.5px) 0, 100% 10.5px, 100% 100%, 10.5px 100%, 0 calc(100% - 10.5px));
-  transition: background 0.18s ease;
-  z-index: -1;
+  inset: 0;
+  background:
+    linear-gradient(90deg,
+      transparent                      10%,
+      rgba(var(--cr), 0.6)             10%,
+      rgba(var(--cr), 0.6)             46%,
+      transparent                      46%)
+    top 0 left 0 / 100% 1px no-repeat,
+    linear-gradient(90deg,
+      transparent                      54%,
+      rgba(var(--cr), 0.6)             54%,
+      rgba(var(--cr), 0.6)             90%,
+      transparent                      90%)
+    bottom 0 left 0 / 100% 1px no-repeat;
+  pointer-events: none;
+  z-index: 2;
 }
 
-.btn-cyber-run   { --cr: 56, 189, 248;  }
-.btn-cyber-check { --cr: 34, 197, 94;   }
-.btn-cyber-hint  { --cr: 245, 158, 11;  }
-.btn-cyber-reset { --cr: 239, 68, 68;   }
+/* Colour variants */
+.btn-cyber-run   { --cr:  56, 189, 248; }   /* cyan  */
+.btn-cyber-check { --cr:  34, 197,  94; }   /* green */
+.btn-cyber-hint  { --cr: 245, 158,  11; }   /* amber */
+.btn-cyber-reset { --cr: 239,  68,  68; }   /* red   */
 
+/* Hover: brighten border, intensify glow + inner light */
 .btn-cyber:hover:not(:disabled) {
-  filter: drop-shadow(0 0 8px rgba(var(--cr), 0.85)) drop-shadow(0 0 20px rgba(var(--cr), 0.35));
-}
-.btn-cyber:hover:not(:disabled)::before { background: rgba(var(--cr), 0.9); }
-.btn-cyber:hover:not(:disabled)::after  {
-  background: linear-gradient(135deg, rgba(5, 8, 20, 0.82) 0%, rgba(var(--cr), 0.16) 100%);
+  border-color: rgba(var(--cr), 0.95);
+  background: linear-gradient(180deg,
+    rgba(var(--cr), 0.18)  0%,
+    rgba(5, 8, 22,  0.9)  28%,
+    rgba(5, 8, 22,  0.9)  72%,
+    rgba(var(--cr), 0.11) 100%);
+  box-shadow:
+    inset 0 0 32px rgba(var(--cr), 0.14),
+    inset 0  1px 0  rgba(var(--cr), 0.5);
+  filter:
+    drop-shadow(0 0  8px rgba(var(--cr), 0.8))
+    drop-shadow(0 0 22px rgba(var(--cr), 0.3));
 }
 
+/* Active / pressed: push down, darken interior */
 .btn-cyber:active:not(:disabled) {
-  transform: scale(0.95);
-  filter: drop-shadow(0 0 4px rgba(var(--cr), 0.5));
+  transform: translateY(2px) scale(0.98);
+  filter: drop-shadow(0 0 5px rgba(var(--cr), 0.5));
+  background: linear-gradient(180deg,
+    rgba(var(--cr), 0.05)  0%,
+    rgba(3, 5, 15,  0.97) 28%,
+    rgba(3, 5, 15,  0.97) 72%,
+    rgba(var(--cr), 0.03) 100%);
+  box-shadow:
+    inset 0 0 36px rgba(var(--cr), 0.2),
+    inset 0  2px 8px rgba(0, 0, 0, 0.55);
 }
 
+/* Disabled */
 .btn-cyber:disabled {
-  opacity: 0.35;
+  opacity: 0.3;
   cursor: not-allowed;
-  filter: grayscale(55%) brightness(0.55);
+  filter: grayscale(60%) brightness(0.5);
 }
 
-.btn-cyber-icon { font-size: 0.9rem; line-height: 1; flex-shrink: 0; }
+/* Icon: larger, glowing */
+.btn-cyber-icon {
+  font-size: 1.05rem;
+  line-height: 1;
+  flex-shrink: 0;
+  filter: drop-shadow(0 0 5px rgba(var(--cr), 0.9));
+}
 
 /* ──────────────────────────────────────────────────────────── */
 

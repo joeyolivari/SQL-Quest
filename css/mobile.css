@@ -7,7 +7,18 @@
 
 /* ── Tablet + phone: 768px and below ──────────────────────────────────────────────────── */
 @media (max-width: 768px) {
-  .btn-cyber { height: 38px; padding: 0 14px 0 11px; font-size: 0.72rem; }
+  .btn-cyber { height: 48px; padding: 0 16px 0 12px; font-size: 0.76rem; gap: 6px; min-width: 100px; }
+
+  /* Cyber tab bar */
+  .mobile-tabs { background: rgba(6, 8, 18, 0.98); border-top: 1px solid rgba(56,189,248,0.18); }
+  .mobile-tab  { letter-spacing: 0.05em; text-transform: uppercase; font-size: 0.6rem; font-weight: 700; border-radius: 6px; }
+  .mobile-tab.active {
+    background: rgba(56,189,248,0.1);
+    color: rgb(56,189,248);
+    border-color: rgba(56,189,248,0.35);
+    text-shadow: 0 0 8px rgba(56,189,248,0.6);
+  }
+
   /* Header: single compact row, no wrap */
   header { padding: 10px 14px; gap: 10px; flex-wrap: nowrap; }
   .logo { font-size: 0.92rem; }
@@ -111,8 +122,21 @@
 
 /* ── Small phones: 480px and below ─────────────────────────────────────────────────────── */
 @media (max-width: 480px) {
-  .btn-cyber { height: 34px; padding: 0 11px 0 9px; font-size: 0.67rem; gap: 5px; }
-  .btn-cyber-icon { font-size: 0.78rem; }
+  /* 2-column grid for the 4 cyber buttons on phones */
+  .btn-cyber {
+    height: 44px;
+    padding: 0 14px 0 10px;
+    font-size: 0.68rem;
+    gap: 5px;
+    flex: 1 1 calc(50% - 4px);
+    justify-content: center;
+    min-width: 0;
+  }
+  .btn-cyber-icon { font-size: 0.88rem; }
+  /* non-cyber buttons go full row */
+  .btn-row .btn-secondary,
+  .btn-row .btn-primary,
+  .btn-row .btn-quote { flex-shrink: 0; }
   header { padding: 8px 12px; }
   .logo { font-size: 0.84rem; }
   .btn-learn { display: none; } /* accessible via Schema tab */
