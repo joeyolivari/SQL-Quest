@@ -14,12 +14,14 @@ import {
   recordMasteryHint, recordMasteryMistake,
 } from '../learning/masteryTracker.js';
 import { getRecommendedMission, buildTrainingQueue, buildReviewQueue } from '../learning/adaptiveQueue.js';
+import { getHintStep } from '../learning/hintEngine.js';
 
 let engineReady = false;
 let selectedDifficulty = 'beginner';
 let selectedMode = 'story';
 let timerInterval = null;
 let missionStartTime = 0;
+let levelHintStep = 0;
 
 function getMissionRating(attempts, levelHintUsed) {
   if (attempts === 0 && !levelHintUsed) return 'Perfect';
@@ -123,16 +125,7 @@ function initHomeScreen() {
     });
   }
 
-  const saved = loadProgress();
-  if (saved && saved.queueIds && saved.queueIds.length) {
-    ui.showContinueSection(
-      `${saved.completedMissions.length}/${saved.queueIds.length} missions · ${saved.score} pts · ${ui.formatTime(saved.totalTime || 0)}`
-    );
-    document.getElementById('btnContinue').addEventListener('click', () => {
-      restoreProgress(saved);
-    });
-  }
-
+  refreshContinueSection();
   renderHomeList();
   updateRecommendation();
 }
@@ -201,6 +194,23 @@ function startGame(queue, scenarioId, startIndex = 0) {
   loadLevel(startIndex);
 }
 
+function refreshContinueSection() {
+  const saved = loadProgress();
+  const sec = document.getElementById('continueSection');
+  if (saved && saved.queueIds && saved.queueIds.length) {
+    ui.showContinueSection(
+      `${saved.completedMissions.length}/${saved.queueIds.length} missions · ${saved.score} pts · ${ui.formatTime(saved.totalTime || 0)}`
+    );
+    // Replace button to avoid listener accumulation
+    const old = document.getElementById('btnContinue');
+    const btn = old.cloneNode(true);
+    old.replaceWith(btn);
+    btn.addEventListener('click', () => restoreProgress(saved));
+  } else if (sec) {
+    sec.style.display = 'none';
+  }
+}
+
 function goHome() {
   stopTimer();
   saveProgress();
@@ -212,6 +222,7 @@ function goHome() {
   state.totalTime = 0;
   ui.updateTimer(0);
   ui.showHomeScreen();
+  refreshContinueSection();
   renderHomeList();
   updateRecommendation();
 }
@@ -245,6 +256,7 @@ function loadLevel(index) {
   const mission = state.missionQueue[index];
   resetForLevel(index);
   missionStartTime = state.totalTime;
+  levelHintStep = 0;
   ui.loadMission(mission, index, briefings[mission.id]);
   ui.updateStats(state.score, state.hintsLeft, state.attempts, index + 1);
   ui.renderProgressDots(state.completedMissions, index, state.missionQueue.length);
@@ -337,7 +349,9 @@ function showHint() {
   const mission = state.missionQueue[state.currentMissionIndex];
   useHint();
   recordMasteryHint(mission.concepts);
-  ui.showHintMessage('💡 ' + mission.hint);
+  const progressive = getHintStep(mission.id, levelHintStep);
+  levelHintStep++;
+  ui.showHintMessage('💡 ' + (progressive ?? mission.hint));
   ui.updateStats(state.score, state.hintsLeft, state.attempts, state.currentMissionIndex + 1);
   if (state.hintsLeft <= 0) document.getElementById('btnHint').disabled = true;
 }
