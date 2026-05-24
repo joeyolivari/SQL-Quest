@@ -1358,6 +1358,17 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   box-shadow: 0 0 48px rgba(56, 189, 248, 0.58), 0 0 80px rgba(56, 189, 248, 0.22), var(--shadow-lift);
   transform: translateY(-2px);
 }
+.home-footer .btn-drill {
+  border-color: rgba(245, 158, 11, 0.45);
+  color: #f8fafc;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(15, 23, 42, 0.9) 100%);
+  box-shadow: var(--shadow-card);
+}
+.home-footer .btn-drill:hover {
+  border-color: rgba(245, 158, 11, 0.75);
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.18) 0%, rgba(24, 33, 55, 0.94) 100%);
+  transform: translateY(-2px);
+}
 
 /* ── Difficulty card image skins ─────────────────────────────────────────────────────────────── */
 /* Real RGBA PNGs — transparent rounded corners, neon border at image edge.                      */

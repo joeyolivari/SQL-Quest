@@ -10,6 +10,8 @@ import { state, resetForLevel, useHint, recordAttempt, completeCurrentMission,
          saveProgress, loadProgress, clearProgress } from '../core/gameState.js';
 import { getNextHint, resetHintLadder } from '../learning/hintEngine.js';
 import { buildLearningDashboard } from '../learning/dashboard.js';
+import { buildMasteryProfile, getWeakestSkills } from '../learning/masteryTracker.js';
+import { buildWeakSkillQueue } from '../learning/adaptiveQueue.js';
 import * as ui from '../ui/ui.js';
 
 let engineReady = false;
@@ -80,6 +82,10 @@ function initHomeScreen() {
     startGame(getMissionQueue(selectedDifficulty), null, 0);
   });
 
+  document.getElementById('btnWeakDrill').addEventListener('click', () => {
+    startWeakSkillDrill();
+  });
+
   const btnClear = document.getElementById('btnClearSave');
   if (btnClear) {
     btnClear.addEventListener('click', () => {
@@ -110,6 +116,26 @@ function getMissionQueue(difficulty) {
   return filtered.length ? filtered : [...missions];
 }
 
+function startWeakSkillDrill() {
+  if (!engineReady) {
+    ui.showHomeError('SQL engine is still loading. Please wait.');
+    return;
+  }
+
+  const masteryProfile = buildMasteryProfile(missions, loadProgress());
+  const weakestProfile = {
+    ...masteryProfile,
+    skills: getWeakestSkills(masteryProfile)
+  };
+  const queue = buildWeakSkillQueue(missions, weakestProfile);
+  if (!queue.length) {
+    ui.showHomeError('No drill missions are available yet.');
+    return;
+  }
+
+  startGame(queue, 'weak-skill-drill', 0, 'weak drill');
+}
+
 function restoreProgress(saved) {
   if (!engineReady) { ui.showHomeError('SQL engine is still loading. Please wait.'); return; }
   const queue = saved.queueIds.map(id => missions.find(m => m.id === id)).filter(Boolean);
@@ -134,7 +160,7 @@ function restoreProgress(saved) {
   loadLevel(idx);
 }
 
-function startGame(queue, scenarioId, startIndex = 0) {
+function startGame(queue, scenarioId, startIndex = 0, difficultyLabel = selectedDifficulty) {
   if (!engineReady) {
     ui.showError('SQL engine is still loading. Please wait a moment.');
     return;
@@ -147,7 +173,7 @@ function startGame(queue, scenarioId, startIndex = 0) {
   state.earnedBadges = new Set();
   state.missionAttempts = {};
   state.totalTime = 0;
-  state.selectedDifficulty = selectedDifficulty;
+  state.selectedDifficulty = difficultyLabel;
 
   ui.hideHomeScreen();
   ui.renderSchema(schema);

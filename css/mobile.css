@@ -197,6 +197,9 @@
   .home-hero-badge { font-size: 0.63rem; }
   .home-stat-chips { gap: 7px; }
   .home-stat-chip { font-size: 0.71rem; padding: 4px 10px; }
+  .home-footer { flex-direction: column; }
+  .home-footer .btn-primary,
+  .home-footer .btn-drill { width: 100%; }
 
   /* Difficulty cards: use compact native cards on phones. */
   .diff-row { grid-template-columns: 1fr; gap: 10px; }
