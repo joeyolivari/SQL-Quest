@@ -1187,6 +1187,111 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .continue-info { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
 .home-error { font-size: 0.8rem; color: var(--danger); }
 
+.learning-dashboard {
+  background: rgba(8, 14, 26, 0.72);
+  border: 1px solid rgba(56, 189, 248, 0.16);
+  border-radius: 14px;
+  padding: 16px;
+}
+.learning-summary {
+  display: grid;
+  grid-template-columns: minmax(160px, 0.7fr) minmax(220px, 1.3fr);
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.learning-metric,
+.learning-recommendation {
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  padding: 13px;
+}
+.learning-metric span,
+.learning-recommendation span {
+  display: block;
+  color: var(--muted);
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+.learning-metric strong {
+  color: var(--accent);
+  font-size: 1.45rem;
+  font-family: var(--font-mono);
+}
+.learning-recommendation strong {
+  display: block;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+.learning-recommendation small {
+  color: var(--muted);
+  line-height: 1.45;
+}
+.learning-columns {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-bottom: 14px;
+}
+.learning-dashboard h4 {
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 8px;
+}
+.skill-pill-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.skill-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: rgba(56, 189, 248, 0.07);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 0.76rem;
+}
+.skill-pill strong { color: var(--accent); font-family: var(--font-mono); }
+.learning-empty {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+.mastery-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 12px;
+}
+.mastery-list h4 { grid-column: 1 / -1; }
+.mastery-row-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 0.72rem;
+  margin-bottom: 5px;
+}
+.mastery-row-top strong { color: var(--text); font-family: var(--font-mono); }
+.mastery-track {
+  height: 7px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  overflow: hidden;
+}
+.mastery-track span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--success));
+  border-radius: inherit;
+}
+
 /* ── Learning mode selector ───────────────────────────────────────────────────────────────────────────────────── */
 .mode-row {
   display: grid;
@@ -1446,6 +1551,11 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   background: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 100%);
   box-shadow: 0 0 48px rgba(56, 189, 248, 0.58), 0 0 80px rgba(56, 189, 248, 0.22), var(--shadow-lift);
   transform: translateY(-2px);
+}
+.home-footer .btn-drill {
+  padding: 15px 34px;
+  border-radius: 12px;
+  font-size: 0.95rem;
 }
 
 /* ── Difficulty card image skins ─────────────────────────────────────────────────────────────── */

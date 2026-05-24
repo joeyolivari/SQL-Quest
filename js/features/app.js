@@ -5,16 +5,18 @@ import { briefings } from '../data/casefiles.js';
 import { checkBadges, BADGE_DEFS } from './badges.js';
 import { initEngine, executeQuery, isSafeQuery } from '../core/sqlEngine.js';
 import { compareResults } from '../core/validation.js';
+import { getDiagnosticMessage } from '../core/diagnostics.js';
 import { state, resetForLevel, useHint, recordAttempt, completeCurrentMission,
          saveProgress, loadProgress, clearProgress } from '../core/gameState.js';
 import * as ui from '../ui/ui.js';
 import { diagnoseSQL } from '../learning/diagnostics.js';
 import {
   loadMastery, getAllMastery, recordMasteryAttempt, recordMasterySuccess,
-  recordMasteryHint, recordMasteryMistake,
+  recordMasteryHint, recordMasteryMistake, buildMasteryProfile, getWeakestSkills,
 } from '../learning/masteryTracker.js';
-import { getRecommendedMission, buildTrainingQueue, buildReviewQueue } from '../learning/adaptiveQueue.js';
-import { getHintStep } from '../learning/hintEngine.js';
+import { getRecommendedMission, buildTrainingQueue, buildReviewQueue, buildWeakSkillQueue } from '../learning/adaptiveQueue.js';
+import { getHintStep, getNextHint, resetHintLadder } from '../learning/hintEngine.js';
+import { buildLearningDashboard } from '../learning/dashboard.js';
 
 let engineReady = false;
 let selectedDifficulty = 'beginner';
@@ -64,6 +66,10 @@ function updateRecommendation() {
   ui.renderRecommendation(rec, () => {
     if (rec) startGame([rec.mission], null, 0);
   });
+}
+
+function renderLearningDashboard() {
+  ui.renderLearningDashboard(buildLearningDashboard(missions, loadProgress()));
 }
 
 function renderHomeList() {
@@ -116,16 +122,22 @@ function initHomeScreen() {
     startGame(getMissionQueue(selectedDifficulty), null, 0);
   });
 
+  document.getElementById('btnWeakDrill')?.addEventListener('click', () => {
+    startWeakSkillDrill();
+  });
+
   const btnClear = document.getElementById('btnClearSave');
   if (btnClear) {
     btnClear.addEventListener('click', () => {
       clearProgress();
       const sec = document.getElementById('continueSection');
       if (sec) sec.style.display = 'none';
+      renderLearningDashboard();
     });
   }
 
   refreshContinueSection();
+  renderLearningDashboard();
   renderHomeList();
   updateRecommendation();
 }
@@ -144,6 +156,26 @@ function getMissionQueue(difficulty) {
     return buildReviewQueue(missions, getAllMastery(), difficulty).queue;
   }
   return getMissionsByDifficulty(difficulty);
+}
+
+function startWeakSkillDrill() {
+  if (!engineReady) {
+    ui.showHomeError('SQL engine is still loading. Please wait.');
+    return;
+  }
+
+  const masteryProfile = buildMasteryProfile(missions, loadProgress());
+  const weakestProfile = {
+    ...masteryProfile,
+    skills: getWeakestSkills(masteryProfile)
+  };
+  const queue = buildWeakSkillQueue(missions, weakestProfile);
+  if (!queue.length) {
+    ui.showHomeError('No drill missions are available yet.');
+    return;
+  }
+
+  startGame(queue, 'weak-skill-drill', 0, 'weak drill');
 }
 
 function restoreProgress(saved) {
@@ -170,7 +202,7 @@ function restoreProgress(saved) {
   loadLevel(idx);
 }
 
-function startGame(queue, scenarioId, startIndex = 0) {
+function startGame(queue, scenarioId, startIndex = 0, difficultyLabel = selectedDifficulty) {
   if (!engineReady) {
     ui.showError('SQL engine is still loading. Please wait a moment.');
     return;
@@ -183,7 +215,7 @@ function startGame(queue, scenarioId, startIndex = 0) {
   state.earnedBadges = new Set();
   state.missionAttempts = {};
   state.totalTime = 0;
-  state.selectedDifficulty = selectedDifficulty;
+  state.selectedDifficulty = difficultyLabel;
 
   ui.hideHomeScreen();
   ui.renderSchema(schema);
@@ -223,6 +255,7 @@ function goHome() {
   ui.updateTimer(0);
   ui.showHomeScreen();
   refreshContinueSection();
+  renderLearningDashboard();
   renderHomeList();
   updateRecommendation();
 }
@@ -255,10 +288,12 @@ function initMobileTabs() {
 function loadLevel(index) {
   const mission = state.missionQueue[index];
   resetForLevel(index);
+  resetHintLadder(mission.id);
   missionStartTime = state.totalTime;
   levelHintStep = 0;
   ui.loadMission(mission, index, briefings[mission.id]);
   ui.updateStats(state.score, state.hintsLeft, state.attempts, index + 1);
+  document.getElementById('btnHint').disabled = state.hintsLeft <= 0;
   ui.renderProgressDots(state.completedMissions, index, state.missionQueue.length);
   startTimer();
   saveProgress();
@@ -339,7 +374,13 @@ function checkAnswer() {
       recordMasteryMistake(mission.concepts, diag.type);
       ui.showError(diag.message + ' ' + diag.nextStep);
     } else {
-      ui.showError(result.message || 'Almost there. Your result set does not match the mission output yet.');
+      ui.showError(getDiagnosticMessage({
+        sql: currentSQL,
+        mission,
+        userResult: state.lastResult,
+        expectedResult: expected,
+        validationMessage: result.message
+      }));
     }
   }
 }
@@ -352,6 +393,33 @@ function showHint() {
   const progressive = getHintStep(mission.id, levelHintStep);
   levelHintStep++;
   ui.showHintMessage('💡 ' + (progressive ?? mission.hint));
+  ui.updateStats(state.score, state.hintsLeft, state.attempts, state.currentMissionIndex + 1);
+  if (state.hintsLeft <= 0) document.getElementById('btnHint').disabled = true;
+}
+
+function showProgressiveHint() {
+  if (state.hintsLeft <= 0) {
+    ui.showError('No hints left. Try running a query and studying the result.');
+    return;
+  }
+  const mission = state.missionQueue[state.currentMissionIndex];
+  const hint = getNextHint(mission);
+  if (!hint.text) {
+    ui.showError('No hint is available for this mission.');
+    return;
+  }
+  if (hint.shouldConsume) {
+    if (hint.isProgressive) {
+      state.hintsLeft--;
+      state.levelHintUsed = true;
+    } else {
+      useHint();
+    }
+    recordMasteryHint(mission.concepts);
+  }
+  if (hint.isProgressive && hint.shouldConsume) levelHintStep++;
+  const label = hint.isProgressive ? `Hint ${hint.step}/${hint.total}: ` : '';
+  ui.showHintMessage(label + hint.text);
   ui.updateStats(state.score, state.hintsLeft, state.attempts, state.currentMissionIndex + 1);
   if (state.hintsLeft <= 0) document.getElementById('btnHint').disabled = true;
 }
@@ -484,7 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('btnRun').addEventListener('click', runQuery);
   document.getElementById('btnCheck').addEventListener('click', checkAnswer);
-  document.getElementById('btnHint').addEventListener('click', showHint);
+  document.getElementById('btnHint').addEventListener('click', showProgressiveHint);
   document.getElementById('btnReset').addEventListener('click', resetEditor);
   document.getElementById('btnSolution').addEventListener('click', showSolution);
   document.getElementById('btnNext').addEventListener('click', nextLevel);
