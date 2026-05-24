@@ -64,15 +64,21 @@
   <div class="home-section">
     <div class="section-row">
       <h3>Learning Dashboard</h3>
-      <span class="section-hint">Skill progress from completed missions</span>
+      <div class="section-actions">
+        <span class="section-hint">Skill progress from completed missions</span>
+        <button class="section-toggle" data-collapse-target="learningDashboard" aria-expanded="true">Minimize</button>
+      </div>
     </div>
     <div id="learningDashboard" class="learning-dashboard"></div>
   </div>
 
   <!-- Learning Mode -->
   <div class="home-section">
-    <h3>Learning Mode</h3>
-    <div class="mode-row">
+    <div class="section-row">
+      <h3>Learning Mode</h3>
+      <button class="section-toggle" data-collapse-target="learningModeOptions" aria-expanded="true">Minimize</button>
+    </div>
+    <div class="mode-row" id="learningModeOptions">
       <button class="mode-btn selected" data-mode="story">
         <span class="mode-icon">&#128218;</span>
         <span class="mode-label">Story Mode</span>

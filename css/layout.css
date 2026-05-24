@@ -168,9 +168,18 @@ header {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  gap: 12px;
   margin-bottom: 16px;
 }
 .section-row h3 { margin: 0; }
+
+.section-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+}
 
 .section-hint {
   font-size: 0.74rem;

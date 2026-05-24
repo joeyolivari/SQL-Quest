@@ -148,7 +148,8 @@
   .home-stat-chips { gap: 8px; }
   .home-stat-chip { min-width: auto; padding: 10px 14px; }
   .mission-list { max-height: none; }
-  .section-row { flex-direction: column; align-items: flex-start; gap: 4px; }
+  .section-row { flex-direction: column; align-items: flex-start; gap: 6px; }
+  .section-actions { width: 100%; justify-content: space-between; }
   .continue-section { flex-direction: column; align-items: flex-start; }
   .continue-actions { width: 100%; }
   .learning-summary,
