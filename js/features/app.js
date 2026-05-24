@@ -154,8 +154,8 @@ function restoreProgress(saved) {
   state.missionQueue = queue;
   state.score = saved.score;
   state.hintsLeft = saved.hintsLeft;
-  state.completedMissions = new Set(saved.completedMissions);
-  state.earnedBadges = new Set(saved.earnedBadges);
+  state.completedMissions = new Set(saved.completedMissions || []);
+  state.earnedBadges = new Set(saved.earnedBadges || []);
   state.missionAttempts = saved.missionAttempts || {};
   state.totalTime = saved.totalTime || 0;
   state.selectedDifficulty = saved.selectedDifficulty || 'beginner';
@@ -199,7 +199,7 @@ function refreshContinueSection() {
   const sec = document.getElementById('continueSection');
   if (saved && saved.queueIds && saved.queueIds.length) {
     ui.showContinueSection(
-      `${saved.completedMissions.length}/${saved.queueIds.length} missions · ${saved.score} pts · ${ui.formatTime(saved.totalTime || 0)}`
+      `${(saved.completedMissions || []).length}/${saved.queueIds.length} missions · ${saved.score} pts · ${ui.formatTime(saved.totalTime || 0)}`
     );
     // Replace button to avoid listener accumulation
     const old = document.getElementById('btnContinue');

@@ -81,6 +81,7 @@ const CHECKS = [
  * @returns {{ type: string, message: string, nextStep: string } | null}
  */
 export function diagnoseSQL(sql, mission, validationResult) {
+  if (!mission?.concepts?.length) return null;
   for (const check of CHECKS) {
     if (check.active(mission) && !check.present(sql)) {
       return { type: check.type, message: check.message, nextStep: check.nextStep };

@@ -139,7 +139,7 @@ export function showSummaryPanel({ rating, points, attempts, hintsUsed, timeTake
   document.getElementById('summaryHints').textContent = hintsUsed;
   document.getElementById('summaryTime').textContent = formatTime(timeTaken);
   document.getElementById('summaryConcepts').innerHTML =
-    concepts.map(c => `<span class="summary-concept">${escapeHtml(c)}</span>`).join('');
+    (concepts || []).map(c => `<span class="summary-concept">${escapeHtml(c)}</span>`).join('');
   panel.classList.add('visible');
 }
 
