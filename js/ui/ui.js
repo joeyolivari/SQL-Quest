@@ -199,6 +199,24 @@ export function showWinModal(score, earnedBadges, total, totalTime, difficulty) 
   document.getElementById('winModal').classList.add('visible');
 }
 
+export function renderRecommendation(rec, onClick) {
+  const sec = document.getElementById('recommendSection');
+  if (!sec) return;
+  if (!rec) { sec.style.display = 'none'; return; }
+
+  document.getElementById('recommendReason').textContent = rec.reason;
+  document.getElementById('recommendMission').textContent =
+    rec.mission.title + ' · ' + rec.mission.difficulty;
+
+  // Replace button to discard any previous click listener
+  const old = document.getElementById('btnRecommend');
+  const btn = old.cloneNode(true);
+  old.replaceWith(btn);
+  btn.addEventListener('click', onClick);
+
+  sec.style.display = 'flex';
+}
+
 export function showContinueSection(info) {
   const sec = document.getElementById('continueSection');
   if (sec) sec.style.display = 'flex';

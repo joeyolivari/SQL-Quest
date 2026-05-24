@@ -10,9 +10,10 @@ import { state, resetForLevel, useHint, recordAttempt, completeCurrentMission,
 import * as ui from '../ui/ui.js';
 import { diagnoseSQL } from '../learning/diagnostics.js';
 import {
-  loadMastery, recordMasteryAttempt, recordMasterySuccess,
+  loadMastery, getAllMastery, recordMasteryAttempt, recordMasterySuccess,
   recordMasteryHint, recordMasteryMistake,
 } from '../learning/masteryTracker.js';
+import { getRecommendedMission } from '../learning/adaptiveQueue.js';
 
 let engineReady = false;
 let selectedDifficulty = 'beginner';
@@ -47,6 +48,13 @@ function stopTimer() {
 }
 
 // ── Home screen ───────────────────────────────────────────────────────────────
+
+function updateRecommendation() {
+  const rec = getRecommendedMission(missions, getAllMastery());
+  ui.renderRecommendation(rec, () => {
+    if (rec) startGame([rec.mission], null, 0);
+  });
+}
 
 function renderHomeList() {
   ui.renderMissionList(getMissionQueue(selectedDifficulty), (qIdx) => {
@@ -98,6 +106,7 @@ function initHomeScreen() {
   }
 
   renderHomeList();
+  updateRecommendation();
 }
 
 function getMissionQueue(difficulty) {
@@ -166,6 +175,7 @@ function goHome() {
   ui.updateTimer(0);
   ui.showHomeScreen();
   renderHomeList();
+  updateRecommendation();
 }
 
 // ── Mobile tabs ───────────────────────────────────────────────────────────────
