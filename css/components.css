@@ -302,6 +302,59 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .btn-success { background: var(--success); color: #052e16; }
 .btn-success:hover:not(:disabled) { background: #4ade80; box-shadow: 0 0 16px rgba(34, 197, 94, 0.35); }
 
+/* ── Image-skin action buttons ──────────────────────────────── */
+.btn-img {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  border-radius: 0;
+  height: 52px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  transition: filter 0.18s ease, transform 0.12s ease, opacity 0.18s ease;
+}
+
+.btn-img img {
+  display: block;
+  height: 100%;
+  width: auto;
+  mix-blend-mode: screen;
+  pointer-events: none;
+  transition: filter 0.18s ease;
+}
+
+/* visually hidden label for accessibility */
+.btn-img-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.btn-img:hover:not(:disabled) img { filter: brightness(1.25) saturate(1.1); }
+.btn-img:active:not(:disabled) { transform: scale(0.96); }
+.btn-img:active:not(:disabled) img { filter: brightness(0.85); }
+.btn-img:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-img:disabled img { filter: grayscale(50%); }
+
+/* light theme: give a dark background so the neon glows remain visible */
+body.light .btn-img {
+  background: #0b0e17;
+  border-radius: 8px;
+}
+body.light .btn-img img { mix-blend-mode: normal; }
+
+/* ──────────────────────────────────────────────────────────── */
+
 .btn-learn {
   background: rgba(56, 189, 248, 0.12);
   border: 1px solid rgba(56, 189, 248, 0.4);
