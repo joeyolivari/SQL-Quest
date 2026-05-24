@@ -38,6 +38,8 @@ header {
 .game-container {
   flex: 1;
   height: calc(100vh - 58px);
+  height: calc(100dvh - 58px);
+  max-height: calc(100dvh - 58px);
   display: grid;
   grid-template-columns: 290px minmax(0, 1fr) 340px;
   overflow: hidden;

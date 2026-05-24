@@ -25,9 +25,24 @@
   }
 
   /* Header: single compact row, no wrap */
-  header { padding: 10px 14px; gap: 10px; flex-wrap: nowrap; }
-  .logo { font-size: 0.92rem; }
-  .stats { gap: 8px; font-size: 0.74rem; flex-wrap: nowrap; overflow-x: auto; justify-content: flex-end; }
+  header { padding: 10px 14px; gap: 8px; flex-wrap: wrap; align-items: flex-start; }
+  .logo {
+    width: 100%;
+    font-size: 0.92rem;
+    white-space: normal;
+    line-height: 1.2;
+  }
+  .stats {
+    width: 100%;
+    gap: 8px;
+    font-size: 0.74rem;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    justify-content: flex-start;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+  }
+  .stats::-webkit-scrollbar { display: none; }
   .stat-attempts { display: none; }
   .btn-learn { padding: 5px 9px; font-size: 0.7rem; }
 
@@ -35,6 +50,7 @@
   .game-container {
     display: block;
     height: auto;
+    max-height: none;
     overflow: visible;
     padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
   }
@@ -42,7 +58,7 @@
   /* Default tab = Mission: show center, hide sidebar + right-panel */
   .sidebar     { display: none; }
   .right-panel { display: none; }
-  .center      { overflow: visible; padding: 14px; }
+  .center      { overflow: visible; padding: 14px; width: 100%; }
 
   /* Schema tab ─ show sidebar only */
   .game-container.tab-schema .sidebar {
@@ -116,7 +132,13 @@
   .modal--wide { max-height: 92vh; padding: 16px; }
 
   /* Home screen — tablet */
-  .home-screen { padding: 32px 16px 72px; gap: 28px; }
+  .home-screen {
+    padding: 28px 16px 72px;
+    gap: 28px;
+    overflow-x: clip;
+  }
+  .home-hero { overflow: hidden; }
+  .home-hero::before { width: min(620px, 150vw); }
   .home-title { font-size: 1.9rem; }
   .diff-row { grid-template-columns: repeat(2, 1fr); }
   .diff-btn { padding: 14px 16px; column-gap: 12px; }
@@ -146,8 +168,11 @@
   .btn-row .btn-secondary,
   .btn-row .btn-primary,
   .btn-row .btn-quote { flex-shrink: 0; }
-  header { padding: 8px 12px; }
-  .logo { font-size: 0.84rem; }
+  header { padding: 9px 12px; }
+  .logo { font-size: 0.9rem; }
+  .stats { font-size: 0.72rem; }
+  .stats .stat:first-child,
+  .stats .stat-attempts { display: none; }
   .btn-learn { display: none; } /* accessible via Schema tab */
   .btn-learn-schema { display: inline-block; }
 
@@ -160,24 +185,38 @@
   .mobile-tab-icon { font-size: 1rem; }
 
   /* Home screen — phone */
-  .home-screen { padding: 20px 12px 72px; gap: 22px; }
+  .home-screen { padding: 18px 12px 72px; gap: 22px; }
   .home-title { font-size: 1.55rem; }
   .home-tagline { font-size: 0.88rem; }
   .home-hero-badge { font-size: 0.63rem; }
   .home-stat-chips { gap: 7px; }
   .home-stat-chip { font-size: 0.71rem; padding: 4px 10px; }
 
-  /* Difficulty cards: 1-column on phones so aspect-ratio cards aren't squashed */
+  /* Difficulty cards: use compact native cards on phones. */
   .diff-row { grid-template-columns: 1fr; gap: 10px; }
-  .diff-btn { padding: 14px 16px; border-radius: 12px; column-gap: 12px; }
+  .diff-btn,
+  .diff-btn:hover,
+  .diff-btn.selected {
+    min-height: 76px;
+    aspect-ratio: auto !important;
+    padding: 12px 14px;
+    border-radius: 12px;
+    column-gap: 12px;
+    background-image: none !important;
+    background-color: rgba(8, 14, 26, 0.92);
+    border-color: rgba(56, 189, 248, 0.18);
+    box-shadow: var(--shadow-card);
+    filter: none;
+  }
   .diff-icon { width: 40px; height: 40px; font-size: 1.2rem; border-radius: 10px; }
+  .diff-btn .diff-icon { opacity: 1 !important; }
   .diff-label { font-size: 0.82rem; }
   .diff-count { font-size: 0.63rem; }
 
   /* Mission list — more breathing room */
   .mission-list { max-height: none; }
   .mission-item { padding: 11px 12px; gap: 10px; }
-  .mission-item-title { font-size: 0.82rem; }
+  .mission-item-title { font-size: 0.82rem; white-space: normal; line-height: 1.35; }
   .mission-concept { font-size: 0.64rem; }
   .mission-item-badge { font-size: 0.6rem; padding: 2px 6px; }
 
