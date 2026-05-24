@@ -8,6 +8,7 @@ import { compareResults } from '../core/validation.js';
 import { state, resetForLevel, useHint, recordAttempt, completeCurrentMission,
          saveProgress, loadProgress, clearProgress } from '../core/gameState.js';
 import * as ui from '../ui/ui.js';
+import { diagnoseSQL } from '../learning/diagnostics.js';
 
 let engineReady = false;
 let selectedDifficulty = 'beginner';
@@ -258,7 +259,12 @@ function checkAnswer() {
   } else {
     recordAttempt();
     ui.updateStats(state.score, state.hintsLeft, state.attempts, state.currentMissionIndex + 1);
-    ui.showError(result.message || 'Almost there. Your result set does not match the mission output yet.');
+    const diag = diagnoseSQL(currentSQL, mission, result);
+    if (diag) {
+      ui.showError(diag.message + ' ' + diag.nextStep);
+    } else {
+      ui.showError(result.message || 'Almost there. Your result set does not match the mission output yet.');
+    }
   }
 }
 
