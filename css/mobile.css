@@ -5,6 +5,11 @@
   .game-container { grid-template-columns: 230px minmax(0, 1fr) 290px; }
 }
 
+/* ── Tablet landscape: 900px ─────────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .game-container { grid-template-columns: 220px minmax(0, 1fr) 260px; }
+}
+
 /* ── Tablet + phone: 768px and below ──────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .btn-cyber { height: 48px; padding: 0 16px 0 12px; font-size: 0.76rem; gap: 6px; min-width: 100px; }
@@ -31,7 +36,7 @@
     display: block;
     height: auto;
     overflow: visible;
-    padding-bottom: 60px; /* clear fixed tab bar */
+    padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
   }
 
   /* Default tab = Mission: show center, hide sidebar + right-panel */
@@ -61,18 +66,19 @@
   .game-container.tab-results .center  { display: none; }
   .game-container.tab-results .sidebar { display: none; }
 
-  /* Fixed bottom tab bar */
+  /* Fixed bottom tab bar — height auto for safe-area / notch support */
   .mobile-tabs {
     display: flex;
     position: fixed;
     bottom: 0;
     left: 0;
     right: 0;
-    height: 58px;
+    height: auto;
+    min-height: 58px;
     background: var(--panel);
     border-top: 1px solid var(--border);
     z-index: 50;
-    padding: 5px 8px;
+    padding: 5px 8px max(8px, env(safe-area-inset-bottom, 8px));
     gap: 4px;
   }
   .mobile-tab {
@@ -99,6 +105,9 @@
     color: var(--accent);
     border-color: var(--border);
   }
+
+  /* Toast above tab bar */
+  .badge-toast { bottom: calc(68px + env(safe-area-inset-bottom, 0px)); right: 12px; }
 
   /* Misc game elements */
   textarea { min-height: 160px; }
@@ -145,7 +154,8 @@
   button { padding: 7px 10px; font-size: 0.74rem; }
   .mission-card h2 { font-size: 0.9rem; }
   .mission-card p  { font-size: 0.8rem; }
-  textarea { min-height: 140px; }
+  textarea { min-height: 110px; }
+  .mission-card { padding: 14px 16px; }
   .mobile-tab { font-size: 0.6rem; }
   .mobile-tab-icon { font-size: 1rem; }
 
@@ -156,16 +166,33 @@
   .home-hero-badge { font-size: 0.63rem; }
   .home-stat-chips { gap: 7px; }
   .home-stat-chip { font-size: 0.71rem; padding: 4px 10px; }
-  .diff-row { gap: 8px; }
-  .diff-btn { padding: 12px 14px; border-radius: 10px; column-gap: 10px; }
+
+  /* Difficulty cards: 1-column on phones so aspect-ratio cards aren't squashed */
+  .diff-row { grid-template-columns: 1fr; gap: 10px; }
+  .diff-btn { padding: 14px 16px; border-radius: 12px; column-gap: 12px; }
   .diff-icon { width: 40px; height: 40px; font-size: 1.2rem; border-radius: 10px; }
-  .diff-label { font-size: 0.78rem; }
-  .diff-count { font-size: 0.61rem; }
+  .diff-label { font-size: 0.82rem; }
+  .diff-count { font-size: 0.63rem; }
+
+  /* Mission list — more breathing room */
   .mission-list { max-height: none; }
-  .mission-item { padding: 9px 10px; gap: 9px; }
-  .mission-item-title { font-size: 0.78rem; }
-  .mission-concept { font-size: 0.57rem; }
-  .mission-item-badge { font-size: 0.58rem; padding: 2px 5px; }
+  .mission-item { padding: 11px 12px; gap: 10px; }
+  .mission-item-title { font-size: 0.82rem; }
+  .mission-concept { font-size: 0.64rem; }
+  .mission-item-badge { font-size: 0.6rem; padding: 2px 6px; }
+
+  /* Modals — bottom-sheet style on phone */
+  .modal-overlay { align-items: flex-end; }
+  .modal { padding: 20px 16px; max-width: calc(100vw - 24px); border-radius: 14px; }
+  .modal--wide {
+    max-width: 100%;
+    max-height: 88vh;
+    padding: 18px 14px;
+    border-radius: 16px 16px 0 0;
+    margin: 0;
+    align-self: flex-end;
+  }
+
   .btn-lg { padding: 11px 24px; font-size: 0.9rem; }
   .section-hint { display: none; }
 }

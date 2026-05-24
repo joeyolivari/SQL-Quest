@@ -13,7 +13,7 @@
   border: 1px solid var(--border);
   border-radius: 10px;
   overflow: hidden;
-  font-size: 0.75rem;
+  font-size: 0.78rem;
   background: var(--panel2);
   box-shadow: var(--shadow-card);
 }
@@ -23,7 +23,7 @@
   border-left: 3px solid rgba(56, 189, 248, 0.5);
   padding: 7px 10px;
   font-weight: 700;
-  font-size: 0.73rem;
+  font-size: 0.75rem;
   letter-spacing: 0.04em;
   color: var(--accent);
   cursor: pointer;
@@ -33,7 +33,7 @@
   user-select: none;
 }
 
-.schema-body { padding: 6px 10px; }
+.schema-body { padding: 6px 10px; overflow-x: auto; }
 .schema-table.collapsed .schema-body { display: none; }
 
 .schema-body div {
@@ -44,12 +44,14 @@
   border-bottom: 1px solid rgba(51, 65, 85, 0.7);
   color: var(--muted);
   transition: color 0.15s;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .schema-body div:hover { color: var(--text); }
 
 .schema-body div:last-child { border-bottom: none; }
-.type-tag { color: var(--warning); font-size: 0.68rem; white-space: nowrap; font-family: var(--font-mono); }
+.type-tag { color: var(--warning); font-size: 0.71rem; white-space: nowrap; font-family: var(--font-mono); }
 
 .level-progress {
   display: flex;
@@ -763,7 +765,7 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   align-items: center;
   column-gap: 14px;
   row-gap: 3px;
-  padding: 18px 20px;
+  padding: 20px 22px;
   border-radius: 14px;
   border: 1px solid;
   background: linear-gradient(135deg, rgba(8, 14, 26, 0.92) 0%, rgba(14, 22, 40, 0.88) 100%);
@@ -1076,7 +1078,7 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   display: flex;
   flex-direction: column;
   gap: 6px;
-  max-height: 380px;
+  max-height: min(520px, calc(100vh - 320px));
   overflow-y: auto;
   padding-right: 4px;
   scrollbar-width: thin;
