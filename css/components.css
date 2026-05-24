@@ -1193,6 +1193,24 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   border-radius: 14px;
   padding: 16px;
 }
+.learning-dashboard.is-collapsed,
+.mode-row.is-collapsed {
+  display: none;
+}
+.section-toggle {
+  padding: 6px 10px;
+  border-radius: 7px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+.section-toggle:hover {
+  color: var(--text);
+  border-color: rgba(56, 189, 248, 0.38);
+  background: rgba(56, 189, 248, 0.06);
+}
 .learning-summary {
   display: grid;
   grid-template-columns: minmax(160px, 0.7fr) minmax(220px, 1.3fr);

@@ -117,6 +117,8 @@ function initHomeScreen() {
     });
   });
 
+  initSectionToggles();
+
   document.getElementById('btnPlayAll').addEventListener('click', () => {
     clearProgress();
     startGame(getMissionQueue(selectedDifficulty), null, 0);
@@ -140,6 +142,18 @@ function initHomeScreen() {
   renderLearningDashboard();
   renderHomeList();
   updateRecommendation();
+}
+
+function initSectionToggles() {
+  document.querySelectorAll('[data-collapse-target]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.dataset.collapseTarget);
+      if (!target) return;
+      const isCollapsed = target.classList.toggle('is-collapsed');
+      btn.setAttribute('aria-expanded', String(!isCollapsed));
+      btn.textContent = isCollapsed ? 'Show' : 'Minimize';
+    });
+  });
 }
 
 function getMissionsByDifficulty(difficulty) {
