@@ -1,0 +1,339 @@
+/* ── learning.css ─────────────────────────────────────────────────────────────
+   Retro CRT polish for every accelerated-learning UI element.
+   Loaded after components.css so specificity overrides are minimal.
+──────────────────────────────────────────────────────────────────────────── */
+
+/* ── 1. Diagnostic / error feedback ──────────────────────────────────────── */
+
+.error-box {
+  padding: 13px 16px;
+  line-height: 1.7;
+  letter-spacing: 0.01em;
+  position: relative;
+  overflow: hidden;
+}
+/* Subtle terminal texture so long diagnostic messages feel structured */
+.error-box::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent      0px,
+    transparent      2px,
+    rgba(0,0,0,0.04) 2px,
+    rgba(0,0,0,0.04) 3px
+  );
+  pointer-events: none;
+}
+
+/* ── 2. Hint box ──────────────────────────────────────────────────────────── */
+
+.hint-box {
+  line-height: 1.72;
+  letter-spacing: 0.01em;
+  position: relative;
+  overflow: hidden;
+}
+/* Top phosphor line — matches the CRT card pattern */
+.hint-box::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    transparent 5%,
+    rgba(245, 158, 11, 0.7) 40%,
+    rgba(251, 191, 36, 0.75) 60%,
+    transparent 95%
+  );
+}
+/* Scanline texture */
+.hint-box::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent      0px,
+    transparent      2px,
+    rgba(0,0,0,0.04) 2px,
+    rgba(0,0,0,0.04) 3px
+  );
+  pointer-events: none;
+}
+
+/* ── 3. Mission completion summary ───────────────────────────────────────── */
+
+/* Rating-specific outer phosphor glow */
+.mission-summary[data-rating="Perfect"] {
+  box-shadow: 0 0 32px rgba(34, 197, 94, 0.12), var(--shadow-card);
+}
+.mission-summary[data-rating="Good"] {
+  box-shadow: 0 0 32px rgba(245, 158, 11, 0.12), var(--shadow-card);
+}
+.mission-summary[data-rating="Needs Review"] {
+  box-shadow: 0 0 32px rgba(239, 68, 68, 0.12), var(--shadow-card);
+}
+
+/* Phosphor glow on numeric stat values */
+.mission-summary[data-rating="Perfect"] .summary-stat-val {
+  color: #86efac;
+  text-shadow: 0 0 10px rgba(34, 197, 94, 0.55);
+}
+.mission-summary[data-rating="Good"] .summary-stat-val {
+  color: #fde68a;
+  text-shadow: 0 0 10px rgba(245, 158, 11, 0.55);
+}
+.mission-summary[data-rating="Needs Review"] .summary-stat-val {
+  color: #fca5a5;
+  text-shadow: 0 0 10px rgba(239, 68, 68, 0.55);
+}
+
+/* Deeper terminal-style stat cells */
+.summary-stat {
+  background: rgba(0, 0, 0, 0.28);
+  box-shadow:
+    inset 0 1px 4px rgba(0, 0, 0, 0.4),
+    inset 0 -1px 0   rgba(255, 255, 255, 0.03);
+}
+
+/* Monospace terminal feel for concept chips */
+.summary-concept {
+  font-family: var(--font-mono);
+  font-size: 0.69rem;
+  letter-spacing: 0.06em;
+  padding: 3px 10px;
+}
+
+/* Scanline overlay — sits above the card background, below all content */
+.mission-summary::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent       0px,
+    transparent       2px,
+    rgba(0,0,0,0.048) 2px,
+    rgba(0,0,0,0.048) 3px
+  );
+  pointer-events: none;
+  border-radius: 12px;
+  z-index: 0;
+}
+/* Lift content above scanlines */
+.summary-header,
+.summary-grid,
+.summary-concepts {
+  position: relative;
+  z-index: 1;
+}
+
+/* Tighter, more confident header */
+.summary-title {
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+}
+.summary-rating {
+  font-size: 1.05rem;
+  letter-spacing: 0.02em;
+}
+
+/* ── 4. Learning mode selector ────────────────────────────────────────────── */
+
+.mode-btn {
+  position: relative;
+  overflow: hidden;
+  /* taller so icon has room */
+  padding: 16px 18px;
+}
+
+/* Top phosphor accent line, hidden until selected */
+.mode-btn::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: transparent;
+  transition: background 0.22s;
+}
+
+/* ── Story: cyan accent */
+.mode-btn[data-mode="story"].selected {
+  border-color: rgba(56, 189, 248, 0.55);
+  background: rgba(56, 189, 248, 0.08);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.09), var(--shadow-card);
+}
+.mode-btn[data-mode="story"].selected::before {
+  background: linear-gradient(
+    90deg,
+    transparent 5%,
+    rgba(56, 189, 248, 0.9) 50%,
+    transparent 95%
+  );
+}
+.mode-btn[data-mode="story"].selected .mode-icon {
+  filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.65));
+}
+/* story label stays accent (matches base .mode-btn.selected .mode-label) */
+
+/* ── Training: amber accent */
+.mode-btn[data-mode="training"].selected {
+  border-color: rgba(245, 158, 11, 0.52);
+  background: rgba(245, 158, 11, 0.07);
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.09), var(--shadow-card);
+}
+.mode-btn[data-mode="training"].selected::before {
+  background: linear-gradient(
+    90deg,
+    transparent 5%,
+    rgba(245, 158, 11, 0.9) 50%,
+    transparent 95%
+  );
+}
+.mode-btn[data-mode="training"].selected .mode-label {
+  color: #f59e0b;
+}
+.mode-btn[data-mode="training"].selected .mode-icon {
+  filter: drop-shadow(0 0 6px rgba(245, 158, 11, 0.65));
+}
+
+/* ── Review: red accent */
+.mode-btn[data-mode="review"].selected {
+  border-color: rgba(239, 68, 68, 0.48);
+  background: rgba(239, 68, 68, 0.07);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.09), var(--shadow-card);
+}
+.mode-btn[data-mode="review"].selected::before {
+  background: linear-gradient(
+    90deg,
+    transparent 5%,
+    rgba(239, 68, 68, 0.9) 50%,
+    transparent 95%
+  );
+}
+.mode-btn[data-mode="review"].selected .mode-label {
+  color: #f87171;
+}
+.mode-btn[data-mode="review"].selected .mode-icon {
+  filter: drop-shadow(0 0 6px rgba(239, 68, 68, 0.55));
+}
+
+/* Mode desc: slightly larger for readability */
+.mode-desc {
+  font-size: 0.74rem;
+  line-height: 1.4;
+  margin-top: 1px;
+}
+
+/* ── 5. Recommendation card ───────────────────────────────────────────────── */
+
+/* Terminal mono font for the recommended mission name */
+.recommend-mission {
+  font-family: var(--font-mono);
+  font-size: 0.81rem;
+  letter-spacing: 0.04em;
+}
+
+/* Slightly bolder reason text */
+.recommend-reason {
+  line-height: 1.62;
+}
+
+/* Scanlines over the card */
+.recommend-section::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent      0px,
+    transparent      2px,
+    rgba(0,0,0,0.04) 2px,
+    rgba(0,0,0,0.04) 3px
+  );
+  pointer-events: none;
+}
+/* Ensure text stays above scanlines */
+.recommend-left,
+.recommend-actions {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── 6. Mission explanation (learn box) ───────────────────────────────────── */
+
+.learn-box {
+  line-height: 1.68;
+  position: relative;
+  overflow: hidden;
+}
+.learn-box h4 {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.learn-box p {
+  font-size: 0.82rem;
+  line-height: 1.7;
+}
+/* Scanlines */
+.learn-box::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent      0px,
+    transparent      2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 3px
+  );
+  pointer-events: none;
+}
+
+/* ── 7. Mission-list hint text ────────────────────────────────────────────── */
+
+#missionListHint {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+  opacity: 0.7;
+}
+
+/* ── 8. Light theme overrides ─────────────────────────────────────────────── */
+
+body.light .mission-summary[data-rating="Perfect"]      .summary-stat-val { color: #15803d; text-shadow: none; }
+body.light .mission-summary[data-rating="Good"]         .summary-stat-val { color: #b45309; text-shadow: none; }
+body.light .mission-summary[data-rating="Needs Review"] .summary-stat-val { color: #dc2626; text-shadow: none; }
+body.light .summary-stat {
+  background: rgba(0, 0, 0, 0.04);
+  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+body.light .summary-concept {
+  background: rgba(14, 165, 233, 0.1);
+  border-color: rgba(14, 165, 233, 0.32);
+}
+body.light .error-box::after,
+body.light .hint-box::after,
+body.light .mission-summary::after,
+body.light .recommend-section::after,
+body.light .learn-box::after { opacity: 0.4; }
+
+/* ── 9. Mobile overrides ──────────────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .mode-btn { padding: 14px 16px; }
+}
+
+@media (max-width: 480px) {
+  /* Hint-box top line occupies more visual weight on small screens */
+  .hint-box { padding-top: 14px; }
+  /* Summary concept chips smaller */
+  .summary-concept { font-size: 0.65rem; letter-spacing: 0.04em; }
+  /* Error box: less padding */
+  .error-box { padding: 11px 13px; }
+}

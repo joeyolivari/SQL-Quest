@@ -8,15 +8,28 @@ import { compareResults } from '../core/validation.js';
 import { getDiagnosticMessage } from '../core/diagnostics.js';
 import { state, resetForLevel, useHint, recordAttempt, completeCurrentMission,
          saveProgress, loadProgress, clearProgress } from '../core/gameState.js';
-import { getNextHint, resetHintLadder } from '../learning/hintEngine.js';
-import { buildLearningDashboard } from '../learning/dashboard.js';
-import { buildMasteryProfile, getWeakestSkills } from '../learning/masteryTracker.js';
-import { buildWeakSkillQueue } from '../learning/adaptiveQueue.js';
 import * as ui from '../ui/ui.js';
+import { diagnoseSQL } from '../learning/diagnostics.js';
+import {
+  loadMastery, getAllMastery, recordMasteryAttempt, recordMasterySuccess,
+  recordMasteryHint, recordMasteryMistake, buildMasteryProfile, getWeakestSkills,
+} from '../learning/masteryTracker.js';
+import { getRecommendedMission, buildTrainingQueue, buildReviewQueue, buildWeakSkillQueue } from '../learning/adaptiveQueue.js';
+import { getHintStep, getNextHint, resetHintLadder } from '../learning/hintEngine.js';
+import { buildLearningDashboard } from '../learning/dashboard.js';
 
 let engineReady = false;
 let selectedDifficulty = 'beginner';
+let selectedMode = 'story';
 let timerInterval = null;
+let missionStartTime = 0;
+let levelHintStep = 0;
+
+function getMissionRating(attempts, levelHintUsed) {
+  if (attempts === 0 && !levelHintUsed) return 'Perfect';
+  if (attempts >= 3) return 'Needs Review';
+  return 'Good';
+}
 
 // ── Theme ─────────────────────────────────────────────────────────────────────
 
@@ -48,9 +61,10 @@ function stopTimer() {
 
 // ── Home screen ───────────────────────────────────────────────────────────────
 
-function renderHomeList() {
-  ui.renderMissionList(getMissionQueue(selectedDifficulty), (qIdx) => {
-    startGame(getMissionQueue(selectedDifficulty), null, qIdx);
+function updateRecommendation() {
+  const rec = getRecommendedMission(missions, getAllMastery());
+  ui.renderRecommendation(rec, () => {
+    if (rec) startGame([rec.mission], null, 0);
   });
 }
 
@@ -58,14 +72,40 @@ function renderLearningDashboard() {
   ui.renderLearningDashboard(buildLearningDashboard(missions, loadProgress()));
 }
 
+function renderHomeList() {
+  const queue = getMissionQueue(selectedDifficulty);
+  ui.renderMissionList(queue, (qIdx) => {
+    startGame(queue, null, qIdx);
+  });
+  const hint = document.getElementById('missionListHint');
+  if (hint) {
+    if (selectedMode === 'training') {
+      hint.textContent = 'Ordered by weakest skill — click any to start there';
+    } else if (selectedMode === 'review') {
+      hint.textContent = 'Focused on low-mastery skills — click any to start there';
+    } else {
+      hint.textContent = 'Click any mission to start from there';
+    }
+  }
+}
+
 function initHomeScreen() {
   // Populate difficulty counts
   const counts = { beginner: 0, intermediate: 0, advanced: 0, all: missions.length };
-  missions.forEach(m => { const d = m.difficulty.toLowerCase(); if (counts[d] !== undefined) counts[d]++; });
+  missions.forEach(m => { const d = m.difficulty?.toLowerCase(); if (d && counts[d] !== undefined) counts[d]++; });
   Object.entries(counts).forEach(([diff, n]) => {
     const id = 'count' + diff.charAt(0).toUpperCase() + diff.slice(1);
     const el = document.getElementById(id);
     if (el) el.textContent = n + ' mission' + (n === 1 ? '' : 's');
+  });
+
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedMode = btn.dataset.mode;
+      renderHomeList();
+    });
   });
 
   document.querySelectorAll('.diff-btn').forEach(btn => {
@@ -82,7 +122,7 @@ function initHomeScreen() {
     startGame(getMissionQueue(selectedDifficulty), null, 0);
   });
 
-  document.getElementById('btnWeakDrill').addEventListener('click', () => {
+  document.getElementById('btnWeakDrill')?.addEventListener('click', () => {
     startWeakSkillDrill();
   });
 
@@ -96,24 +136,26 @@ function initHomeScreen() {
     });
   }
 
-  const saved = loadProgress();
-  if (saved && saved.queueIds && saved.queueIds.length) {
-    ui.showContinueSection(
-      `${saved.completedMissions.length}/${saved.queueIds.length} missions · ${saved.score} pts · ${ui.formatTime(saved.totalTime || 0)}`
-    );
-    document.getElementById('btnContinue').addEventListener('click', () => {
-      restoreProgress(saved);
-    });
-  }
-
+  refreshContinueSection();
   renderLearningDashboard();
   renderHomeList();
+  updateRecommendation();
+}
+
+function getMissionsByDifficulty(difficulty) {
+  if (difficulty === 'all') return [...missions];
+  const filtered = missions.filter(m => m.difficulty?.toLowerCase() === difficulty);
+  return filtered.length ? filtered : [...missions];
 }
 
 function getMissionQueue(difficulty) {
-  if (difficulty === 'all') return [...missions];
-  const filtered = missions.filter(m => m.difficulty.toLowerCase() === difficulty);
-  return filtered.length ? filtered : [...missions];
+  if (selectedMode === 'training') {
+    return buildTrainingQueue(missions, getAllMastery(), difficulty).queue;
+  }
+  if (selectedMode === 'review') {
+    return buildReviewQueue(missions, getAllMastery(), difficulty).queue;
+  }
+  return getMissionsByDifficulty(difficulty);
 }
 
 function startWeakSkillDrill() {
@@ -144,8 +186,8 @@ function restoreProgress(saved) {
   state.missionQueue = queue;
   state.score = saved.score;
   state.hintsLeft = saved.hintsLeft;
-  state.completedMissions = new Set(saved.completedMissions);
-  state.earnedBadges = new Set(saved.earnedBadges);
+  state.completedMissions = new Set(saved.completedMissions || []);
+  state.earnedBadges = new Set(saved.earnedBadges || []);
   state.missionAttempts = saved.missionAttempts || {};
   state.totalTime = saved.totalTime || 0;
   state.selectedDifficulty = saved.selectedDifficulty || 'beginner';
@@ -184,6 +226,23 @@ function startGame(queue, scenarioId, startIndex = 0, difficultyLabel = selected
   loadLevel(startIndex);
 }
 
+function refreshContinueSection() {
+  const saved = loadProgress();
+  const sec = document.getElementById('continueSection');
+  if (saved && saved.queueIds && saved.queueIds.length) {
+    ui.showContinueSection(
+      `${(saved.completedMissions || []).length}/${saved.queueIds.length} missions · ${saved.score} pts · ${ui.formatTime(saved.totalTime || 0)}`
+    );
+    // Replace button to avoid listener accumulation
+    const old = document.getElementById('btnContinue');
+    const btn = old.cloneNode(true);
+    old.replaceWith(btn);
+    btn.addEventListener('click', () => restoreProgress(saved));
+  } else if (sec) {
+    sec.style.display = 'none';
+  }
+}
+
 function goHome() {
   stopTimer();
   saveProgress();
@@ -195,8 +254,10 @@ function goHome() {
   state.totalTime = 0;
   ui.updateTimer(0);
   ui.showHomeScreen();
+  refreshContinueSection();
   renderLearningDashboard();
   renderHomeList();
+  updateRecommendation();
 }
 
 // ── Mobile tabs ───────────────────────────────────────────────────────────────
@@ -228,6 +289,8 @@ function loadLevel(index) {
   const mission = state.missionQueue[index];
   resetForLevel(index);
   resetHintLadder(mission.id);
+  missionStartTime = state.totalTime;
+  levelHintStep = 0;
   ui.loadMission(mission, index, briefings[mission.id]);
   ui.updateStats(state.score, state.hintsLeft, state.attempts, index + 1);
   document.getElementById('btnHint').disabled = state.hintsLeft <= 0;
@@ -271,10 +334,20 @@ function checkAnswer() {
     return;
   }
   const result = compareResults(state.lastResult, expected, mission.requiredColumns, mission.orderMatters);
+  recordMasteryAttempt(mission.concepts);
   if (result.ok) {
+    recordMasterySuccess(mission.concepts);
     stopTimer();
+    const rating = getMissionRating(state.attempts, state.levelHintUsed);
     const points = completeCurrentMission();
-    ui.showSuccess(`&#10003; <strong>Mission complete.</strong> +${points} points.`);
+    ui.showSummaryPanel({
+      rating,
+      points,
+      attempts: state.attempts + 1,
+      hintsUsed: state.levelHintUsed ? 1 : 0,
+      timeTaken: state.totalTime - missionStartTime,
+      concepts: mission.concepts,
+    });
     ui.showExplanation(mission.explanation);
     document.getElementById('btnCheck').disabled = true;
     ui.renderProgressDots(state.completedMissions, state.currentMissionIndex, state.missionQueue.length);
@@ -296,20 +369,45 @@ function checkAnswer() {
   } else {
     recordAttempt();
     ui.updateStats(state.score, state.hintsLeft, state.attempts, state.currentMissionIndex + 1);
-    ui.showError(getDiagnosticMessage({
-      sql: currentSQL,
-      mission,
-      userResult: state.lastResult,
-      expectedResult: expected,
-      validationMessage: result.message || 'Almost there. Your result set does not match the mission output yet.'
-    }));
+    const diag = diagnoseSQL(currentSQL, mission, result);
+    if (diag) {
+      recordMasteryMistake(mission.concepts, diag.type);
+      ui.showError(diag.message + ' ' + diag.nextStep);
+    } else {
+      ui.showError(getDiagnosticMessage({
+        sql: currentSQL,
+        mission,
+        userResult: state.lastResult,
+        expectedResult: expected,
+        validationMessage: result.message
+      }));
+    }
   }
 }
 
 function showHint() {
   if (state.hintsLeft <= 0) { ui.showError('No hints left. Try running a query and studying the result.'); return; }
-  const hint = getNextHint(state.missionQueue[state.currentMissionIndex]);
-  if (!hint.text) { ui.showError('No hint is available for this mission.'); return; }
+  const mission = state.missionQueue[state.currentMissionIndex];
+  useHint();
+  recordMasteryHint(mission.concepts);
+  const progressive = getHintStep(mission.id, levelHintStep);
+  levelHintStep++;
+  ui.showHintMessage('💡 ' + (progressive ?? mission.hint));
+  ui.updateStats(state.score, state.hintsLeft, state.attempts, state.currentMissionIndex + 1);
+  if (state.hintsLeft <= 0) document.getElementById('btnHint').disabled = true;
+}
+
+function showProgressiveHint() {
+  if (state.hintsLeft <= 0) {
+    ui.showError('No hints left. Try running a query and studying the result.');
+    return;
+  }
+  const mission = state.missionQueue[state.currentMissionIndex];
+  const hint = getNextHint(mission);
+  if (!hint.text) {
+    ui.showError('No hint is available for this mission.');
+    return;
+  }
   if (hint.shouldConsume) {
     if (hint.isProgressive) {
       state.hintsLeft--;
@@ -317,8 +415,10 @@ function showHint() {
     } else {
       useHint();
     }
+    recordMasteryHint(mission.concepts);
   }
-  const label = hint.isProgressive ? `Hint ${hint.step}/${hint.total}: ` : 'Hint: ';
+  if (hint.isProgressive && hint.shouldConsume) levelHintStep++;
+  const label = hint.isProgressive ? `Hint ${hint.step}/${hint.total}: ` : '';
   ui.showHintMessage(label + hint.text);
   ui.updateStats(state.score, state.hintsLeft, state.attempts, state.currentMissionIndex + 1);
   if (state.hintsLeft <= 0) document.getElementById('btnHint').disabled = true;
@@ -452,7 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   document.getElementById('btnRun').addEventListener('click', runQuery);
   document.getElementById('btnCheck').addEventListener('click', checkAnswer);
-  document.getElementById('btnHint').addEventListener('click', showHint);
+  document.getElementById('btnHint').addEventListener('click', showProgressiveHint);
   document.getElementById('btnReset').addEventListener('click', resetEditor);
   document.getElementById('btnSolution').addEventListener('click', showSolution);
   document.getElementById('btnNext').addEventListener('click', nextLevel);
@@ -482,6 +582,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  loadMastery();
   initMobileTabs();
   initHomeScreen();
   initGame();

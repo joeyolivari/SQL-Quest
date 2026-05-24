@@ -124,10 +124,23 @@ export function showExplanation(text) {
 }
 
 export function hideMessages(includeHint = true) {
-  ['errorBox', 'successBox', 'learnBox'].forEach(id =>
+  ['errorBox', 'successBox', 'learnBox', 'summaryPanel'].forEach(id =>
     document.getElementById(id).classList.remove('visible')
   );
   if (includeHint) document.getElementById('hintBox').classList.remove('visible');
+}
+
+export function showSummaryPanel({ rating, points, attempts, hintsUsed, timeTaken, concepts }) {
+  const panel = document.getElementById('summaryPanel');
+  panel.dataset.rating = rating;
+  document.getElementById('summaryRating').textContent = rating;
+  document.getElementById('summaryPoints').textContent = '+' + points;
+  document.getElementById('summaryAttempts').textContent = attempts;
+  document.getElementById('summaryHints').textContent = hintsUsed;
+  document.getElementById('summaryTime').textContent = formatTime(timeTaken);
+  document.getElementById('summaryConcepts').innerHTML =
+    (concepts || []).map(c => `<span class="summary-concept">${escapeHtml(c)}</span>`).join('');
+  panel.classList.add('visible');
 }
 
 export function showSolutionBox(sql) {
@@ -197,6 +210,24 @@ export function showWinModal(score, earnedBadges, total, totalTime, difficulty) 
       : '—';
   }
   document.getElementById('winModal').classList.add('visible');
+}
+
+export function renderRecommendation(rec, onClick) {
+  const sec = document.getElementById('recommendSection');
+  if (!sec) return;
+  if (!rec) { sec.style.display = 'none'; return; }
+
+  document.getElementById('recommendReason').textContent = rec.reason;
+  document.getElementById('recommendMission').textContent =
+    rec.mission.title + ' · ' + rec.mission.difficulty;
+
+  // Replace button to discard any previous click listener
+  const old = document.getElementById('btnRecommend');
+  const btn = old.cloneNode(true);
+  old.replaceWith(btn);
+  btn.addEventListener('click', onClick);
+
+  sec.style.display = 'flex';
 }
 
 export function showContinueSection(info) {

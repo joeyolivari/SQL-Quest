@@ -1,3 +1,24 @@
+// Maps concept names to the SQL keyword the engine must detect in the query.
+export const conceptKeywords = {
+  'WHERE':          { keyword: 'WHERE',    pattern: /\bWHERE\b/i },
+  'JOIN':           { keyword: 'JOIN',     pattern: /\bJOIN\b/i },
+  'Self-Join':      { keyword: 'JOIN',     pattern: /\bJOIN\b/i },
+  'GROUP BY':       { keyword: 'GROUP BY', pattern: /\bGROUP\s+BY\b/i },
+  'ORDER BY':       { keyword: 'ORDER BY', pattern: /\bORDER\s+BY\b/i },
+  'HAVING':         { keyword: 'HAVING',   pattern: /\bHAVING\b/i },
+  'WITH':           { keyword: 'WITH',     pattern: /\bWITH\b/i },
+  'CTE':            { keyword: 'WITH',     pattern: /\bWITH\b/i },
+  'Recursive CTE':  { keyword: 'WITH',     pattern: /\bWITH\b/i },
+  'WITH RECURSIVE': { keyword: 'WITH',     pattern: /\bWITH\b/i },
+  'Window Function':{ keyword: 'OVER',     pattern: /\bOVER\b/i },
+  'SUM OVER':       { keyword: 'OVER',     pattern: /\bOVER\b/i },
+  'LAG':            { keyword: 'OVER',     pattern: /\bOVER\b/i },
+  'RANK':           { keyword: 'OVER',     pattern: /\bOVER\b/i },
+  'DENSE_RANK':     { keyword: 'OVER',     pattern: /\bOVER\b/i },
+  'CASE':           { keyword: 'CASE',     pattern: /\bCASE\b/i },
+  'LEFT JOIN':      { keyword: 'LEFT JOIN',pattern: /\bLEFT\s+JOIN\b/i },
+};
+
 export const skillMap = {
   select_where: {
     label: 'SELECT and WHERE',
