@@ -9,6 +9,10 @@ import { state, resetForLevel, useHint, recordAttempt, completeCurrentMission,
          saveProgress, loadProgress, clearProgress } from '../core/gameState.js';
 import * as ui from '../ui/ui.js';
 import { diagnoseSQL } from '../learning/diagnostics.js';
+import {
+  loadMastery, recordMasteryAttempt, recordMasterySuccess,
+  recordMasteryHint, recordMasteryMistake,
+} from '../learning/masteryTracker.js';
 
 let engineReady = false;
 let selectedDifficulty = 'beginner';
@@ -234,7 +238,9 @@ function checkAnswer() {
     return;
   }
   const result = compareResults(state.lastResult, expected, mission.requiredColumns, mission.orderMatters);
+  recordMasteryAttempt(mission.concepts);
   if (result.ok) {
+    recordMasterySuccess(mission.concepts);
     stopTimer();
     const points = completeCurrentMission();
     ui.showSuccess(`&#10003; <strong>Mission complete.</strong> +${points} points.`);
@@ -261,6 +267,7 @@ function checkAnswer() {
     ui.updateStats(state.score, state.hintsLeft, state.attempts, state.currentMissionIndex + 1);
     const diag = diagnoseSQL(currentSQL, mission, result);
     if (diag) {
+      recordMasteryMistake(mission.concepts, diag.type);
       ui.showError(diag.message + ' ' + diag.nextStep);
     } else {
       ui.showError(result.message || 'Almost there. Your result set does not match the mission output yet.');
@@ -270,8 +277,10 @@ function checkAnswer() {
 
 function showHint() {
   if (state.hintsLeft <= 0) { ui.showError('No hints left. Try running a query and studying the result.'); return; }
+  const mission = state.missionQueue[state.currentMissionIndex];
   useHint();
-  ui.showHintMessage('💡 ' + state.missionQueue[state.currentMissionIndex].hint);
+  recordMasteryHint(mission.concepts);
+  ui.showHintMessage('💡 ' + mission.hint);
   ui.updateStats(state.score, state.hintsLeft, state.attempts, state.currentMissionIndex + 1);
   if (state.hintsLeft <= 0) document.getElementById('btnHint').disabled = true;
 }
@@ -434,6 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   });
 
+  loadMastery();
   initMobileTabs();
   initHomeScreen();
   initGame();
