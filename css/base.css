@@ -3,16 +3,67 @@ html { min-height: 100%; }
 body { min-height: 100%; overflow-x: hidden; overflow-y: auto; }
 
 body {
-  background-color: var(--bg);
+  /* ── Retro CRT background — pure CSS, no images ────────────
+     Layer order (top → bottom):
+     1. Vignette   — dark corners push to near-black
+     2. Phosphor   — soft blue-cyan bloom from screen centre
+     3. Scanlines  — 1px dark stripe / 2px gap, fixed to viewport
+     4. Grid verts — faint blue vertical lines every 44px
+     5. Grid horiz — faint blue horizontal lines every 44px
+  ─────────────────────────────────────────────────────────── */
+  background-color: #04060e;
   background-image:
-    linear-gradient(rgba(11, 17, 32, 0.72), rgba(11, 17, 32, 0.82)),
-    url('../assets/images/backgrounds/hero-command-center.png');
-  background-size: cover;
-  background-position: center top;
-  background-repeat: no-repeat;
+    radial-gradient(ellipse at 50% 50%,
+      transparent 42%, rgba(0, 0, 0, 0.80) 100%),
+    radial-gradient(ellipse at 50% 32%,
+      rgba(6, 50, 112, 0.30) 0%, transparent 66%),
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.13)  0px,
+      rgba(0, 0, 0, 0.13)  1px,
+      transparent          1px,
+      transparent          3px
+    ),
+    linear-gradient(90deg, rgba(14, 82, 196, 0.052) 1px, transparent 1px),
+    linear-gradient(0deg,  rgba(14, 82, 196, 0.052) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    44px 44px,
+    44px 44px;
+  background-attachment: fixed;
+  background-position: 0 0;
+
   color: var(--text);
   font-family: var(--font-sans);
   display: flex;
   flex-direction: column;
   line-height: 1.5;
+}
+
+/* Subtle CRT flicker — barely perceptible blue-tinted blink */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 500;
+  background: transparent;
+  animation: crt-flicker 11s ease-in-out infinite;
+}
+
+@keyframes crt-flicker {
+  0%, 85%, 91%, 100% { background: transparent; }
+  86%                 { background: rgba(0, 18, 58, 0.05); }
+  92%                 { background: rgba(0, 18, 58, 0.03); }
+}
+
+/* Light theme: kill the CRT effects */
+body.light {
+  background-attachment: scroll;
+}
+body.light::after {
+  animation: none;
+  background: transparent;
 }
