@@ -251,7 +251,7 @@ export function hideHomeScreen() {
   const hs = document.getElementById('homeScreen');
   if (hs) hs.style.display = 'none';
   const gc = document.querySelector('.game-container');
-  if (gc) gc.style.display = 'grid';
+  if (gc) gc.style.removeProperty('display');
   // Let CSS control mobile tab bar visibility
   const tabs = document.getElementById('mobileTabs');
   if (tabs) tabs.style.removeProperty('display');
