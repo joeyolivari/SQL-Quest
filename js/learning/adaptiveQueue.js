@@ -1,4 +1,73 @@
 const DIFF_ORDER = { 'Beginner': 0, 'Intermediate': 1, 'Advanced': 2 };
+const REVIEW_SCORE_THRESHOLD = 0.6;
+
+function getMissionsByDifficulty(allMissions, difficulty) {
+  if (difficulty === 'all') return [...allMissions];
+  const filtered = allMissions.filter(m => m.difficulty.toLowerCase() === difficulty);
+  return filtered.length ? filtered : [...allMissions];
+}
+
+function collectByConceptRank(allMissions, rankedConcepts) {
+  const seen = new Set();
+  const queue = [];
+  for (const concept of rankedConcepts) {
+    allMissions
+      .filter(m => m.concepts.includes(concept) && !seen.has(m.id))
+      .sort((a, b) => (DIFF_ORDER[a.difficulty] ?? 3) - (DIFF_ORDER[b.difficulty] ?? 3))
+      .forEach(m => { seen.add(m.id); queue.push(m); });
+  }
+  return { queue, seen };
+}
+
+/**
+ * Training queue: missions ordered weakest-concept-first, then filled with
+ * remaining difficulty-filtered missions. Falls back to difficulty queue when
+ * no mastery data exists.
+ */
+export function buildTrainingQueue(allMissions, masteryProgress, difficulty) {
+  const fallback = getMissionsByDifficulty(allMissions, difficulty);
+  const attempted = masteryProgress
+    ? Object.entries(masteryProgress)
+        .filter(([, d]) => d.attempts > 0)
+        .sort(([, a], [, b]) => a.score - b.score || 0)
+        .map(([concept]) => concept)
+    : [];
+
+  if (!attempted.length) return { queue: fallback, usingFallback: true };
+
+  const { queue, seen } = collectByConceptRank(allMissions, attempted);
+  fallback.forEach(m => { if (!seen.has(m.id)) queue.push(m); });
+  return { queue: queue.length ? queue : fallback, usingFallback: !queue.length };
+}
+
+/**
+ * Review queue: only missions that cover concepts with score < threshold.
+ * If nothing qualifies, uses the 3 lowest-scoring attempted concepts instead.
+ * Falls back to difficulty queue when no mastery data exists.
+ */
+export function buildReviewQueue(allMissions, masteryProgress, difficulty) {
+  const fallback = getMissionsByDifficulty(allMissions, difficulty);
+  if (!masteryProgress) return { queue: fallback, usingFallback: true };
+
+  const attempted = Object.entries(masteryProgress).filter(([, d]) => d.attempts > 0);
+  if (!attempted.length) return { queue: fallback, usingFallback: true };
+
+  let weakConcepts = attempted
+    .filter(([, d]) => d.score < REVIEW_SCORE_THRESHOLD)
+    .sort(([, a], [, b]) => a.score - b.score)
+    .map(([c]) => c);
+
+  if (!weakConcepts.length) {
+    // Everything is passing — review the 3 lowest scorers anyway
+    weakConcepts = attempted
+      .sort(([, a], [, b]) => a.score - b.score)
+      .slice(0, 3)
+      .map(([c]) => c);
+  }
+
+  const { queue } = collectByConceptRank(allMissions, weakConcepts);
+  return { queue: queue.length ? queue : fallback, usingFallback: !queue.length };
+}
 
 /**
  * Inspect mastery progress and return the single best mission to practice next,

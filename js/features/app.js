@@ -13,10 +13,11 @@ import {
   loadMastery, getAllMastery, recordMasteryAttempt, recordMasterySuccess,
   recordMasteryHint, recordMasteryMistake,
 } from '../learning/masteryTracker.js';
-import { getRecommendedMission } from '../learning/adaptiveQueue.js';
+import { getRecommendedMission, buildTrainingQueue, buildReviewQueue } from '../learning/adaptiveQueue.js';
 
 let engineReady = false;
 let selectedDifficulty = 'beginner';
+let selectedMode = 'story';
 let timerInterval = null;
 let missionStartTime = 0;
 
@@ -64,9 +65,20 @@ function updateRecommendation() {
 }
 
 function renderHomeList() {
-  ui.renderMissionList(getMissionQueue(selectedDifficulty), (qIdx) => {
-    startGame(getMissionQueue(selectedDifficulty), null, qIdx);
+  const queue = getMissionQueue(selectedDifficulty);
+  ui.renderMissionList(queue, (qIdx) => {
+    startGame(queue, null, qIdx);
   });
+  const hint = document.getElementById('missionListHint');
+  if (hint) {
+    if (selectedMode === 'training') {
+      hint.textContent = 'Ordered by weakest skill — click any to start there';
+    } else if (selectedMode === 'review') {
+      hint.textContent = 'Focused on low-mastery skills — click any to start there';
+    } else {
+      hint.textContent = 'Click any mission to start from there';
+    }
+  }
 }
 
 function initHomeScreen() {
@@ -77,6 +89,15 @@ function initHomeScreen() {
     const id = 'count' + diff.charAt(0).toUpperCase() + diff.slice(1);
     const el = document.getElementById(id);
     if (el) el.textContent = n + ' mission' + (n === 1 ? '' : 's');
+  });
+
+  document.querySelectorAll('.mode-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+      btn.classList.add('selected');
+      selectedMode = btn.dataset.mode;
+      renderHomeList();
+    });
   });
 
   document.querySelectorAll('.diff-btn').forEach(btn => {
@@ -116,10 +137,20 @@ function initHomeScreen() {
   updateRecommendation();
 }
 
-function getMissionQueue(difficulty) {
+function getMissionsByDifficulty(difficulty) {
   if (difficulty === 'all') return [...missions];
   const filtered = missions.filter(m => m.difficulty.toLowerCase() === difficulty);
   return filtered.length ? filtered : [...missions];
+}
+
+function getMissionQueue(difficulty) {
+  if (selectedMode === 'training') {
+    return buildTrainingQueue(missions, getAllMastery(), difficulty).queue;
+  }
+  if (selectedMode === 'review') {
+    return buildReviewQueue(missions, getAllMastery(), difficulty).queue;
+  }
+  return getMissionsByDifficulty(difficulty);
 }
 
 function restoreProgress(saved) {

@@ -60,6 +60,28 @@
     </div>
   </div>
 
+  <!-- Learning Mode -->
+  <div class="home-section">
+    <h3>Learning Mode</h3>
+    <div class="mode-row">
+      <button class="mode-btn selected" data-mode="story">
+        <span class="mode-icon">&#128218;</span>
+        <span class="mode-label">Story Mode</span>
+        <span class="mode-desc">Play missions in order</span>
+      </button>
+      <button class="mode-btn" data-mode="training">
+        <span class="mode-icon">&#127919;</span>
+        <span class="mode-label">Training Mode</span>
+        <span class="mode-desc">Start with your weakest skills</span>
+      </button>
+      <button class="mode-btn" data-mode="review">
+        <span class="mode-icon">&#128260;</span>
+        <span class="mode-label">Review Mode</span>
+        <span class="mode-desc">Revisit failed or low-mastery skills</span>
+      </button>
+    </div>
+  </div>
+
   <!-- Difficulty -->
   <div class="home-section">
     <h3>Select Difficulty</h3>
@@ -91,7 +113,7 @@
   <div class="home-section">
     <div class="section-row">
       <h3>Mission Select</h3>
-      <span class="section-hint">Click any mission to start from there</span>
+      <span class="section-hint" id="missionListHint">Click any mission to start from there</span>
     </div>
     <div id="missionList" class="mission-list"></div>
   </div>

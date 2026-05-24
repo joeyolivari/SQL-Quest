@@ -1187,6 +1187,54 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 .continue-info { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
 .home-error { font-size: 0.8rem; color: var(--danger); }
 
+/* ── Learning mode selector ───────────────────────────────────────────────────────────────────────────────────── */
+.mode-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.mode-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-sans);
+  transition: border-color .15s, background .15s, box-shadow .15s;
+  width: 100%;
+}
+.mode-btn:hover {
+  background: rgba(56, 189, 248, 0.05);
+  border-color: rgba(56, 189, 248, 0.3);
+}
+.mode-btn.selected {
+  background: rgba(56, 189, 248, 0.07);
+  border-color: rgba(56, 189, 248, 0.5);
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.08);
+}
+.mode-icon {
+  font-size: 1.25rem;
+  line-height: 1;
+  margin-bottom: 2px;
+}
+.mode-label {
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.2;
+}
+.mode-btn.selected .mode-label { color: var(--accent); }
+.mode-desc {
+  font-size: 0.72rem;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
 /* ── Recommended review card ──────────────────────────────────────────────────────────────────────────────────── */
 .recommend-section {
   background: linear-gradient(135deg, rgba(6, 12, 24, 0.95) 0%, rgba(20, 14, 2, 0.9) 100%);
