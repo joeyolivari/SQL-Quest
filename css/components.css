@@ -1097,66 +1097,54 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 }
 
 /* ── Difficulty card image skins ─────────────────────────────────────────────────────────────── */
-/* background-blend-mode:screen makes the PNG's dark areas transparent so only the neon          */
-/* borders and icon glows show — no black outer margin visible.                                  */
+/* New PNGs have real alpha transparency — outer corners are transparent, neon border is at the  */
+/* image edge. aspect-ratio matches the 1672×941 image so 100%×100% fills with zero distortion. */
 
 .diff-btn.beginner,
 .diff-btn.beginner:hover,
-.diff-btn.beginner.selected {
-  background-image: url('../assets/images/difficulty/beginner-card.png');
-  background-size: 100% 100%;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-blend-mode: screen;
-  border-color: transparent;
-}
-.diff-btn.beginner                              { background-color: rgba(8, 14, 26, 0.95); }
-.diff-btn.beginner:hover,
-.diff-btn.beginner.selected                    { background-color: rgba(34, 197, 94, 0.13); border-color: rgba(34, 197, 94, 0.55); box-shadow: var(--shadow-lift), var(--glow-green-md); }
-
+.diff-btn.beginner.selected,
 .diff-btn.intermediate,
 .diff-btn.intermediate:hover,
-.diff-btn.intermediate.selected {
-  background-image: url('../assets/images/difficulty/intermediate-card.png');
-  background-size: 100% 100%;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-blend-mode: screen;
-  border-color: transparent;
-}
-.diff-btn.intermediate                         { background-color: rgba(8, 14, 26, 0.95); }
-.diff-btn.intermediate:hover,
-.diff-btn.intermediate.selected                { background-color: rgba(245, 158, 11, 0.13); border-color: rgba(245, 158, 11, 0.55); box-shadow: var(--shadow-lift), var(--glow-amber-md); }
-
+.diff-btn.intermediate.selected,
 .diff-btn.advanced,
 .diff-btn.advanced:hover,
-.diff-btn.advanced.selected {
-  background-image: url('../assets/images/difficulty/advanced-card.png');
-  background-size: 100% 100%;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-blend-mode: screen;
-  border-color: transparent;
-}
-.diff-btn.advanced                             { background-color: rgba(8, 14, 26, 0.95); }
-.diff-btn.advanced:hover,
-.diff-btn.advanced.selected                    { background-color: rgba(239, 68, 68, 0.13); border-color: rgba(239, 68, 68, 0.55); box-shadow: var(--shadow-lift), var(--glow-danger-md); }
-
+.diff-btn.advanced.selected,
 .diff-btn[data-diff="all"],
 .diff-btn[data-diff="all"]:hover,
 .diff-btn[data-diff="all"].selected {
-  background-image: url('../assets/images/difficulty/all-levels-card.png');
+  background-color: transparent;
   background-size: 100% 100%;
   background-position: center;
   background-repeat: no-repeat;
-  background-blend-mode: screen;
   border-color: transparent;
+  aspect-ratio: 1672 / 941;
 }
-.diff-btn[data-diff="all"]                     { background-color: rgba(8, 14, 26, 0.95); }
-.diff-btn[data-diff="all"]:hover,
-.diff-btn[data-diff="all"].selected            { background-color: rgba(168, 85, 247, 0.13); border-color: rgba(168, 85, 247, 0.55); box-shadow: var(--shadow-lift), var(--glow-purple-md); }
 
-/* Hide emoji icons — card images show the icon graphic */
+.diff-btn.beginner,
+.diff-btn.beginner:hover,
+.diff-btn.beginner.selected      { background-image: url('../assets/images/difficulty/beginner-card.png'); }
+.diff-btn.beginner:hover,
+.diff-btn.beginner.selected      { filter: brightness(1.15); box-shadow: var(--shadow-lift), var(--glow-green-md); }
+
+.diff-btn.intermediate,
+.diff-btn.intermediate:hover,
+.diff-btn.intermediate.selected  { background-image: url('../assets/images/difficulty/intermediate-card.png'); }
+.diff-btn.intermediate:hover,
+.diff-btn.intermediate.selected  { filter: brightness(1.15); box-shadow: var(--shadow-lift), var(--glow-amber-md); }
+
+.diff-btn.advanced,
+.diff-btn.advanced:hover,
+.diff-btn.advanced.selected      { background-image: url('../assets/images/difficulty/advanced-card.png'); }
+.diff-btn.advanced:hover,
+.diff-btn.advanced.selected      { filter: brightness(1.15); box-shadow: var(--shadow-lift), var(--glow-danger-md); }
+
+.diff-btn[data-diff="all"],
+.diff-btn[data-diff="all"]:hover,
+.diff-btn[data-diff="all"].selected { background-image: url('../assets/images/difficulty/all-levels-card.png'); }
+.diff-btn[data-diff="all"]:hover,
+.diff-btn[data-diff="all"].selected { filter: brightness(1.15); box-shadow: var(--shadow-lift), var(--glow-purple-md); }
+
+/* Hide emoji icons — card images include the icon graphic */
 .diff-btn.beginner .diff-icon,
 .diff-btn.intermediate .diff-icon,
 .diff-btn.advanced .diff-icon,
