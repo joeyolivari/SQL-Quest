@@ -98,6 +98,10 @@
   .home-screen { padding: 32px 16px 72px; gap: 28px; }
   .home-title { font-size: 1.9rem; }
   .diff-row { grid-template-columns: repeat(2, 1fr); }
+  .diff-btn { padding: 14px 16px; column-gap: 12px; }
+  .diff-icon { width: 44px; height: 44px; }
+  .home-stat-chips { gap: 8px; }
+  .home-stat-chip { min-width: auto; padding: 10px 14px; }
   .mission-list { max-height: none; }
   .section-row { flex-direction: column; align-items: flex-start; gap: 4px; }
   .continue-section { flex-direction: column; align-items: flex-start; }
@@ -126,9 +130,9 @@
   .home-stat-chips { gap: 7px; }
   .home-stat-chip { font-size: 0.71rem; padding: 4px 10px; }
   .diff-row { gap: 8px; }
-  .diff-btn { padding: 13px 8px 10px; border-radius: 10px; }
-  .diff-icon { font-size: 1.2rem; }
-  .diff-label { font-size: 0.75rem; }
+  .diff-btn { padding: 12px 14px; border-radius: 10px; column-gap: 10px; }
+  .diff-icon { width: 40px; height: 40px; font-size: 1.2rem; border-radius: 10px; }
+  .diff-label { font-size: 0.78rem; }
   .diff-count { font-size: 0.61rem; }
   .mission-list { max-height: none; }
   .mission-item { padding: 9px 10px; gap: 9px; }
