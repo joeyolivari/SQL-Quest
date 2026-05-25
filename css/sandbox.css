@@ -13,9 +13,11 @@
   gap: 18px;
 }
 
+/* Shared panel card background/border */
 .sandbox-header,
 .sandbox-practice-panel,
 .sandbox-stats-panel,
+.sandbox-schema-wrap,
 .sandbox-results-wrap {
   background:
     linear-gradient(135deg, rgba(56, 189, 248, 0.09), rgba(15, 23, 42, 0.78) 45%, rgba(8, 13, 28, 0.94)),
@@ -29,6 +31,7 @@
 .sandbox-header::before,
 .sandbox-practice-panel::before,
 .sandbox-stats-panel::before,
+.sandbox-schema-wrap::before,
 .sandbox-results-wrap::before {
   content: '';
   position: absolute;
@@ -102,18 +105,73 @@
   border-color: rgba(239, 68, 68, 0.3);
 }
 
-.sandbox-grid {
+/* ── Tab bar (mobile only) ──────────────────────────────────── */
+.sandbox-tab-bar {
+  display: none;
+  gap: 4px;
+  background: var(--panel);
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  border-radius: 12px;
+  padding: 5px;
+}
+
+.sandbox-tab {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 8px 4px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.62rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  transition: background .15s, color .15s;
+  touch-action: manipulation;
+}
+
+.sandbox-tab-icon { font-size: 1rem; line-height: 1; }
+
+.sandbox-tab.active {
+  background: rgba(56, 189, 248, 0.1);
+  color: var(--accent);
+  border-color: rgba(56, 189, 248, 0.3);
+  text-shadow: 0 0 8px rgba(56, 189, 248, 0.5);
+}
+
+/* ── Desktop layout grid ────────────────────────────────────── */
+.sandbox-layout {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 340px;
   gap: 18px;
-  align-items: stretch;
 }
 
+.sandbox-pane {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Editor pane spans both right-column rows so its height matches schema + stats */
+.sandbox-pane--editor  { grid-column: 1; grid-row: 1 / 3; }
+.sandbox-pane--schema  { grid-column: 2; grid-row: 1; }
+.sandbox-pane--stats   { grid-column: 2; grid-row: 2; }
+.sandbox-pane--results { grid-column: 1 / -1; grid-row: 3; }
+
+/* ── Panel inner elements ───────────────────────────────────── */
 .sandbox-practice-panel,
 .sandbox-stats-panel,
+.sandbox-schema-wrap,
 .sandbox-results-wrap {
   border-radius: 12px;
   padding: 18px;
+  flex: 1;
 }
 
 .sandbox-practice-panel {
@@ -123,6 +181,29 @@
   min-width: 0;
 }
 
+/* ── Schema panel ───────────────────────────────────────────── */
+.sandbox-schema-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  overflow: hidden;
+}
+
+.sandbox-schema-body {
+  overflow-y: auto;
+  overflow-x: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* On desktop, cap schema height so it doesn't push stats too far down */
+@media (min-width: 769px) {
+  .sandbox-schema-body { max-height: 42vh; }
+}
+
+/* ── Chip row ───────────────────────────────────────────────── */
 .sandbox-chip-row {
   display: flex;
   flex-wrap: wrap;
@@ -138,6 +219,7 @@
   font-size: 0.74rem;
   font-weight: 700;
   cursor: pointer;
+  touch-action: manipulation;
 }
 
 .sandbox-chip:hover {
@@ -145,6 +227,7 @@
   box-shadow: var(--glow-sm);
 }
 
+/* ── Editor ─────────────────────────────────────────────────── */
 .sandbox-editor {
   min-height: 260px;
   height: 34vh;
@@ -169,9 +252,8 @@
   box-shadow: 0 0 24px rgba(56, 189, 248, 0.28);
 }
 
-.sandbox-stats-panel {
-  min-width: 0;
-}
+/* ── Stats panel ────────────────────────────────────────────── */
+.sandbox-stats-panel { min-width: 0; }
 
 .sandbox-panel-row {
   display: flex;
@@ -230,10 +312,12 @@
   box-shadow: 0 0 12px rgba(34, 197, 94, 0.4);
 }
 
+/* ── Results panel ──────────────────────────────────────────── */
 .sandbox-result-panel {
   min-height: 230px;
   height: auto;
   max-height: 52vh;
+  overflow-x: auto;
 }
 
 .sandbox-empty-state,
@@ -259,9 +343,7 @@
   align-items: stretch;
 }
 
-.sandbox-error-state strong {
-  color: #fecaca;
-}
+.sandbox-error-state strong { color: #fecaca; }
 
 .sandbox-error-state code {
   display: block;
@@ -274,61 +356,7 @@
   font-family: var(--font-mono);
 }
 
-/* ── Sandbox schema reference panel ─────────────────────────────────────────── */
-.sandbox-schema-wrap {
-  background:
-    linear-gradient(135deg, rgba(56, 189, 248, 0.09), rgba(15, 23, 42, 0.78) 45%, rgba(8, 13, 28, 0.94)),
-    var(--panel);
-  border: 1px solid rgba(56, 189, 248, 0.24);
-  box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.04);
-  border-radius: 12px;
-  padding: 18px;
-  position: relative;
-  overflow: hidden;
-}
-
-.sandbox-schema-wrap::before {
-  content: '';
-  position: absolute;
-  inset: 0 0 auto;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.75), rgba(34, 197, 94, 0.45), transparent);
-  pointer-events: none;
-}
-
-.sandbox-schema-heading {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.sandbox-schema-wrap.collapsed .sandbox-schema-heading {
-  margin-bottom: 0;
-}
-
-.sandbox-schema-body {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 10px;
-  max-height: 320px;
-  overflow-y: auto;
-}
-
-.sandbox-schema-wrap.collapsed .sandbox-schema-body {
-  display: none;
-}
-
-.sandbox-schema-btn {
-  flex-shrink: 0;
-  font-size: 0.74rem;
-  padding: 5px 10px;
-}
-
-/* ── Sandbox mobile tab bar ──────────────────────────────────────────────────── */
-.sandbox-mobile-tabs { display: none; }
-
+/* ── Home button ────────────────────────────────────────────── */
 .btn-lab {
   background: linear-gradient(135deg, #22c55e, #38bdf8);
   color: #041016;
@@ -340,116 +368,74 @@
   box-shadow: 0 0 28px rgba(56, 189, 248, 0.36);
 }
 
+/* ── Tablet (≤900px): single-column stacked, no tabs yet ───── */
 @media (max-width: 900px) {
-  .sandbox-grid { grid-template-columns: 1fr; }
+  .sandbox-layout {
+    grid-template-columns: 1fr;
+  }
+  .sandbox-pane--editor,
+  .sandbox-pane--schema,
+  .sandbox-pane--stats,
+  .sandbox-pane--results {
+    grid-column: 1;
+    grid-row: auto;
+  }
   .sandbox-header { flex-direction: column; }
   .sandbox-status { width: 100%; }
   .sandbox-editor { min-height: 300px; height: 38vh; }
 }
 
+/* ── Mobile (≤768px): tabs — only active pane visible ───────── */
 @media (max-width: 768px) {
-  /* Sandbox mobile tab bar */
-  .sandbox-mobile-tabs {
-    display: flex;
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: auto;
-    min-height: 58px;
-    background: var(--panel);
-    border-top: 1px solid var(--border);
-    z-index: 50;
-    padding: 5px 8px max(8px, env(safe-area-inset-bottom, 8px));
-    gap: 4px;
-  }
+  .sandbox-tab-bar { display: flex; }
+  .sandbox-layout  { display: block; }
+  .sandbox-pane    { display: none; }
+  .sandbox-pane.active { display: flex; flex-direction: column; }
 
-  .sandbox-mobile-tab {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 2px;
-    padding: 0;
-    background: transparent;
-    border: 1px solid transparent;
-    border-radius: 8px;
-    color: var(--muted);
-    font-size: 0.66rem;
-    font-weight: 600;
-    cursor: pointer;
-    font-family: var(--font-sans);
-    transition: background .15s, color .15s;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-  }
-
-  .sandbox-mobile-tab.active {
-    background: var(--panel2);
-    color: var(--accent);
-    border-color: var(--border);
-  }
-
-  /* Reserve space for fixed tab bar */
-  .sandbox-screen {
-    padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
-    overflow-x: hidden;
-  }
-
-  /* Hide schema toggle on mobile (tab handles it) */
-  .sandbox-schema-btn { display: none; }
-  .sandbox-schema-heading { margin-bottom: 0; }
-
-  /* Editor tab (default): practice panel only, no schema or stats */
-  .sandbox-grid { display: block; }
-  .sandbox-stats-panel { display: none; }
-  .sandbox-schema-wrap { display: none; }
-  .sandbox-results-wrap { display: none; }
-
-  /* Schema tab */
-  .sandbox-screen.sandbox-tab-schema .sandbox-grid { display: none; }
-  .sandbox-screen.sandbox-tab-schema .sandbox-schema-wrap { display: block; }
-  .sandbox-screen.sandbox-tab-schema .sandbox-schema-body {
-    grid-template-columns: 1fr;
+  /* Results table scrolls inside the panel; no viewport max-height needed */
+  .sandbox-result-panel {
     max-height: none;
-    overflow-y: visible;
+    overflow-x: auto;
+    overflow-y: auto;
   }
-  .sandbox-screen.sandbox-tab-schema .sandbox-results-wrap { display: none; }
 
-  /* Results tab */
-  .sandbox-screen.sandbox-tab-results .sandbox-grid { display: none; }
-  .sandbox-screen.sandbox-tab-results .sandbox-schema-wrap { display: none; }
-  .sandbox-screen.sandbox-tab-results .sandbox-results-wrap { display: flex; }
+  /* Schema body: full height inside its pane */
+  .sandbox-schema-body { max-height: none; flex: 1; }
 
-  /* Stats tab */
-  .sandbox-screen.sandbox-tab-stats .sandbox-grid { display: block; }
-  .sandbox-screen.sandbox-tab-stats .sandbox-practice-panel { display: none; }
-  .sandbox-screen.sandbox-tab-stats .sandbox-stats-panel { display: block; }
-  .sandbox-screen.sandbox-tab-stats .sandbox-schema-wrap { display: none; }
-  .sandbox-screen.sandbox-tab-stats .sandbox-results-wrap { display: none; }
+  /* Prevent schema table cells from causing horizontal overflow */
+  .sandbox-schema-body .schema-body { overflow-x: auto; }
 }
 
+/* ── Small phones (≤560px) ──────────────────────────────────── */
 @media (max-width: 560px) {
-  .sandbox-screen { padding: 14px 10px calc(68px + env(safe-area-inset-bottom, 0px)); }
+  .sandbox-screen { padding: 14px 10px 54px; }
   .sandbox-header,
   .sandbox-practice-panel,
   .sandbox-stats-panel,
+  .sandbox-schema-wrap,
   .sandbox-results-wrap {
     padding: 14px;
     border-radius: 10px;
   }
+
+  .sandbox-tab { font-size: 0.58rem; gap: 2px; padding: 7px 2px; }
+  .sandbox-tab-icon { font-size: 0.9rem; }
+
   .sandbox-header { min-height: 0; }
+  .sandbox-header h1 { font-size: clamp(1.4rem, 7vw, 2.2rem); margin: 6px 0 8px; }
   .sandbox-header p { font-size: 0.9rem; }
-  .sandbox-chip-row { display: grid; grid-template-columns: 1fr; }
+
+  .sandbox-chip-row { display: grid; grid-template-columns: 1fr 1fr; }
   .sandbox-chip { border-radius: 8px; text-align: left; }
+
   .sandbox-editor {
-    min-height: 260px;
-    height: 320px;
+    min-height: 220px;
+    height: 280px;
     font-size: 0.9rem;
   }
-  .sandbox-action-bar { display: grid; grid-template-columns: 1fr; }
-  .sandbox-action-bar button { width: 100%; }
+
+  .sandbox-action-bar { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .sandbox-action-bar .sandbox-run { grid-column: 1 / -1; }
+
   .sandbox-panel-row { flex-direction: column; }
-  .sandbox-result-panel { max-height: 60vh; }
 }

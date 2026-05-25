@@ -144,34 +144,47 @@
 
 <div id="sandboxScreen" class="sandbox-screen" style="display:none">
   <section class="sandbox-shell">
+
     <div class="sandbox-header">
       <div>
         <div class="sandbox-kicker">Free Practice Mode</div>
         <h1>SQL Training Lab</h1>
         <p>Practice freely. Break things here, not in missions.</p>
-        <small>Use the Schema tab if you need table or column names.</small>
+        <small>INSERT, UPDATE, DELETE, and DROP are allowed — isolated sandbox DB, resets any time.</small>
       </div>
       <div class="sandbox-status" id="sandboxStatus" data-type="info">Preparing sandbox database...</div>
     </div>
 
-    <div class="sandbox-schema-wrap" id="sandboxSchemaWrap">
-      <div class="sandbox-schema-heading">
-        <div class="sandbox-panel-title">Database Schema</div>
-        <button class="btn-secondary sandbox-schema-btn" id="btnSandboxSchemaToggle">&#9660; Hide</button>
-      </div>
-      <div id="sandboxSchemaPanel" class="sandbox-schema-body"></div>
-    </div>
+    <!-- Tab bar: visible on mobile only -->
+    <nav class="sandbox-tab-bar" id="sandboxTabBar">
+      <button class="sandbox-tab active" data-sandbox-tab="editor">
+        <span class="sandbox-tab-icon">&#9998;</span>Editor
+      </button>
+      <button class="sandbox-tab" data-sandbox-tab="schema">
+        <span class="sandbox-tab-icon">&#9638;</span>Schema
+      </button>
+      <button class="sandbox-tab" data-sandbox-tab="results">
+        <span class="sandbox-tab-icon">&#9776;</span>Results
+      </button>
+      <button class="sandbox-tab" data-sandbox-tab="stats">
+        <span class="sandbox-tab-icon">&#9650;</span>Stats
+      </button>
+    </nav>
 
-    <div class="sandbox-grid">
-      <main class="sandbox-practice-panel">
-        <div class="sandbox-panel-title">Practice Console</div>
-        <div class="sandbox-chip-row" aria-label="Example queries">
-          <button class="sandbox-chip" data-sandbox-example="clients">SELECT clients</button>
-          <button class="sandbox-chip" data-sandbox-example="transactions">Count transactions</button>
-          <button class="sandbox-chip" data-sandbox-example="join">Join clients/accounts</button>
-          <button class="sandbox-chip" data-sandbox-example="group">Group by account</button>
-        </div>
-        <textarea id="sandboxSqlInput" class="sandbox-editor" spellcheck="false" placeholder="Try a query here:
+    <!-- Desktop: CSS grid. Mobile: one active pane at a time. -->
+    <div class="sandbox-layout">
+
+      <!-- Editor pane -->
+      <div class="sandbox-pane sandbox-pane--editor active" id="sandboxPaneEditor">
+        <div class="sandbox-practice-panel">
+          <div class="sandbox-panel-title">Practice Console</div>
+          <div class="sandbox-chip-row" aria-label="Example queries">
+            <button class="sandbox-chip" data-sandbox-example="clients">SELECT clients</button>
+            <button class="sandbox-chip" data-sandbox-example="transactions">Count transactions</button>
+            <button class="sandbox-chip" data-sandbox-example="join">Join clients/accounts</button>
+            <button class="sandbox-chip" data-sandbox-example="group">Group by account</button>
+          </div>
+          <textarea id="sandboxSqlInput" class="sandbox-editor" spellcheck="false" placeholder="Try a query here:
 
 SELECT * FROM clients LIMIT 5;
 
@@ -180,55 +193,52 @@ FROM transactions
 GROUP BY transaction_type;
 
 CREATE TABLE practice_notes (id INTEGER, note TEXT);"></textarea>
-        <div class="sandbox-action-bar">
-          <button class="btn-lg btn-primary sandbox-run" id="btnSandboxRun">&#9654; Run Query</button>
-          <button class="btn-secondary" id="btnSandboxClear">Clear Editor</button>
-          <button class="btn-secondary" id="btnSandboxResetDb">Reset Sandbox DB</button>
-          <button class="btn-secondary" id="btnSandboxBack">Back Home</button>
-        </div>
-      </main>
-
-      <aside class="sandbox-stats-panel">
-        <div class="sandbox-panel-row">
-          <div>
-            <div class="sandbox-panel-title">SQL Skill XP</div>
-            <p>Every run levels up the clauses and commands you use.</p>
+          <div class="sandbox-action-bar">
+            <button class="btn-lg btn-primary sandbox-run" id="btnSandboxRun">&#9654; Run Query</button>
+            <button class="btn-secondary" id="btnSandboxClear">Clear Editor</button>
+            <button class="btn-secondary" id="btnSandboxResetDb">Reset Sandbox DB</button>
+            <button class="btn-secondary" id="btnSandboxBack">Back Home</button>
           </div>
-          <button class="section-toggle" id="btnSandboxResetStats">Reset Stats</button>
         </div>
-        <div class="sandbox-stats-grid" id="sandboxStatsGrid"></div>
-      </aside>
-    </div>
+      </div>
 
-    <section class="sandbox-results-wrap">
-      <div class="sandbox-panel-row">
-        <div class="sandbox-panel-title">Output Monitor</div>
-        <div class="row-count" id="sandboxRowCount"></div>
+      <!-- Schema pane -->
+      <div class="sandbox-pane sandbox-pane--schema" id="sandboxPaneSchema">
+        <div class="sandbox-schema-wrap">
+          <div class="sandbox-panel-title">Database Schema</div>
+          <div id="sandboxSchemaPanel" class="sandbox-schema-body"></div>
+        </div>
       </div>
-      <div class="result-panel sandbox-result-panel" id="sandboxResultPanel">
-        <div class="sandbox-empty-state">Run any SQL here. Mission score, hints, badges, and mastery stay untouched.</div>
+
+      <!-- Stats pane -->
+      <div class="sandbox-pane sandbox-pane--stats" id="sandboxPaneStats">
+        <div class="sandbox-stats-panel">
+          <div class="sandbox-panel-row">
+            <div>
+              <div class="sandbox-panel-title">SQL Skill XP</div>
+              <p>Every run levels up the clauses and commands you use.</p>
+            </div>
+            <button class="section-toggle" id="btnSandboxResetStats">Reset Stats</button>
+          </div>
+          <div class="sandbox-stats-grid" id="sandboxStatsGrid"></div>
+        </div>
       </div>
-    </section>
+
+      <!-- Results pane -->
+      <div class="sandbox-pane sandbox-pane--results" id="sandboxPaneResults">
+        <div class="sandbox-results-wrap">
+          <div class="sandbox-panel-row">
+            <div class="sandbox-panel-title">Output Monitor</div>
+            <div class="row-count" id="sandboxRowCount"></div>
+          </div>
+          <div class="result-panel sandbox-result-panel" id="sandboxResultPanel">
+            <div class="sandbox-empty-state">Run any SQL here. Mission score, hints, badges, and mastery stay untouched.</div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /.sandbox-layout -->
   </section>
-
-  <nav class="sandbox-mobile-tabs" id="sandboxMobileTabs" style="display:none">
-    <button class="sandbox-mobile-tab active" data-sandbox-tab="editor">
-      <span class="mobile-tab-icon">&#9998;</span>
-      Editor
-    </button>
-    <button class="sandbox-mobile-tab" data-sandbox-tab="schema">
-      <span class="mobile-tab-icon" aria-hidden="true">&#9638;</span>
-      Schema
-    </button>
-    <button class="sandbox-mobile-tab" data-sandbox-tab="results">
-      <span class="mobile-tab-icon">&#128202;</span>
-      Results
-    </button>
-    <button class="sandbox-mobile-tab" data-sandbox-tab="stats">
-      <span class="mobile-tab-icon">&#9889;</span>
-      Stats
-    </button>
-  </nav>
 </div>
 
 <div class="game-container" style="display:none">
