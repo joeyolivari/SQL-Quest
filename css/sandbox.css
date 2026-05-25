@@ -416,11 +416,6 @@
   }
   .sandbox-screen.sandbox-tab-schema .sandbox-results-wrap { display: none; }
 
-  /* Results tab */
-  .sandbox-screen.sandbox-tab-results .sandbox-grid { display: none; }
-  .sandbox-screen.sandbox-tab-results .sandbox-schema-wrap { display: none; }
-  .sandbox-screen.sandbox-tab-results .sandbox-results-wrap { display: flex; }
-
   /* Stats tab */
   .sandbox-screen.sandbox-tab-stats .sandbox-grid { display: block; }
   .sandbox-screen.sandbox-tab-stats .sandbox-practice-panel { display: none; }
