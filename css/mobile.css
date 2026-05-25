@@ -200,6 +200,7 @@
   .home-stat-chip { font-size: 0.71rem; padding: 4px 10px; }
   .home-footer { flex-direction: column; }
   .home-footer .btn-primary,
+  .home-footer .btn-lab,
   .home-footer .btn-drill { width: 100%; }
 
   /* Difficulty cards: use compact native cards on phones. */

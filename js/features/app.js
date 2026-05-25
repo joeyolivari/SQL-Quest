@@ -17,6 +17,7 @@ import {
 import { getRecommendedMission, buildTrainingQueue, buildReviewQueue, buildWeakSkillQueue } from '../learning/adaptiveQueue.js';
 import { getHintStep, getNextHint, resetHintLadder } from '../learning/hintEngine.js';
 import { buildLearningDashboard } from '../learning/dashboard.js';
+import { initSandboxLab, openSandboxLab } from './sandbox.js';
 
 let engineReady = false;
 let selectedDifficulty = 'beginner';
@@ -123,6 +124,8 @@ function initHomeScreen() {
     clearProgress();
     startGame(getMissionQueue(selectedDifficulty), null, 0);
   });
+
+  document.getElementById('btnSandboxLab')?.addEventListener('click', openSandboxLab);
 
   document.getElementById('btnWeakDrill')?.addEventListener('click', () => {
     startWeakSkillDrill();
@@ -599,6 +602,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadMastery();
   initMobileTabs();
   initHomeScreen();
+  initSandboxLab();
   initGame();
 });
 

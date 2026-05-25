@@ -135,10 +135,73 @@
 
   <!-- CTA -->
   <div class="home-footer">
+    <button class="btn-lg btn-lab" id="btnSandboxLab">SQL Training Lab</button>
     <button class="btn-lg btn-primary" id="btnPlayAll">&#9654; Start from Beginning</button>
     <button class="btn-lg btn-secondary btn-drill" id="btnWeakDrill">Weak Skill Drill</button>
   </div>
 
+</div>
+
+<div id="sandboxScreen" class="sandbox-screen" style="display:none">
+  <section class="sandbox-shell">
+    <div class="sandbox-header">
+      <div>
+        <div class="sandbox-kicker">Free Practice Mode</div>
+        <h1>SQL Training Lab</h1>
+        <p>Practice freely. Break things here, not in missions.</p>
+        <small>Use the Schema tab if you need table or column names.</small>
+      </div>
+      <div class="sandbox-status" id="sandboxStatus" data-type="info">Preparing sandbox database...</div>
+    </div>
+
+    <div class="sandbox-grid">
+      <main class="sandbox-practice-panel">
+        <div class="sandbox-panel-title">Practice Console</div>
+        <div class="sandbox-chip-row" aria-label="Example queries">
+          <button class="sandbox-chip" data-sandbox-example="clients">SELECT clients</button>
+          <button class="sandbox-chip" data-sandbox-example="transactions">Count transactions</button>
+          <button class="sandbox-chip" data-sandbox-example="join">Join clients/accounts</button>
+          <button class="sandbox-chip" data-sandbox-example="group">Group by account</button>
+        </div>
+        <textarea id="sandboxSqlInput" class="sandbox-editor" spellcheck="false" placeholder="Try a query here:
+
+SELECT * FROM clients LIMIT 5;
+
+SELECT transaction_type, COUNT(*) AS total
+FROM transactions
+GROUP BY transaction_type;
+
+CREATE TABLE practice_notes (id INTEGER, note TEXT);"></textarea>
+        <div class="sandbox-action-bar">
+          <button class="btn-lg btn-primary sandbox-run" id="btnSandboxRun">&#9654; Run Query</button>
+          <button class="btn-secondary" id="btnSandboxClear">Clear Editor</button>
+          <button class="btn-secondary" id="btnSandboxResetDb">Reset Sandbox DB</button>
+          <button class="btn-secondary" id="btnSandboxBack">Back Home</button>
+        </div>
+      </main>
+
+      <aside class="sandbox-stats-panel">
+        <div class="sandbox-panel-row">
+          <div>
+            <div class="sandbox-panel-title">SQL Skill XP</div>
+            <p>Every run levels up the clauses and commands you use.</p>
+          </div>
+          <button class="section-toggle" id="btnSandboxResetStats">Reset Stats</button>
+        </div>
+        <div class="sandbox-stats-grid" id="sandboxStatsGrid"></div>
+      </aside>
+    </div>
+
+    <section class="sandbox-results-wrap">
+      <div class="sandbox-panel-row">
+        <div class="sandbox-panel-title">Output Monitor</div>
+        <div class="row-count" id="sandboxRowCount"></div>
+      </div>
+      <div class="result-panel sandbox-result-panel" id="sandboxResultPanel">
+        <div class="sandbox-empty-state">Run any SQL here. Mission score, hints, badges, and mastery stay untouched.</div>
+      </div>
+    </section>
+  </section>
 </div>
 
 <div class="game-container" style="display:none">

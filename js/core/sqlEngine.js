@@ -11,11 +11,33 @@ export async function initEngine() {
   seed();
 }
 
+export async function createSandboxDatabase() {
+  const SQL = await initSqlJs({
+    locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.12.0/${file}`
+  });
+  const sandboxDb = new SQL.Database();
+  createTables(sandboxDb);
+  seed(sandboxDb);
+  return sandboxDb;
+}
+
 export function executeQuery(sql) {
   if (!db) throw new Error('Database not initialized.');
-  const raw = db.exec(sql);
-  if (!raw.length) return { columns: [], rows: [] };
-  return { columns: raw[0].columns, rows: raw[0].values };
+  return executeOnDatabase(db, sql);
+}
+
+export function executeSandboxQuery(sandboxDb, sql) {
+  if (!sandboxDb) throw new Error('Sandbox database not initialized.');
+  return executeOnDatabase(sandboxDb, sql);
+}
+
+function executeOnDatabase(targetDb, sql) {
+  const beforeChanges = typeof targetDb.getRowsModified === 'function' ? targetDb.getRowsModified() : 0;
+  const raw = targetDb.exec(sql);
+  const afterChanges = typeof targetDb.getRowsModified === 'function' ? targetDb.getRowsModified() : beforeChanges;
+  const rowsModified = Math.max(0, afterChanges - beforeChanges);
+  if (!raw.length) return { columns: [], rows: [], rowsModified };
+  return { columns: raw[0].columns, rows: raw[0].values, rowsModified };
 }
 
 export function isSafeQuery(sql) {
@@ -34,15 +56,15 @@ export function isSafeQuery(sql) {
   return !blocked.some(w => new RegExp('\\b' + w + '\\b', 'i').test(clean));
 }
 
-function insert(table, columns, rows) {
+function insert(targetDb, table, columns, rows) {
   const ph = columns.map(() => '?').join(', ');
-  const stmt = db.prepare(`INSERT INTO ${table} (${columns.join(', ')}) VALUES (${ph})`);
+  const stmt = targetDb.prepare(`INSERT INTO ${table} (${columns.join(', ')}) VALUES (${ph})`);
   rows.forEach(row => stmt.run(row));
   stmt.free();
 }
 
-function createTables() {
-  db.run(`
+function createTables(targetDb = db) {
+  targetDb.run(`
     CREATE TABLE clients (
       client_id INTEGER PRIMARY KEY, full_name TEXT, email TEXT,
       advisor_id INTEGER, kyc_status TEXT, province TEXT,
@@ -80,29 +102,29 @@ function createTables() {
   `);
 }
 
-function seed() {
-  insert('advisors',
+function seed(targetDb = db) {
+  insert(targetDb, 'advisors',
     ['advisor_id','advisor_name','branch','region','license_type'],
     seedData.advisors);
-  insert('clients',
+  insert(targetDb, 'clients',
     ['client_id','full_name','email','advisor_id','kyc_status','province','risk_rating','onboarding_date'],
     seedData.clients);
-  insert('accounts',
+  insert(targetDb, 'accounts',
     ['account_id','client_id','account_type','balance','open_date','account_status','last_review_date'],
     seedData.accounts);
-  insert('transactions',
+  insert(targetDb, 'transactions',
     ['transaction_id','account_id','transaction_date','amount','transaction_type','debit_credit','transaction_status','description'],
     seedData.transactions);
-  insert('journal_entries',
+  insert(targetDb, 'journal_entries',
     ['journal_id','transaction_id','entry_date','debit_amount','credit_amount','gl_account','created_by'],
     seedData.journalEntries);
-  insert('compliance_reviews',
+  insert(targetDb, 'compliance_reviews',
     ['review_id','account_id','review_date','issue_type','severity','review_status','assigned_to'],
     seedData.complianceReviews);
-  insert('compliance_flags',
+  insert(targetDb, 'compliance_flags',
     ['flag_id','transaction_id','flag_type','severity','reviewed','created_date'],
     seedData.complianceFlags);
-  insert('regulatory_updates',
+  insert(targetDb, 'regulatory_updates',
     ['update_id','regulator','topic','effective_date','impact_level','summary'],
     seedData.regulatoryUpdates);
 }
