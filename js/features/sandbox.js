@@ -1,5 +1,6 @@
 import { createSandboxDatabase, executeSandboxQuery } from '../core/sqlEngine.js';
 import { loadSqlUsageStats, recordSqlUsage, resetSqlUsageStats, SQL_USAGE_SKILLS } from '../learning/sqlUsageTracker.js';
+import { schema } from '../data/schema.js';
 
 const EXAMPLE_QUERIES = {
   clients: `SELECT client_id, full_name, kyc_status, risk_rating
@@ -27,6 +28,9 @@ let isReady = false;
 
 export function initSandboxLab() {
   bindSandboxEvents();
+  renderSandboxSchema();
+  initSandboxSchemaToggle();
+  initSandboxMobileTabs();
   renderUsageStats(loadSqlUsageStats());
   renderSandboxEmptyState();
   resetSandboxDatabase({ quiet: true });
@@ -38,11 +42,15 @@ export function openSandboxLab() {
   const lab = document.getElementById('sandboxScreen');
   lab.style.display = 'flex';
   lab.scrollTop = 0;
+  setSandboxMobileTab('editor');
+  document.getElementById('sandboxMobileTabs')?.style.removeProperty('display');
   document.getElementById('sandboxSqlInput')?.focus();
 }
 
 export function closeSandboxLab() {
   document.getElementById('sandboxScreen').style.display = 'none';
+  const tabs = document.getElementById('sandboxMobileTabs');
+  if (tabs) tabs.style.display = 'none';
   document.getElementById('homeScreen').style.display = 'flex';
 }
 
@@ -114,6 +122,7 @@ function runSandboxQuery() {
     renderSandboxError('SQL error', err.message);
     showSandboxStatus('Query stopped. Review the error panel.', 'error');
   }
+  if (isSandboxMobile()) setSandboxMobileTab('results');
 }
 
 function clearSandboxEditor() {
@@ -193,6 +202,62 @@ function setSandboxBusy(isBusy) {
   });
   if (isBusy) showSandboxStatus('Preparing sandbox database...', 'info');
   else if (isReady) showSandboxStatus('Training room online.', 'success');
+}
+
+function renderSandboxSchema() {
+  const panel = document.getElementById('sandboxSchemaPanel');
+  if (!panel) return;
+  panel.innerHTML = Object.entries(schema).map(([table, cols]) => `
+    <div class="schema-table collapsed">
+      <div class="schema-header" data-sandbox-schema-toggle>
+        ${escapeHtml(table)} <span>&#9658;</span>
+      </div>
+      <div class="schema-body">
+        ${cols.map(([name, type]) =>
+          `<div><span>${escapeHtml(name)}</span><span class="type-tag">${escapeHtml(type)}</span></div>`
+        ).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  panel.addEventListener('click', e => {
+    const header = e.target.closest('[data-sandbox-schema-toggle]');
+    if (!header) return;
+    const box = header.closest('.schema-table');
+    box.classList.toggle('collapsed');
+    header.querySelector('span').textContent = box.classList.contains('collapsed') ? '▶' : '▼';
+  });
+}
+
+function initSandboxSchemaToggle() {
+  const btn = document.getElementById('btnSandboxSchemaToggle');
+  const wrap = document.getElementById('sandboxSchemaWrap');
+  if (!btn || !wrap) return;
+  btn.addEventListener('click', () => {
+    const isCollapsed = wrap.classList.toggle('collapsed');
+    btn.textContent = isCollapsed ? '▶ Show' : '▼ Hide';
+  });
+}
+
+function isSandboxMobile() {
+  return window.innerWidth <= 768;
+}
+
+function initSandboxMobileTabs() {
+  document.querySelectorAll('.sandbox-mobile-tab').forEach(tab => {
+    tab.addEventListener('click', () => setSandboxMobileTab(tab.dataset.sandboxTab));
+  });
+}
+
+function setSandboxMobileTab(name) {
+  const screen = document.getElementById('sandboxScreen');
+  if (!screen) return;
+  screen.classList.remove('sandbox-tab-schema', 'sandbox-tab-results', 'sandbox-tab-stats');
+  if (name !== 'editor') screen.classList.add('sandbox-tab-' + name);
+  document.querySelectorAll('.sandbox-mobile-tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.sandboxTab === name);
+  });
+  screen.scrollTo(0, 0);
 }
 
 function escapeHtml(value) {

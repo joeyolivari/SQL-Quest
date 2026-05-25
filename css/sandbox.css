@@ -274,6 +274,61 @@
   font-family: var(--font-mono);
 }
 
+/* ── Sandbox schema reference panel ─────────────────────────────────────────── */
+.sandbox-schema-wrap {
+  background:
+    linear-gradient(135deg, rgba(56, 189, 248, 0.09), rgba(15, 23, 42, 0.78) 45%, rgba(8, 13, 28, 0.94)),
+    var(--panel);
+  border: 1px solid rgba(56, 189, 248, 0.24);
+  box-shadow: var(--shadow-card), inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  border-radius: 12px;
+  padding: 18px;
+  position: relative;
+  overflow: hidden;
+}
+
+.sandbox-schema-wrap::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(56, 189, 248, 0.75), rgba(34, 197, 94, 0.45), transparent);
+  pointer-events: none;
+}
+
+.sandbox-schema-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.sandbox-schema-wrap.collapsed .sandbox-schema-heading {
+  margin-bottom: 0;
+}
+
+.sandbox-schema-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+}
+
+.sandbox-schema-wrap.collapsed .sandbox-schema-body {
+  display: none;
+}
+
+.sandbox-schema-btn {
+  flex-shrink: 0;
+  font-size: 0.74rem;
+  padding: 5px 10px;
+}
+
+/* ── Sandbox mobile tab bar ──────────────────────────────────────────────────── */
+.sandbox-mobile-tabs { display: none; }
+
 .btn-lab {
   background: linear-gradient(135deg, #22c55e, #38bdf8);
   color: #041016;
@@ -292,8 +347,91 @@
   .sandbox-editor { min-height: 300px; height: 38vh; }
 }
 
+@media (max-width: 768px) {
+  /* Sandbox mobile tab bar */
+  .sandbox-mobile-tabs {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: auto;
+    min-height: 58px;
+    background: var(--panel);
+    border-top: 1px solid var(--border);
+    z-index: 50;
+    padding: 5px 8px max(8px, env(safe-area-inset-bottom, 8px));
+    gap: 4px;
+  }
+
+  .sandbox-mobile-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 2px;
+    padding: 0;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: var(--muted);
+    font-size: 0.66rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: var(--font-sans);
+    transition: background .15s, color .15s;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .sandbox-mobile-tab.active {
+    background: var(--panel2);
+    color: var(--accent);
+    border-color: var(--border);
+  }
+
+  /* Reserve space for fixed tab bar */
+  .sandbox-screen {
+    padding-bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+    overflow-x: hidden;
+  }
+
+  /* Hide schema toggle on mobile (tab handles it) */
+  .sandbox-schema-btn { display: none; }
+  .sandbox-schema-heading { margin-bottom: 0; }
+
+  /* Editor tab (default): practice panel only, no schema or stats */
+  .sandbox-grid { display: block; }
+  .sandbox-stats-panel { display: none; }
+  .sandbox-schema-wrap { display: none; }
+  .sandbox-results-wrap { display: none; }
+
+  /* Schema tab */
+  .sandbox-screen.sandbox-tab-schema .sandbox-grid { display: none; }
+  .sandbox-screen.sandbox-tab-schema .sandbox-schema-wrap { display: block; }
+  .sandbox-screen.sandbox-tab-schema .sandbox-schema-body {
+    grid-template-columns: 1fr;
+    max-height: none;
+    overflow-y: visible;
+  }
+  .sandbox-screen.sandbox-tab-schema .sandbox-results-wrap { display: none; }
+
+  /* Results tab */
+  .sandbox-screen.sandbox-tab-results .sandbox-grid { display: none; }
+  .sandbox-screen.sandbox-tab-results .sandbox-schema-wrap { display: none; }
+  .sandbox-screen.sandbox-tab-results .sandbox-results-wrap { display: flex; }
+
+  /* Stats tab */
+  .sandbox-screen.sandbox-tab-stats .sandbox-grid { display: block; }
+  .sandbox-screen.sandbox-tab-stats .sandbox-practice-panel { display: none; }
+  .sandbox-screen.sandbox-tab-stats .sandbox-stats-panel { display: block; }
+  .sandbox-screen.sandbox-tab-stats .sandbox-schema-wrap { display: none; }
+  .sandbox-screen.sandbox-tab-stats .sandbox-results-wrap { display: none; }
+}
+
 @media (max-width: 560px) {
-  .sandbox-screen { padding: 14px 10px 54px; }
+  .sandbox-screen { padding: 14px 10px calc(68px + env(safe-area-inset-bottom, 0px)); }
   .sandbox-header,
   .sandbox-practice-panel,
   .sandbox-stats-panel,
