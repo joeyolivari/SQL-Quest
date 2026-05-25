@@ -154,6 +154,14 @@
       <div class="sandbox-status" id="sandboxStatus" data-type="info">Preparing sandbox database...</div>
     </div>
 
+    <div class="sandbox-schema-wrap" id="sandboxSchemaWrap">
+      <div class="sandbox-schema-heading">
+        <div class="sandbox-panel-title">Database Schema</div>
+        <button class="btn-secondary sandbox-schema-btn" id="btnSandboxSchemaToggle">&#9660; Hide</button>
+      </div>
+      <div id="sandboxSchemaPanel" class="sandbox-schema-body"></div>
+    </div>
+
     <div class="sandbox-grid">
       <main class="sandbox-practice-panel">
         <div class="sandbox-panel-title">Practice Console</div>
@@ -202,6 +210,25 @@ CREATE TABLE practice_notes (id INTEGER, note TEXT);"></textarea>
       </div>
     </section>
   </section>
+
+  <nav class="sandbox-mobile-tabs" id="sandboxMobileTabs" style="display:none">
+    <button class="sandbox-mobile-tab active" data-sandbox-tab="editor">
+      <span class="mobile-tab-icon">&#9998;</span>
+      Editor
+    </button>
+    <button class="sandbox-mobile-tab" data-sandbox-tab="schema">
+      <span class="mobile-tab-icon" aria-hidden="true">&#9638;</span>
+      Schema
+    </button>
+    <button class="sandbox-mobile-tab" data-sandbox-tab="results">
+      <span class="mobile-tab-icon">&#128202;</span>
+      Results
+    </button>
+    <button class="sandbox-mobile-tab" data-sandbox-tab="stats">
+      <span class="mobile-tab-icon">&#9889;</span>
+      Stats
+    </button>
+  </nav>
 </div>
 
 <div class="game-container" style="display:none">
