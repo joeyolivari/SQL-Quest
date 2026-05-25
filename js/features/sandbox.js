@@ -41,10 +41,15 @@ export function openSandboxLab() {
   document.querySelector('.game-container').style.display = 'none';
   const lab = document.getElementById('sandboxScreen');
   lab.style.display = 'flex';
+  // Body scrolls on mobile (home screen is long), so reset body scroll not just element scroll
+  window.scrollTo(0, 0);
   lab.scrollTop = 0;
   setSandboxMobileTab('editor');
   document.getElementById('sandboxMobileTabs')?.style.removeProperty('display');
-  document.getElementById('sandboxSqlInput')?.focus();
+  // Skip auto-focus on mobile: virtual keyboard pops up and fights the scroll-to-top
+  if (window.innerWidth > 768) {
+    document.getElementById('sandboxSqlInput')?.focus();
+  }
 }
 
 export function closeSandboxLab() {
@@ -52,6 +57,7 @@ export function closeSandboxLab() {
   const tabs = document.getElementById('sandboxMobileTabs');
   if (tabs) tabs.style.display = 'none';
   document.getElementById('homeScreen').style.display = 'flex';
+  window.scrollTo(0, 0);
 }
 
 function bindSandboxEvents() {
