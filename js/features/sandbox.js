@@ -122,7 +122,9 @@ function runSandboxQuery() {
     renderSandboxError('SQL error', err.message);
     showSandboxStatus('Query stopped. Review the error panel.', 'error');
   }
-  if (isSandboxMobile()) setSandboxMobileTab('results');
+  if (isSandboxMobile()) {
+    document.querySelector('.sandbox-results-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
 
 function clearSandboxEditor() {
