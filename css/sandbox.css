@@ -401,11 +401,10 @@
   .sandbox-schema-btn { display: none; }
   .sandbox-schema-heading { margin-bottom: 0; }
 
-  /* Editor tab (default): practice panel only, no schema or stats */
+  /* Editor tab (default): practice panel + results inline, no schema or stats */
   .sandbox-grid { display: block; }
   .sandbox-stats-panel { display: none; }
   .sandbox-schema-wrap { display: none; }
-  .sandbox-results-wrap { display: none; }
 
   /* Schema tab */
   .sandbox-screen.sandbox-tab-schema .sandbox-grid { display: none; }
