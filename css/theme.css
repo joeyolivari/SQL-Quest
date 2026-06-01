@@ -87,3 +87,211 @@ body.light .mobile-tab.active { color: #0369a1; background: rgba(3,105,161,0.08)
 body.light .badge { background: rgba(3,105,161,0.1); color: #0369a1; border-color: rgba(3,105,161,0.22); }
 body.light .eli12-box { background: #dbeafe; color: #1e40af; }
 body.light .eli12-label { background: #2563eb; color: #fff; }
+
+/* ── Light mode: dark-glass cards that need light backgrounds ─────────────── */
+
+/* Home stat chips */
+body.light .home-stat-chip {
+  background: #ffffff;
+  border-color: rgba(3, 105, 161, 0.22);
+  color: #334155;
+}
+body.light .home-stat-chip:hover {
+  background: #f1f5f9;
+  border-color: rgba(3, 105, 161, 0.4);
+  box-shadow: none;
+}
+body.light .home-stat-chip strong { color: #0f172a; }
+
+/* Learning dashboard */
+body.light .learning-dashboard {
+  background: #ffffff;
+  border-color: rgba(3, 105, 161, 0.18);
+}
+body.light .learning-metric,
+body.light .learning-recommendation {
+  background: #f8fafc;
+  border-color: #e2e8f0;
+}
+body.light .learning-metric strong { color: #0369a1; }
+body.light .learning-recommendation strong { color: #0f172a; }
+body.light .learning-recommendation small { color: #475569; }
+body.light .learning-dashboard h4 { color: #475569; }
+body.light .mastery-track { background: rgba(0, 0, 0, 0.08); }
+body.light .mastery-row-top { color: #334155; }
+body.light .mastery-row-top strong { color: #0f172a; }
+
+/* Skill pills */
+body.light .skill-pill {
+  background: rgba(3, 105, 161, 0.07);
+  border-color: rgba(3, 105, 161, 0.2);
+  color: #0f172a;
+}
+body.light .skill-pill strong { color: #0369a1; }
+body.light .learning-empty { color: #475569; }
+
+/* Mission list items */
+body.light .mission-item {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+body.light .mission-item:hover {
+  background: #f8fafc;
+  border-color: rgba(3, 105, 161, 0.35);
+  border-left-color: #0369a1;
+  box-shadow: 0 0 12px rgba(3, 105, 161, 0.07), 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+body.light .mission-item-num {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #334155;
+}
+body.light .mission-item:hover .mission-item-num {
+  border-color: rgba(3, 105, 161, 0.4);
+  color: #0369a1;
+  box-shadow: none;
+}
+body.light .mission-item-title { color: #0f172a; }
+body.light .mission-concept {
+  color: #0369a1;
+  background: rgba(3, 105, 161, 0.07);
+  border-color: rgba(3, 105, 161, 0.2);
+}
+
+/* Learning mode buttons */
+body.light .mode-btn {
+  background: #ffffff;
+  border-color: #e2e8f0;
+}
+body.light .mode-btn:hover {
+  background: #f1f5f9;
+  border-color: rgba(3, 105, 161, 0.35);
+}
+body.light .mode-btn.selected {
+  background: rgba(3, 105, 161, 0.06);
+  border-color: rgba(3, 105, 161, 0.4);
+  box-shadow: none;
+}
+body.light .mode-label { color: #0f172a; }
+body.light .mode-btn.selected .mode-label { color: #0369a1; }
+body.light .mode-desc { color: #475569; }
+
+/* Section toggle button */
+body.light .section-toggle {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #334155;
+}
+body.light .section-toggle:hover { background: #e2e8f0; color: #0f172a; border-color: #cbd5e1; }
+
+/* Section labels */
+body.light .home-section h3 { color: #0f172a; }
+body.light .section-hint { color: #475569; }
+body.light .panel-title,
+body.light .sidebar h3 { color: #475569; }
+
+/* Continue section */
+body.light .continue-section {
+  background: linear-gradient(135deg, #eef6ff 0%, #e0f0ff 100%);
+  border-color: rgba(3, 105, 161, 0.3);
+  box-shadow: 0 0 0 1px rgba(3,105,161,0.05), var(--shadow-card);
+}
+body.light .continue-title { color: #0f172a; }
+body.light .continue-info { color: #475569; }
+body.light .btn-clear-save {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #475569;
+}
+body.light .btn-clear-save:hover:not(:disabled) {
+  background: #e2e8f0;
+  border-color: #94a3b8;
+  color: #0f172a;
+}
+
+/* Recommended review section */
+body.light .recommend-section {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef9ee 100%);
+  border-color: rgba(146, 64, 14, 0.3);
+  box-shadow: 0 0 0 1px rgba(146,64,14,0.05), var(--shadow-card);
+}
+body.light .recommend-title { color: #0f172a; }
+body.light .recommend-reason { color: #475569; }
+
+/* Mission summary panel */
+body.light .mission-summary {
+  background: #ffffff;
+  border-color: rgba(22, 101, 52, 0.3);
+}
+body.light .mission-summary::before { display: none; }
+body.light .summary-stat { background: #f8fafc; border-color: #e2e8f0; }
+body.light .summary-stat-val { color: #0f172a; }
+body.light .summary-stat-label { color: #475569; }
+body.light .summary-title { color: #475569; }
+body.light .summary-concept { background: rgba(3,105,161,0.07); color: #0369a1; border-color: rgba(3,105,161,0.2); }
+
+/* Casefile */
+body.light .casefile-text { background: #f1f5f9; color: #334155; }
+
+/* Schema body text */
+body.light .schema-body div { color: #334155; border-bottom-color: #e2e8f0; }
+body.light .schema-body div:hover { color: #0f172a; }
+
+/* Scenario label */
+body.light .scenario-label { color: #0369a1; background: rgba(3,105,161,0.06); border-color: rgba(3,105,161,0.2); }
+
+/* Keyword chips */
+body.light .kw-chip { color: #0369a1; background: rgba(3,105,161,0.07); border-color: rgba(3,105,161,0.22); }
+body.light .kw-chip:hover { background: rgba(3,105,161,0.13); border-color: rgba(3,105,161,0.4); box-shadow: none; }
+
+/* Solution box */
+body.light .solution-box { background: #f1f5f9; color: #0f172a; border-color: #cbd5e1; }
+
+/* Header */
+body.light header { background: #ffffff; border-bottom-color: #e2e8f0; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+body.light .logo { color: #0369a1; text-shadow: none; }
+body.light .stat span { color: #0f172a; }
+body.light .btn-theme { color: #475569; border-color: #e2e8f0; }
+body.light .btn-theme:hover { color: #0f172a; border-color: #94a3b8; }
+
+/* Modals */
+body.light .modal { background: #ffffff; border-color: #e2e8f0; }
+body.light .modal h2 { color: #0369a1; }
+body.light .modal p { color: #334155; }
+body.light .cert-item { background: #f8fafc; border-color: #e2e8f0; }
+body.light .cert-label { color: #475569; }
+body.light .cert-val { color: #0f172a; }
+body.light .btn-close { color: #475569; border-color: #e2e8f0; }
+body.light .btn-close:hover { color: #0f172a; border-color: #94a3b8; }
+body.light .tutorial-card { background: #f8fafc; border-color: #e2e8f0; }
+body.light .tutorial-card h4 { color: #0369a1; }
+body.light .tutorial-card p { color: #334155; }
+body.light .tutorial-card pre { background: #f1f5f9; color: #0f172a; }
+body.light .compliance-use { color: #92400e; }
+
+/* Sidebar right panel */
+body.light .sidebar { background: #ffffff; border-right-color: #e2e8f0; }
+body.light .right-panel { background: #ffffff; border-left-color: #e2e8f0; }
+body.light .right-panel .result-panel { background: #f8fafc; }
+
+/* Badge toast */
+body.light .badge-toast { background: #ffffff; border-color: #e2e8f0; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+body.light .toast-desc { color: #475569; }
+
+/* Difficulty buttons on phone (image stripped, native card shown) */
+@media (max-width: 480px) {
+  body.light .diff-btn,
+  body.light .diff-btn:hover,
+  body.light .diff-btn.selected {
+    background-color: #ffffff;
+    border-color: #e2e8f0;
+    box-shadow: var(--shadow-card);
+    filter: none;
+  }
+  body.light .diff-btn.beginner:hover,
+  body.light .diff-btn.beginner.selected { border-color: rgba(22, 101, 52, 0.5); }
+  body.light .diff-btn.intermediate:hover,
+  body.light .diff-btn.intermediate.selected { border-color: rgba(146, 64, 14, 0.5); }
+  body.light .diff-btn.advanced:hover,
+  body.light .diff-btn.advanced.selected { border-color: rgba(190, 18, 60, 0.5); }
+}
