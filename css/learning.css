@@ -354,14 +354,49 @@ body.light .learn-box::after { opacity: 0.4; }
   gap: 40px;
 }
 
-.learning-page-hero {
-  position: relative;
-  padding: 4px 0 4px;
+.learning-page-hero .btn-home {
+  align-self: flex-start;
+  margin-bottom: 20px;
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
 }
 
-.learning-page-hero .btn-home {
-  margin-bottom: 22px;
+/* Hero is a glowing terminal panel */
+.learning-page-hero {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding: 26px 28px 28px;
+  border-radius: 18px;
+  border: 1px solid rgba(56, 189, 248, 0.26);
+  background:
+    radial-gradient(circle at 88% -10%, rgba(56, 189, 248, 0.18), transparent 46%),
+    radial-gradient(circle at 6% 120%, rgba(168, 85, 247, 0.12), transparent 50%),
+    linear-gradient(135deg, rgba(8, 14, 26, 0.94) 0%, rgba(12, 20, 38, 0.92) 100%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.06), var(--shadow-card);
+  overflow: hidden;
 }
+/* Scanline texture + corner bracket for the hacker feel */
+.learning-page-hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent 0 7px, rgba(255, 255, 255, 0.02) 7px 8px);
+  pointer-events: none;
+}
+.learning-page-hero::after {
+  content: '';
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 26px;
+  height: 26px;
+  border-top: 2px solid rgba(56, 189, 248, 0.5);
+  border-right: 2px solid rgba(56, 189, 248, 0.5);
+  border-radius: 0 12px 0 0;
+  pointer-events: none;
+}
+.learning-page-hero > * { position: relative; z-index: 1; }
 
 .learning-page-kicker {
   display: inline-flex;
@@ -381,10 +416,11 @@ body.light .learn-box::after { opacity: 0.4; }
   border-radius: 50%;
   background: var(--accent);
   box-shadow: 0 0 8px var(--accent);
+  animation: pulse-dot 2.4s ease-in-out infinite;
 }
 
 .learning-page-title {
-  font-size: 2.2rem;
+  font-size: 2.3rem;
   font-weight: 900;
   color: var(--text);
   margin: 12px 0 10px;
@@ -403,6 +439,17 @@ body.light .learn-box::after { opacity: 0.4; }
   max-width: 560px;
   line-height: 1.6;
 }
+
+body.light .learning-page-hero {
+  background:
+    radial-gradient(circle at 88% -10%, rgba(3, 105, 161, 0.1), transparent 46%),
+    linear-gradient(135deg, #ffffff, #f4f8fc);
+  border-color: rgba(3, 105, 161, 0.2);
+}
+body.light .learning-page-hero::before { display: none; }
+body.light .learning-page-hero::after { border-color: rgba(3, 105, 161, 0.35); }
+body.light .learning-page-title { color: #0f172a; }
+body.light .learning-page-tagline { color: #475569; }
 
 /* ── Learning Center launcher card (home screen) ──────────────────────────── */
 .learning-launch {
@@ -428,6 +475,24 @@ body.light .learn-box::after { opacity: 0.4; }
   border-color: rgba(56, 189, 248, 0.6);
   box-shadow: 0 16px 38px rgba(0, 0, 0, 0.4), 0 0 28px rgba(56, 189, 248, 0.18);
 }
+.learning-launch:active {
+  transform: translateY(-1px) scale(0.995);
+}
+/* Diagonal light sheen that sweeps across on hover */
+.learning-launch::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 45%;
+  height: 100%;
+  background: linear-gradient(100deg, transparent, rgba(56, 189, 248, 0.14), transparent);
+  transform: skewX(-18deg);
+  pointer-events: none;
+  transition: left 0.55s ease;
+  z-index: 1;
+}
+.learning-launch:hover::after { left: 130%; }
 
 /* Drifting scanline texture */
 .learning-launch-glow {
@@ -485,14 +550,33 @@ body.light .learn-box::after { opacity: 0.4; }
 .learning-launch-arrow {
   margin-left: auto;
   flex-shrink: 0;
-  font-size: 1.3rem;
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  border-radius: 10px;
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  background: rgba(56, 189, 248, 0.08);
   color: var(--accent);
   position: relative;
-  z-index: 1;
-  transition: transform 0.2s;
+  z-index: 2;
+  animation: launch-nudge 2.2s ease-in-out infinite;
+  transition: transform 0.2s, background 0.2s, border-color 0.2s;
 }
 .learning-launch:hover .learning-launch-arrow {
   transform: translateX(4px);
+  background: rgba(56, 189, 248, 0.18);
+  border-color: rgba(56, 189, 248, 0.55);
+  animation: none;
+}
+@keyframes launch-nudge {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(4px); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .learning-launch-arrow { animation: none; }
 }
 
 /* Light theme */
@@ -514,13 +598,19 @@ body.light .learning-launch-icon {
 }
 body.light .learning-launch-title { color: #0f172a; }
 body.light .learning-launch-desc { color: #475569; }
-body.light .learning-launch-meta,
-body.light .learning-launch-arrow { color: #0369a1; }
+body.light .learning-launch-meta { color: #0369a1; }
+body.light .learning-launch-arrow {
+  color: #0369a1;
+  border-color: rgba(3, 105, 161, 0.3);
+  background: rgba(3, 105, 161, 0.07);
+}
 
 /* Mobile */
 @media (max-width: 768px) {
-  .learning-screen { padding: 20px 16px 80px; gap: 30px; }
+  .learning-screen { padding: 20px 16px 80px; gap: 28px; }
+  .learning-page-hero { padding: 20px 18px 22px; }
   .learning-page-title { font-size: 1.7rem; }
   .learning-launch { padding: 16px 16px; gap: 14px; }
   .learning-launch-icon { width: 44px; height: 44px; font-size: 1.3rem; }
+  .learning-launch-desc { font-size: 0.76rem; }
 }

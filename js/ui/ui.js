@@ -336,6 +336,8 @@ export function renderKeywordBar(keywords, onInsert) {
 export function hideHomeScreen() {
   const hs = document.getElementById('homeScreen');
   if (hs) hs.style.display = 'none';
+  const ls = document.getElementById('learningScreen');
+  if (ls) ls.style.display = 'none';
   const gc = document.querySelector('.game-container');
   if (gc) gc.style.removeProperty('display');
   // Let CSS control mobile tab bar visibility
@@ -346,6 +348,8 @@ export function hideHomeScreen() {
 export function showHomeScreen() {
   const hs = document.getElementById('homeScreen');
   if (hs) hs.style.display = 'flex';
+  const ls = document.getElementById('learningScreen');
+  if (ls) ls.style.display = 'none';
   const gc = document.querySelector('.game-container');
   if (gc) gc.style.display = 'none';
   // Always hide tab bar on home screen (it lives inside game-container
