@@ -9,7 +9,7 @@
  * Bump CACHE_VERSION to force all clients to pick up new files on deploy.
  */
 
-const CACHE_VERSION = 'csq-v5';
+const CACHE_VERSION = 'csq-v6';
 const CDN_CACHE = 'csq-cdn-v1';
 
 // Build absolute URLs relative to this SW's location so the same
@@ -39,6 +39,7 @@ const APP_SHELL = [
   BASE + 'js/core/gameState.js',
   BASE + 'js/core/validation.js',
   BASE + 'js/core/diagnostics.js',
+  BASE + 'js/core/sound.js',
   BASE + 'js/data/missions.js',
   BASE + 'js/data/schema.js',
   BASE + 'js/data/data.js',

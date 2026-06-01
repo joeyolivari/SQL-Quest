@@ -337,3 +337,190 @@ body.light .learn-box::after { opacity: 0.4; }
   /* Error box: less padding */
   .error-box { padding: 11px 13px; }
 }
+
+/* ── 10. Learning Center page ─────────────────────────────────────────────────
+   The Learning Dashboard + Learning Mode selector now live on their own page,
+   reached from the home menu. Layout mirrors the home screen for consistency.
+──────────────────────────────────────────────────────────────────────────── */
+
+.learning-screen {
+  flex: 1;
+  max-width: 860px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 32px 24px 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.learning-page-hero {
+  position: relative;
+  padding: 4px 0 4px;
+}
+
+.learning-page-hero .btn-home {
+  margin-bottom: 22px;
+}
+
+.learning-page-kicker {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+  font-family: var(--font-mono);
+}
+.learning-page-kicker::before {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+}
+
+.learning-page-title {
+  font-size: 2.2rem;
+  font-weight: 900;
+  color: var(--text);
+  margin: 12px 0 10px;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+.learning-page-title span {
+  color: var(--accent);
+  text-shadow: 0 0 32px rgba(56, 189, 248, 0.45);
+}
+
+.learning-page-tagline {
+  font-size: 0.98rem;
+  color: var(--muted);
+  margin: 0;
+  max-width: 560px;
+  line-height: 1.6;
+}
+
+/* ── Learning Center launcher card (home screen) ──────────────────────────── */
+.learning-launch {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  text-align: left;
+  padding: 20px 22px;
+  border-radius: 16px;
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(56, 189, 248, 0.16), transparent 40%),
+    linear-gradient(135deg, rgba(8, 14, 26, 0.92) 0%, rgba(14, 22, 40, 0.9) 100%);
+  cursor: pointer;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+  transition: border-color 0.22s, transform 0.15s, box-shadow 0.22s;
+}
+.learning-launch:hover {
+  transform: translateY(-3px);
+  border-color: rgba(56, 189, 248, 0.6);
+  box-shadow: 0 16px 38px rgba(0, 0, 0, 0.4), 0 0 28px rgba(56, 189, 248, 0.18);
+}
+
+/* Drifting scanline texture */
+.learning-launch-glow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(0deg, transparent 0 7px, rgba(255, 255, 255, 0.025) 7px 8px);
+  opacity: 0.8;
+}
+
+.learning-launch-icon {
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  border-radius: 14px;
+  border: 1px solid rgba(56, 189, 248, 0.45);
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.22), rgba(56, 189, 248, 0.05));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 0 20px rgba(56, 189, 248, 0.18);
+  position: relative;
+  z-index: 1;
+}
+
+.learning-launch-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  position: relative;
+  z-index: 1;
+}
+.learning-launch-title {
+  font-size: 1.02rem;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: 0.01em;
+}
+.learning-launch-desc {
+  font-size: 0.8rem;
+  color: var(--muted);
+  line-height: 1.45;
+}
+.learning-launch-meta {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: var(--accent);
+  opacity: 0.85;
+  margin-top: 4px;
+}
+
+.learning-launch-arrow {
+  margin-left: auto;
+  flex-shrink: 0;
+  font-size: 1.3rem;
+  color: var(--accent);
+  position: relative;
+  z-index: 1;
+  transition: transform 0.2s;
+}
+.learning-launch:hover .learning-launch-arrow {
+  transform: translateX(4px);
+}
+
+/* Light theme */
+body.light .learning-screen .learning-page-title span { text-shadow: none; }
+body.light .learning-launch {
+  background: #ffffff;
+  border-color: rgba(3, 105, 161, 0.22);
+  box-shadow: var(--shadow-card);
+}
+body.light .learning-launch:hover {
+  border-color: rgba(3, 105, 161, 0.45);
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+}
+body.light .learning-launch-glow { display: none; }
+body.light .learning-launch-icon {
+  border-color: rgba(3, 105, 161, 0.3);
+  background: rgba(3, 105, 161, 0.07);
+  box-shadow: none;
+}
+body.light .learning-launch-title { color: #0f172a; }
+body.light .learning-launch-desc { color: #475569; }
+body.light .learning-launch-meta,
+body.light .learning-launch-arrow { color: #0369a1; }
+
+/* Mobile */
+@media (max-width: 768px) {
+  .learning-screen { padding: 20px 16px 80px; gap: 30px; }
+  .learning-page-title { font-size: 1.7rem; }
+  .learning-launch { padding: 16px 16px; gap: 14px; }
+  .learning-launch-icon { width: 44px; height: 44px; font-size: 1.3rem; }
+}

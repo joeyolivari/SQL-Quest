@@ -188,3 +188,168 @@
       0 0 28px rgba(var(--diff-rgb), 0.14);
   }
 }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   Hacker-grade difficulty cards
+   Decorative frame (.diff-frame) + status tag (.diff-tag) overlays that turn
+   each card into a "terminal module": corner brackets, a scanning beam, a live
+   status readout, and escalating neon intensity from Beginner → Advanced.
+   These rules are deliberately scoped to .diff-row so they layer on top of the
+   base cards in both desktop and mobile layouts.
+═══════════════════════════════════════════════════════════════════════════ */
+
+/* Per-card neon channel — defined at base so the overlays work on every layout */
+.diff-row .diff-btn { --diff-rgb: 56, 189, 248; }
+.diff-row .diff-btn.beginner { --diff-rgb: 34, 197, 94; }
+.diff-row .diff-btn.intermediate { --diff-rgb: 245, 158, 11; }
+.diff-row .diff-btn.advanced { --diff-rgb: 239, 68, 68; }
+.diff-row .diff-btn[data-diff="all"] { --diff-rgb: 168, 85, 247; }
+
+/* Decorative frame fills the card and never intercepts clicks */
+.diff-row .diff-frame {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
+/* Top-left viewfinder corner bracket */
+.diff-row .diff-frame::before {
+  content: '';
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 16px;
+  height: 16px;
+  border-top: 2px solid rgba(var(--diff-rgb), 0.55);
+  border-left: 2px solid rgba(var(--diff-rgb), 0.55);
+  opacity: 0.7;
+  transition: opacity 0.22s, top 0.22s, left 0.22s;
+}
+
+/* Horizontal scan beam — idle near the top, sweeps on hover/selected */
+.diff-row .diff-frame::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(var(--diff-rgb), 0.85) 50%, transparent 100%);
+  box-shadow: 0 0 10px rgba(var(--diff-rgb), 0.6);
+  opacity: 0;
+  transition: opacity 0.22s;
+}
+
+/* Live status tag in the top-right corner */
+.diff-row .diff-tag {
+  position: absolute;
+  top: 11px;
+  right: 12px;
+  z-index: 1;
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.14em;
+  color: rgba(var(--diff-rgb), 0.78);
+  opacity: 0.62;
+  padding-left: 11px;
+  transition: opacity 0.22s, color 0.22s;
+}
+/* Blinking status LED before the tag text */
+.diff-row .diff-tag::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 5px;
+  height: 5px;
+  margin-top: -2.5px;
+  border-radius: 50%;
+  background: rgb(var(--diff-rgb));
+  box-shadow: 0 0 6px rgba(var(--diff-rgb), 0.9);
+}
+
+/* Hover / selected: light everything up */
+.diff-row .diff-btn:hover .diff-frame::after,
+.diff-row .diff-btn.selected .diff-frame::after {
+  opacity: 1;
+  animation: diff-scan 2.6s linear infinite;
+}
+.diff-row .diff-btn:hover .diff-frame::before,
+.diff-row .diff-btn.selected .diff-frame::before {
+  opacity: 1;
+}
+.diff-row .diff-btn:hover .diff-tag,
+.diff-row .diff-btn.selected .diff-tag {
+  opacity: 1;
+  color: rgb(var(--diff-rgb));
+}
+.diff-row .diff-btn.selected .diff-tag::before {
+  animation: diff-led 1.1s steps(1, end) infinite;
+}
+
+/* Selected cards get a slow breathing neon halo */
+.diff-row .diff-btn.selected {
+  animation: diff-pulse 2.8s ease-in-out infinite;
+}
+
+/* Advanced is the "danger" tier — add a faint glitch flicker to its label */
+.diff-row .diff-btn.advanced.selected .diff-label,
+.diff-row .diff-btn.advanced:hover .diff-label {
+  animation: diff-glitch 3.4s steps(1, end) infinite;
+}
+
+@keyframes diff-scan {
+  0%   { top: -2px; opacity: 0; }
+  12%  { opacity: 1; }
+  88%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+@keyframes diff-led {
+  0%, 60%  { opacity: 1; }
+  61%, 100% { opacity: 0.25; }
+}
+
+@keyframes diff-pulse {
+  0%, 100% { box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.10),
+      0 14px 34px rgba(0, 0, 0, 0.38),
+      0 0 22px rgba(var(--diff-rgb), 0.18); }
+  50%      { box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 16px 40px rgba(0, 0, 0, 0.42),
+      0 0 40px rgba(var(--diff-rgb), 0.34); }
+}
+
+@keyframes diff-glitch {
+  0%, 92%, 100% { transform: translate(0, 0); text-shadow: 0 0 16px rgba(var(--diff-rgb), 0.4); }
+  93%  { transform: translate(-1.5px, 0); text-shadow: 1.5px 0 rgba(56, 189, 248, 0.8), -1.5px 0 rgba(239, 68, 68, 0.8); }
+  95%  { transform: translate(1.5px, 0);  text-shadow: -1.5px 0 rgba(56, 189, 248, 0.8), 1.5px 0 rgba(239, 68, 68, 0.8); }
+  97%  { transform: translate(-1px, 0);   text-shadow: 0 0 16px rgba(var(--diff-rgb), 0.4); }
+}
+
+/* Respect reduced-motion: keep the styling, drop the animation */
+@media (prefers-reduced-motion: reduce) {
+  .diff-row .diff-btn.selected,
+  .diff-row .diff-btn:hover .diff-frame::after,
+  .diff-row .diff-btn.selected .diff-frame::after,
+  .diff-row .diff-btn.selected .diff-tag::before,
+  .diff-row .diff-btn.advanced.selected .diff-label,
+  .diff-row .diff-btn.advanced:hover .diff-label {
+    animation: none;
+  }
+}
+
+/* Light theme: soften the neon so it reads on white */
+body.light .diff-row .diff-frame::before { border-color: rgba(var(--diff-rgb), 0.45); }
+body.light .diff-row .diff-tag { color: rgba(var(--diff-rgb), 0.9); opacity: 0.7; }
+
+/* Mobile: smaller brackets/tag, no transform jitter from the glow pulse */
+@media (max-width: 768px) {
+  .diff-row .diff-frame::before { top: 9px; left: 9px; width: 13px; height: 13px; }
+  .diff-row .diff-tag { top: 9px; right: 10px; font-size: 0.5rem; }
+  .diff-row .diff-btn.selected { animation: none; }
+}
