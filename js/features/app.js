@@ -129,6 +129,11 @@ function renderHomeList() {
 }
 
 function initHomeScreen() {
+  // Ensure component-rendered Learning Center exists before wiring its buttons.
+  if (typeof window.ensureLearningScreen === 'function') {
+    window.ensureLearningScreen();
+  }
+
   // Populate difficulty counts
   const counts = { beginner: 0, intermediate: 0, advanced: 0, all: missions.length };
   missions.forEach(m => { const d = m.difficulty?.toLowerCase(); if (d && counts[d] !== undefined) counts[d]++; });
@@ -146,6 +151,7 @@ function initHomeScreen() {
       selectedMode = btn.dataset.mode;
       playToggle();
       renderHomeList();
+      updateLearningLaunchMeta();
     });
   });
 
