@@ -4,6 +4,25 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>Compliance SQL Quest</title>
+
+  <!-- PWA manifest -->
+  <link rel="manifest" href="manifest.webmanifest" />
+
+  <!-- Browser chrome theme color (Android, Chrome) -->
+  <meta name="theme-color" content="#00ff41" />
+
+  <!-- SEO / install prompt description -->
+  <meta name="description" content="Master SQL through real-world financial compliance investigations." />
+
+  <!-- iOS PWA support -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="SQL Quest" />
+  <link rel="apple-touch-icon" href="assets/icons/icon-192.svg" />
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="assets/icons/icon-192.svg" />
+
   <link rel="stylesheet" href="css/styles.css" />
 </head>
 <body>
@@ -379,6 +398,15 @@ CREATE TABLE practice_notes (id INTEGER, note TEXT);"></textarea>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.12.0/sql-wasm.js"></script>
 <script type="module" src="js/features/app.js"></script>
+
+<!-- Register service worker after page load; silent fail keeps web version unaffected -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('./service-worker.js').catch(function () {});
+    });
+  }
+</script>
 
 </body>
 </html>

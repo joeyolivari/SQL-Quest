@@ -1,0 +1,19 @@
+{
+  "appId": "com.joeyolivari.sqlquest",
+  "appName": "Compliance SQL Quest",
+  "webDir": ".",
+  "server": {
+    "androidScheme": "https"
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2000,
+      "backgroundColor": "#0a0f0a",
+      "showSpinner": false
+    },
+    "StatusBar": {
+      "style": "Dark",
+      "backgroundColor": "#0a0f0a"
+    }
+  }
+}
