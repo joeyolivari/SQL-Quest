@@ -1,0 +1,156 @@
+/* Desktop difficulty cards: pure CSS cyber modules, no image assets. */
+@media (min-width: 769px) {
+  .diff-row {
+    gap: 16px;
+  }
+
+  .diff-btn {
+    --diff-rgb: 56, 189, 248;
+    min-height: 148px;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr auto;
+    align-content: stretch;
+    justify-items: start;
+    gap: 10px;
+    padding: 18px 18px 16px;
+    border: 1px solid rgba(var(--diff-rgb), 0.46);
+    border-radius: 18px;
+    background:
+      radial-gradient(circle at 14% 12%, rgba(var(--diff-rgb), 0.26), transparent 34%),
+      linear-gradient(135deg, rgba(var(--diff-rgb), 0.10), rgba(6, 12, 24, 0.94) 44%, rgba(2, 6, 16, 0.98));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.08),
+      inset 0 -32px 60px rgba(0, 0, 0, 0.18),
+      0 14px 34px rgba(0, 0, 0, 0.34);
+    isolation: isolate;
+  }
+
+  .diff-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    height: auto;
+    background:
+      linear-gradient(90deg, transparent 0 10%, rgba(var(--diff-rgb), 0.48) 10% 42%, transparent 42% 58%, rgba(var(--diff-rgb), 0.36) 58% 88%, transparent 88%),
+      repeating-linear-gradient(0deg, transparent 0 8px, rgba(255, 255, 255, 0.035) 8px 9px);
+    background-size: 100% 1px, 100% 100%;
+    background-repeat: no-repeat, repeat;
+    opacity: 0.72;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .diff-btn::after {
+    content: '';
+    display: block;
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+    width: 44px;
+    height: 44px;
+    border-right: 2px solid rgba(var(--diff-rgb), 0.62);
+    border-bottom: 2px solid rgba(var(--diff-rgb), 0.62);
+    border-radius: 0 0 14px 0;
+    opacity: 0.82;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .diff-icon,
+  .diff-label,
+  .diff-count {
+    position: relative;
+    z-index: 1;
+  }
+
+  .diff-icon {
+    grid-column: 1;
+    grid-row: 1;
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    border-color: rgba(var(--diff-rgb), 0.58);
+    background:
+      linear-gradient(135deg, rgba(var(--diff-rgb), 0.26), rgba(var(--diff-rgb), 0.06));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.10),
+      0 0 22px rgba(var(--diff-rgb), 0.20);
+  }
+
+  .diff-label {
+    grid-column: 1;
+    grid-row: 2;
+    align-self: end;
+    font-size: 0.98rem;
+    letter-spacing: 0.02em;
+    color: rgb(var(--diff-rgb));
+    text-shadow: 0 0 16px rgba(var(--diff-rgb), 0.34);
+  }
+
+  .diff-count {
+    grid-column: 1;
+    grid-row: 3;
+    font-family: var(--font-mono);
+    font-size: 0.69rem;
+    letter-spacing: 0.05em;
+    color: rgba(226, 232, 240, 0.74);
+    text-transform: uppercase;
+  }
+
+  .diff-btn.beginner { --diff-rgb: 34, 197, 94; }
+  .diff-btn.intermediate { --diff-rgb: 245, 158, 11; }
+  .diff-btn.advanced { --diff-rgb: 239, 68, 68; }
+  .diff-btn[data-diff="all"] { --diff-rgb: 168, 85, 247; }
+
+  .diff-btn:hover,
+  .diff-btn.selected {
+    transform: translateY(-5px);
+    border-color: rgba(var(--diff-rgb), 0.96);
+    background:
+      radial-gradient(circle at 18% 14%, rgba(var(--diff-rgb), 0.38), transparent 38%),
+      linear-gradient(135deg, rgba(var(--diff-rgb), 0.16), rgba(6, 12, 24, 0.96) 42%, rgba(2, 6, 16, 1));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.12),
+      0 18px 44px rgba(0, 0, 0, 0.42),
+      0 0 34px rgba(var(--diff-rgb), 0.24);
+  }
+
+  .diff-btn:hover .diff-icon,
+  .diff-btn.selected .diff-icon {
+    border-color: rgba(var(--diff-rgb), 0.95);
+    background: rgba(var(--diff-rgb), 0.22);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.14),
+      0 0 24px rgba(var(--diff-rgb), 0.38);
+  }
+
+  body.light .diff-btn {
+    background:
+      radial-gradient(circle at 14% 12%, rgba(var(--diff-rgb), 0.16), transparent 34%),
+      linear-gradient(135deg, #ffffff, #f8fafc 58%, #eef2f7);
+    border-color: rgba(var(--diff-rgb), 0.38);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 10px 26px rgba(15, 23, 42, 0.10);
+  }
+
+  body.light .diff-btn::before {
+    background:
+      linear-gradient(90deg, transparent 0 10%, rgba(var(--diff-rgb), 0.36) 10% 42%, transparent 42% 58%, rgba(var(--diff-rgb), 0.28) 58% 88%, transparent 88%),
+      repeating-linear-gradient(0deg, transparent 0 8px, rgba(15, 23, 42, 0.035) 8px 9px);
+  }
+
+  body.light .diff-count {
+    color: #475569;
+  }
+
+  body.light .diff-btn:hover,
+  body.light .diff-btn.selected {
+    background:
+      radial-gradient(circle at 18% 14%, rgba(var(--diff-rgb), 0.20), transparent 38%),
+      linear-gradient(135deg, #ffffff, #f8fafc 54%, rgba(var(--diff-rgb), 0.08));
+    box-shadow:
+      0 16px 34px rgba(15, 23, 42, 0.14),
+      0 0 28px rgba(var(--diff-rgb), 0.14);
+  }
+}
