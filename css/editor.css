@@ -1,0 +1,93 @@
+/* ── CodeMirror SQL editor ─────────────────────────────────────────────────── */
+
+.CodeMirror {
+  height: clamp(180px, 34vh, 310px) !important;
+  background: var(--panel3) !important;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text) !important;
+  font-family: var(--font-mono) !important;
+  font-size: 0.86rem !important;
+  line-height: 1.6 !important;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.15);
+  transition: border-color 0.18s, box-shadow 0.18s;
+}
+
+.CodeMirror.CodeMirror-focused {
+  border-color: var(--accent);
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.15), 0 0 0 3px rgba(56, 189, 248, 0.1);
+}
+
+.CodeMirror.CodeMirror-readOnly { opacity: 0.65; }
+
+/* Gutter */
+.CodeMirror-gutters {
+  background: rgba(5, 8, 22, 0.55) !important;
+  border-right: 1px solid rgba(51, 65, 85, 0.5) !important;
+  border-radius: 10px 0 0 10px;
+}
+.CodeMirror-linenumber { color: #475569 !important; font-size: 0.73rem; }
+
+/* Content padding */
+.CodeMirror-lines { padding: 10px 0 10px 4px !important; }
+
+/* Cursor */
+.CodeMirror-cursor { border-left: 2px solid var(--accent) !important; }
+
+/* Selection */
+.CodeMirror-selected { background: rgba(56, 189, 248, 0.15) !important; }
+.CodeMirror-focused .CodeMirror-selected { background: rgba(56, 189, 248, 0.2) !important; }
+
+/* Active line */
+.CodeMirror-activeline-background { background: rgba(56, 189, 248, 0.04) !important; }
+
+/* ── SQL token colors – dark mode ──────────────────────────────────────────── */
+.CodeMirror .cm-keyword  { color: #38bdf8; font-weight: 600; }
+.CodeMirror .cm-builtin  { color: #a78bfa; }
+.CodeMirror .cm-string   { color: #4ade80; }
+.CodeMirror .cm-string-2 { color: #86efac; }
+.CodeMirror .cm-number   { color: #f59e0b; }
+.CodeMirror .cm-comment  { color: #64748b; font-style: italic; }
+.CodeMirror .cm-operator { color: #94a3b8; }
+.CodeMirror .cm-atom     { color: #fb923c; }
+.CodeMirror .cm-variable { color: var(--text); }
+.CodeMirror .cm-type     { color: #67e8f9; }
+
+/* ── Light mode overrides ──────────────────────────────────────────────────── */
+body.light .CodeMirror {
+  background: #f8fafc !important;
+  color: #0f172a !important;
+  border-color: #94a3b8;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+body.light .CodeMirror.CodeMirror-focused {
+  border-color: #0369a1;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.05), 0 0 0 3px rgba(3, 105, 161, 0.12);
+}
+body.light .CodeMirror-gutters {
+  background: #f1f5f9 !important;
+  border-right-color: #e2e8f0 !important;
+}
+body.light .CodeMirror-linenumber { color: #94a3b8 !important; }
+body.light .CodeMirror-cursor { border-left-color: #0f172a !important; }
+body.light .CodeMirror-selected { background: rgba(3, 105, 161, 0.12) !important; }
+body.light .CodeMirror-focused .CodeMirror-selected { background: rgba(3, 105, 161, 0.18) !important; }
+body.light .CodeMirror-activeline-background { background: rgba(3, 105, 161, 0.04) !important; }
+
+body.light .CodeMirror .cm-keyword  { color: #0369a1; }
+body.light .CodeMirror .cm-builtin  { color: #7e22ce; }
+body.light .CodeMirror .cm-string   { color: #166534; }
+body.light .CodeMirror .cm-string-2 { color: #15803d; }
+body.light .CodeMirror .cm-number   { color: #92400e; }
+body.light .CodeMirror .cm-comment  { color: #64748b; }
+body.light .CodeMirror .cm-operator { color: #475569; }
+body.light .CodeMirror .cm-atom     { color: #9a3412; }
+body.light .CodeMirror .cm-variable { color: #0f172a; }
+
+/* ── Mobile heights – match original textarea values ───────────────────────── */
+@media (max-width: 768px) {
+  .CodeMirror { height: 190px !important; font-size: 0.88rem !important; }
+}
+@media (max-width: 480px) {
+  .CodeMirror { height: 164px !important; font-size: 0.85rem !important; }
+}

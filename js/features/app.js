@@ -18,6 +18,11 @@ import { getRecommendedMission, buildTrainingQueue, buildReviewQueue, buildWeakS
 import { getHintStep, getNextHint, resetHintLadder } from '../learning/hintEngine.js';
 import { buildLearningDashboard } from '../learning/dashboard.js';
 import { initSandboxLab, openSandboxLab } from './sandbox.js';
+import {
+  initSqlEditor, enableSqlEditor,
+  getSqlValue, setSqlValue, focusSqlEditor,
+  insertSqlText, wrapSqlCursor,
+} from '../core/editor.js';
 
 let engineReady = false;
 let selectedDifficulty = 'beginner';
@@ -309,6 +314,7 @@ function loadLevel(index) {
   missionStartTime = state.totalTime;
   levelHintStep = 0;
   ui.loadMission(mission, index, briefings[mission.id]);
+  setSqlValue(mission.starterSQL);
   ui.updateStats(state.score, state.hintsLeft, state.attempts, index + 1);
   document.getElementById('btnHint').disabled = state.hintsLeft <= 0;
   ui.renderProgressDots(state.completedMissions, index, state.missionQueue.length);
@@ -319,7 +325,7 @@ function loadLevel(index) {
 
 function runQuery() {
   ui.hideMessages(false);
-  const sql = document.getElementById('sqlInput').value.trim();
+  const sql = getSqlValue().trim();
   if (!sql) { ui.showError('Write a SELECT query first.'); return; }
   if (!isSafeQuery(sql)) { ui.showError('Only SELECT and WITH queries are allowed in this game.'); return; }
   try {
@@ -336,7 +342,7 @@ function runQuery() {
 }
 
 function checkAnswer() {
-  const currentSQL = document.getElementById('sqlInput').value.trim();
+  const currentSQL = getSqlValue().trim();
   if (!state.lastResult) { ui.showError('Run your query before checking the answer.'); return; }
   if (currentSQL !== state.lastRunSQL) {
     ui.showError('You changed the SQL after running it. Run the query again before checking.');
@@ -444,13 +450,13 @@ function showProgressiveHint() {
 function showSolution() {
   state.solutionUsed = true;
   const sql = state.missionQueue[state.currentMissionIndex].solutionSQL;
-  document.getElementById('sqlInput').value = sql;
+  setSqlValue(sql);
   ui.showSolutionBox(sql);
   runQuery();
 }
 
 function resetEditor() {
-  document.getElementById('sqlInput').value = state.missionQueue[state.currentMissionIndex].starterSQL;
+  setSqlValue(state.missionQueue[state.currentMissionIndex].starterSQL);
   state.lastResult = null;
   state.lastRunSQL = '';
   ui.hideMessages();
@@ -509,41 +515,7 @@ const SQL_KEYWORDS = [
 ];
 
 function insertKeyword(kw) {
-  const el = document.getElementById('sqlInput');
-  const pos = el.selectionStart;
-  const val = el.value;
-  const before = val.slice(0, pos);
-  const after = val.slice(pos);
-  const needsSpace = before.length > 0 && !/[\s(]$/.test(before);
-  const text = (needsSpace ? ' ' : '') + kw.insert;
-  el.value = before + text + after;
-  const newPos = pos + text.length - (kw.cursorBack || 0);
-  el.selectionStart = el.selectionEnd = newPos;
-  el.focus();
-}
-
-// ── Wrap helpers (quote / paren) ──────────────────────────────────────────────
-
-function wrapCursor(open, close) {
-  const el = document.getElementById('sqlInput');
-  const s = el.selectionStart, end = el.selectionEnd;
-  const val = el.value;
-  if (s !== end) {
-    el.value = val.slice(0, s) + open + val.slice(s, end) + close + val.slice(end);
-    el.selectionStart = s; el.selectionEnd = end + 2;
-  } else {
-    let ws = s, we = s;
-    while (ws > 0 && /\w/.test(val[ws - 1])) ws--;
-    while (we < val.length && /\w/.test(val[we])) we++;
-    if (ws < we) {
-      el.value = val.slice(0, ws) + open + val.slice(ws, we) + close + val.slice(we);
-      el.selectionStart = ws; el.selectionEnd = we + 2;
-    } else {
-      el.value = val.slice(0, s) + open + close + val.slice(s);
-      el.selectionStart = el.selectionEnd = s + 1;
-    }
-  }
-  el.focus();
+  insertSqlText(kw.insert, kw.cursorBack || 0);
 }
 
 // ── Bootstrap ─────────────────────────────────────────────────────────────────
@@ -555,6 +527,7 @@ async function initGame() {
     ['sqlInput', 'btnRun', 'btnCheck', 'btnHint', 'btnReset', 'btnQuote', 'btnParen', 'btnSolution'].forEach(id => {
       document.getElementById(id).disabled = false;
     });
+    enableSqlEditor();
   } catch (err) {
     ui.showError('SQLite failed to load. Check your connection. ' + err.message);
   }
@@ -566,6 +539,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('csq_theme');
     if (savedTheme) applyTheme(savedTheme);
   } catch (e) {}
+
+  initSqlEditor();
 
   document.getElementById('btnRun').addEventListener('click', runQuery);
   document.getElementById('btnCheck').addEventListener('click', checkAnswer);
@@ -587,8 +562,8 @@ document.addEventListener('DOMContentLoaded', () => {
     this.innerHTML = collapsed ? '&#9654; Show' : '&#9660; Hide';
   });
 
-  document.getElementById('btnQuote').addEventListener('click', () => wrapCursor("'", "'"));
-  document.getElementById('btnParen').addEventListener('click', () => wrapCursor('(', ')'));
+  document.getElementById('btnQuote').addEventListener('click', () => wrapSqlCursor("'", "'"));
+  document.getElementById('btnParen').addEventListener('click', () => wrapSqlCursor('(', ')'));
 
   // Keyword bar
   ui.renderKeywordBar(SQL_KEYWORDS, insertKeyword);

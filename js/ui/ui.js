@@ -46,7 +46,6 @@ export function loadMission(mission, index, briefing) {
   document.getElementById('missionDesc').textContent = mission.task;
   const cfBox = document.getElementById('casefileBox');
   if (cfBox) cfBox.textContent = briefing || '';
-  document.getElementById('sqlInput').value = mission.starterSQL;
 
   const diff = mission.difficulty.toLowerCase();
   document.getElementById('badgeRow').innerHTML =
