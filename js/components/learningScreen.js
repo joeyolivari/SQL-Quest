@@ -91,11 +91,19 @@ function fallbackCloseLearningCenter() {
 function fallbackSelectMode(modeBtn) {
   const screen = document.getElementById('learningScreen');
   if (!screen || !modeBtn) return;
+  const mode = modeBtn.dataset.mode;
 
+  // Prefer the real handler from app.js so the chosen mode actually reorders the
+  // mission list and updates the launcher meta — not just the visual selection.
+  if (mode && typeof window.applyLearningMode === 'function') {
+    window.applyLearningMode(mode);
+    return;
+  }
+
+  // Cosmetic-only fallback if app.js is unavailable.
   screen.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('selected'));
   modeBtn.classList.add('selected');
 
-  const mode = modeBtn.dataset.mode;
   const meta = document.getElementById('learningLaunchMeta');
   if (meta && mode) {
     const label = mode.charAt(0).toUpperCase() + mode.slice(1);

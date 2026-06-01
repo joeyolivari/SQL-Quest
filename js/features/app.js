@@ -76,7 +76,7 @@ function updateRecommendation() {
 }
 
 function renderLearningDashboard() {
-  ui.renderLearningDashboard(buildLearningDashboard(missions, loadProgress()));
+  ui.renderLearningDashboard(buildLearningDashboard(missions, loadProgress()), launchFromDashboard);
 }
 
 const MODE_LABELS = { story: 'Story', training: 'Training', review: 'Review' };
@@ -87,6 +87,51 @@ function updateLearningLaunchMeta() {
   const summary = buildLearningDashboard(missions, loadProgress());
   const mode = MODE_LABELS[selectedMode] || 'Story';
   el.textContent = `${mode} Mode · ${summary.totalCompleted}/${summary.totalMissions} missions complete`;
+}
+
+// Apply a learning mode (story / training / review) and reflect it everywhere.
+// Exposed on window so the component fallback in learningScreen.js can reuse the
+// real logic even if the DOMContentLoaded wiring never ran.
+function applyLearningMode(mode) {
+  const btn = document.querySelector(`.mode-btn[data-mode="${mode}"]`);
+  if (!btn || btn.classList.contains('selected')) return;
+  document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedMode = mode;
+  playToggle();
+  renderHomeList();
+  updateLearningLaunchMeta();
+}
+window.applyLearningMode = applyLearningMode;
+
+// Launch a specific mission by id, leaving the Learning Center first.
+function launchMissionById(missionId) {
+  if (missionId == null) return;
+  let queue = getMissionQueue(selectedDifficulty);
+  let idx = queue.findIndex(m => String(m.id) === String(missionId));
+  if (idx === -1) {
+    // Mission is outside the current difficulty filter — fall back to all levels.
+    queue = getMissionsByDifficulty('all');
+    idx = queue.findIndex(m => String(m.id) === String(missionId));
+  }
+  if (idx === -1) return;
+  const learning = document.getElementById('learningScreen');
+  if (learning) learning.style.display = 'none';
+  playNav();
+  startGame(queue, null, idx);
+}
+
+// Resolve a dashboard click (a mission card or a skill pill/row) to a mission.
+function launchFromDashboard(target) {
+  if (!target) return;
+  let missionId = target.missionId;
+  if (missionId == null && target.skillId != null) {
+    const completed = buildMasteryProfile(missions, loadProgress()).completedMissionIds;
+    const next = missions.find(m => !completed.has(m.id) && m.skillIds?.includes(target.skillId))
+      || missions.find(m => m.skillIds?.includes(target.skillId));
+    missionId = next ? next.id : null;
+  }
+  launchMissionById(missionId);
 }
 
 function openLearningCenter() {
@@ -144,15 +189,7 @@ function initHomeScreen() {
   });
 
   document.querySelectorAll('.mode-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (btn.classList.contains('selected')) return;
-      document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
-      btn.classList.add('selected');
-      selectedMode = btn.dataset.mode;
-      playToggle();
-      renderHomeList();
-      updateLearningLaunchMeta();
-    });
+    btn.addEventListener('click', () => applyLearningMode(btn.dataset.mode));
   });
 
   document.querySelectorAll('.diff-btn').forEach(btn => {
