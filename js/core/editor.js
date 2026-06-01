@@ -1,6 +1,8 @@
 let cm = null;
+let cmReady = false;
 
 export function initSqlEditor() {
+  if (cmReady) return;
   const textarea = document.getElementById('sqlInput');
   if (!textarea || typeof window.CodeMirror === 'undefined') return;
   try {
@@ -10,9 +12,8 @@ export function initSqlEditor() {
       tabSize: 2,
       indentWithTabs: false,
       lineWrapping: true,
-      readOnly: true,
     });
-    cm.setSize('100%', null);
+    cmReady = true;
   } catch (e) {
     cm = null;
   }

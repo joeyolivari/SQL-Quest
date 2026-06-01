@@ -313,6 +313,7 @@ function loadLevel(index) {
   resetHintLadder(mission.id);
   missionStartTime = state.totalTime;
   levelHintStep = 0;
+  initSqlEditor(); // lazy init: container is visible by now
   ui.loadMission(mission, index, briefings[mission.id]);
   setSqlValue(mission.starterSQL);
   ui.updateStats(state.score, state.hintsLeft, state.attempts, index + 1);
@@ -539,8 +540,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const savedTheme = localStorage.getItem('csq_theme');
     if (savedTheme) applyTheme(savedTheme);
   } catch (e) {}
-
-  initSqlEditor();
 
   document.getElementById('btnRun').addEventListener('click', runQuery);
   document.getElementById('btnCheck').addEventListener('click', checkAnswer);
