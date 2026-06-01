@@ -2,16 +2,15 @@
 // Keeps the Learning Center markup out of index.html while preserving the same IDs
 // that app.js uses for navigation, mode buttons, and dashboard rendering.
 //
-// Important: this renders synchronously when the script loads. app.js also calls
-// window.ensureLearningScreen() before attaching event listeners, so the buttons
-// exist before btnLearningBack / btnLearningApply / .mode-btn listeners are wired.
+// This file builds the Learning Center and adds fallback click behavior so the
+// buttons still respond even if app.js is cached, delayed, or interrupted.
 
 function learningScreenMarkup() {
   return `
 <!-- Learning Center (component-rendered screen) -->
 <div id="learningScreen" class="learning-screen" style="display:none">
   <div class="learning-page-hero">
-    <button class="btn-home" id="btnLearningBack" type="button">&#8592; Main Menu</button>
+    <button class="btn-home" id="btnLearningBack" type="button" data-learning-close="true">&#8592; Main Menu</button>
     <div class="learning-page-kicker">Accelerated Learning</div>
     <h1 class="learning-page-title">Learning <span>Center</span></h1>
     <p class="learning-page-tagline">Track your SQL skill mastery and tune how your next missions are ordered.</p>
@@ -50,7 +49,7 @@ function learningScreenMarkup() {
   </div>
 
   <div class="home-footer">
-    <button class="btn-lg btn-primary" id="btnLearningApply" type="button">&#8594; Back to Missions</button>
+    <button class="btn-lg btn-primary" id="btnLearningApply" type="button" data-learning-close="true">&#8594; Back to Missions</button>
   </div>
 </div>`;
 }
@@ -73,6 +72,75 @@ function renderLearningScreen() {
   return null;
 }
 
+function fallbackOpenLearningCenter() {
+  const screen = renderLearningScreen();
+  const home = document.getElementById('homeScreen');
+  if (home) home.style.display = 'none';
+  if (screen) screen.style.display = 'flex';
+  window.scrollTo(0, 0);
+}
+
+function fallbackCloseLearningCenter() {
+  const screen = document.getElementById('learningScreen');
+  const home = document.getElementById('homeScreen');
+  if (screen) screen.style.display = 'none';
+  if (home) home.style.display = 'flex';
+  window.scrollTo(0, 0);
+}
+
+function fallbackSelectMode(modeBtn) {
+  const screen = document.getElementById('learningScreen');
+  if (!screen || !modeBtn) return;
+
+  screen.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('selected'));
+  modeBtn.classList.add('selected');
+
+  const mode = modeBtn.dataset.mode;
+  const meta = document.getElementById('learningLaunchMeta');
+  if (meta && mode) {
+    const label = mode.charAt(0).toUpperCase() + mode.slice(1);
+    meta.textContent = meta.textContent.replace(/^(Story|Training|Review) Mode/, `${label} Mode`);
+  }
+}
+
+function wireLearningScreenFallbacks() {
+  if (window.__learningScreenFallbacksWired) return;
+  window.__learningScreenFallbacksWired = true;
+
+  document.addEventListener('click', event => {
+    const openBtn = event.target.closest('#btnOpenLearning');
+    if (openBtn) {
+      setTimeout(() => {
+        const screen = document.getElementById('learningScreen');
+        if (!screen || screen.style.display === 'none' || !screen.style.display) {
+          fallbackOpenLearningCenter();
+        }
+      }, 0);
+      return;
+    }
+
+    const closeBtn = event.target.closest('[data-learning-close="true"]');
+    if (closeBtn) {
+      setTimeout(() => {
+        const screen = document.getElementById('learningScreen');
+        if (screen && screen.style.display !== 'none') {
+          fallbackCloseLearningCenter();
+        }
+      }, 0);
+      return;
+    }
+
+    const modeBtn = event.target.closest('#learningScreen .mode-btn');
+    if (modeBtn) {
+      setTimeout(() => {
+        if (!modeBtn.classList.contains('selected')) {
+          fallbackSelectMode(modeBtn);
+        }
+      }, 0);
+    }
+  });
+}
+
 // Expose a tiny safe hook for app.js. This avoids fragile timing issues.
 window.ensureLearningScreen = renderLearningScreen;
 
@@ -81,3 +149,5 @@ window.ensureLearningScreen = renderLearningScreen;
 if (!renderLearningScreen() && document.readyState === 'loading') {
   document.addEventListener('DOMContentLoaded', renderLearningScreen, { once: true });
 }
+
+wireLearningScreenFallbacks();
