@@ -9,7 +9,7 @@
  * Bump CACHE_VERSION to force all clients to pick up new files on deploy.
  */
 
-const CACHE_VERSION = 'csq-v4';
+const CACHE_VERSION = 'csq-v5';
 const CDN_CACHE = 'csq-cdn-v1';
 
 // Build absolute URLs relative to this SW's location so the same
@@ -27,6 +27,7 @@ const APP_SHELL = [
   BASE + 'css/layout.css',
   BASE + 'css/components.css',
   BASE + 'css/learning.css',
+  BASE + 'css/difficulty-cards.css',
   BASE + 'css/sandbox.css',
   BASE + 'css/mobile.css',
   BASE + 'js/features/app.js',
@@ -55,10 +56,6 @@ const APP_SHELL = [
   BASE + 'assets/icons/icon-192.svg',
   BASE + 'assets/icons/icon-512.svg',
   BASE + 'assets/icons/icon-maskable.svg',
-  BASE + 'assets/images/difficulty/beginner-card.png',
-  BASE + 'assets/images/difficulty/intermediate-card.png',
-  BASE + 'assets/images/difficulty/advanced-card.png',
-  BASE + 'assets/images/difficulty/all-levels-card.png',
 ];
 
 // ── Install: pre-cache the app shell ─────────────────────────────────────────
