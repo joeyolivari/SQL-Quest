@@ -1,0 +1,38 @@
+/* Minimal difficulty-card base reset.
+   This neutralizes the older .diff-btn styling from components.css so the
+   actual desktop design is fully owned by difficulty-cards.css. */
+
+.diff-btn {
+  appearance: none;
+  border: 0;
+  background-image: none;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  position: relative;
+  overflow: hidden;
+  text-align: left;
+}
+
+.diff-btn::before,
+.diff-btn::after {
+  content: none;
+  display: none;
+}
+
+.diff-icon,
+.diff-label,
+.diff-count {
+  position: relative;
+}
+
+.diff-label {
+  font-weight: 800;
+}
+
+.diff-count {
+  color: var(--muted);
+}
+
+.diff-btn:hover {
+  transform: none;
+}
