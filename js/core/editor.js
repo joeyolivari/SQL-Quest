@@ -1,58 +1,130 @@
-let cm = null;
+// SQL editor powered by CodeMirror 6 (vendored locally in js/lib/codemirror-sql.js
+// so the game keeps working offline / on GitHub Pages with no CDN dependency).
+//
+// The exported helpers (getSqlValue / setSqlValue / focusSqlEditor /
+// insertSqlText / wrapSqlCursor) are the single source of truth the rest of the
+// app uses to talk to the editor. If CodeMirror fails to load for any reason,
+// every helper transparently falls back to the original #sqlInput <textarea>.
+
+import {
+  EditorView, EditorState, keymap, lineNumbers, highlightActiveLine,
+  highlightActiveLineGutter, drawSelection, highlightSpecialChars,
+  defaultKeymap, history, historyKeymap, indentWithTab,
+  syntaxHighlighting, HighlightStyle, bracketMatching, indentOnInput,
+  sql, SQLite, tags as t,
+} from '../lib/codemirror-sql.js';
+
+let view = null;       // the live CodeMirror 6 EditorView (null until init / on failure)
 let cmReady = false;
+
+// Stable token classes so colors can be themed (and flipped for light mode) in
+// css/editor.css instead of being hard-coded inline by CodeMirror.
+const sqlHighlight = HighlightStyle.define([
+  { tag: t.keyword,                 class: 'tok-keyword' },
+  { tag: t.operatorKeyword,         class: 'tok-keyword' },
+  { tag: t.modifier,                class: 'tok-keyword' },
+  { tag: t.string,                  class: 'tok-string' },
+  { tag: t.special(t.string),       class: 'tok-string' },
+  { tag: t.number,                  class: 'tok-number' },
+  { tag: t.bool,                    class: 'tok-atom' },
+  { tag: t.null,                    class: 'tok-atom' },
+  { tag: t.lineComment,             class: 'tok-comment' },
+  { tag: t.blockComment,            class: 'tok-comment' },
+  { tag: t.comment,                 class: 'tok-comment' },
+  { tag: t.operator,                class: 'tok-operator' },
+  { tag: t.punctuation,             class: 'tok-punct' },
+  { tag: t.typeName,                class: 'tok-type' },
+  { tag: t.function(t.variableName),class: 'tok-builtin' },
+  { tag: t.standard(t.name),        class: 'tok-builtin' },
+  { tag: t.variableName,            class: 'tok-variable' },
+  { tag: t.name,                    class: 'tok-variable' },
+]);
+
+function buildExtensions() {
+  return [
+    lineNumbers(),
+    highlightActiveLineGutter(),
+    highlightActiveLine(),
+    highlightSpecialChars(),
+    history(),
+    drawSelection(),
+    indentOnInput(),
+    bracketMatching(),
+    EditorView.lineWrapping,
+    sql({ dialect: SQLite, upperCaseKeywords: false }),
+    syntaxHighlighting(sqlHighlight),
+    keymap.of([...defaultKeymap, ...historyKeymap, indentWithTab]),
+  ];
+}
 
 export function initSqlEditor() {
   if (cmReady) return;
   const textarea = document.getElementById('sqlInput');
-  if (!textarea || typeof window.CodeMirror === 'undefined') return;
+  if (!textarea) return;
   try {
-    cm = window.CodeMirror.fromTextArea(textarea, {
-      mode: 'text/x-sql',
-      lineNumbers: true,
-      tabSize: 2,
-      indentWithTabs: false,
-      lineWrapping: true,
+    view = new EditorView({
+      state: EditorState.create({
+        doc: textarea.value,
+        extensions: buildExtensions(),
+      }),
     });
+    // Drop the CodeMirror DOM right where the textarea sat, then hide the
+    // textarea (kept in the DOM purely as a fallback / value mirror).
+    textarea.insertAdjacentElement('afterend', view.dom);
+    textarea.style.display = 'none';
+    textarea.setAttribute('aria-hidden', 'true');
+    textarea.setAttribute('tabindex', '-1');
     cmReady = true;
   } catch (e) {
-    cm = null;
+    // Leave the textarea visible and usable if CodeMirror could not start.
+    view = null;
+    cmReady = false;
   }
 }
 
 export function enableSqlEditor() {
-  if (!cm) return;
-  cm.setOption('readOnly', false);
+  // CodeMirror is editable from creation; nothing to toggle. Keep the textarea
+  // fallback in sync so Run/Check work even before the editor is built.
+  const el = document.getElementById('sqlInput');
+  if (el) el.disabled = false;
 }
 
 export function getSqlValue() {
-  if (cm) return cm.getValue();
+  if (view) return view.state.doc.toString();
   const el = document.getElementById('sqlInput');
   return el ? el.value : '';
 }
 
 export function setSqlValue(text) {
-  if (cm) { cm.setValue(text); return; }
+  if (view) {
+    view.dispatch({
+      changes: { from: 0, to: view.state.doc.length, insert: text },
+      selection: { anchor: text.length },
+    });
+    return;
+  }
   const el = document.getElementById('sqlInput');
   if (el) el.value = text;
 }
 
 export function focusSqlEditor() {
-  if (cm) { cm.focus(); return; }
+  if (view) { view.focus(); return; }
   const el = document.getElementById('sqlInput');
   if (el) el.focus();
 }
 
 export function insertSqlText(text, cursorBack = 0) {
-  if (cm) {
-    const before = cm.getValue().slice(0, cm.getDoc().indexFromPos(cm.getCursor()));
+  if (view) {
+    const sel = view.state.selection.main;
+    const before = view.state.doc.sliceString(0, sel.from);
     const needsSpace = before.length > 0 && !/[\s(]$/.test(before);
     const insert = (needsSpace ? ' ' : '') + text;
-    cm.replaceSelection(insert, 'end');
-    if (cursorBack > 0) {
-      const c = cm.getCursor();
-      cm.setCursor({ line: c.line, ch: Math.max(0, c.ch - cursorBack) });
-    }
-    cm.focus();
+    const cursorPos = sel.from + insert.length - cursorBack;
+    view.dispatch({
+      changes: { from: sel.from, to: sel.to, insert },
+      selection: { anchor: Math.max(0, cursorPos) },
+    });
+    view.focus();
     return;
   }
   const el = document.getElementById('sqlInput');
@@ -68,31 +140,37 @@ export function insertSqlText(text, cursorBack = 0) {
 }
 
 export function wrapSqlCursor(open, close) {
-  if (cm) {
-    const doc = cm.getDoc();
-    if (doc.somethingSelected()) {
-      doc.replaceSelection(open + doc.getSelection() + close);
+  if (view) {
+    const sel = view.state.selection.main;
+    if (!sel.empty) {
+      const selected = view.state.doc.sliceString(sel.from, sel.to);
+      view.dispatch({
+        changes: { from: sel.from, to: sel.to, insert: open + selected + close },
+        selection: { anchor: sel.from + open.length, head: sel.from + open.length + selected.length },
+      });
     } else {
-      const cursor = doc.getCursor();
-      const line = doc.getLine(cursor.line);
-      let ws = cursor.ch, we = cursor.ch;
-      while (ws > 0 && /\w/.test(line[ws - 1])) ws--;
-      while (we < line.length && /\w/.test(line[we])) we++;
+      const pos = sel.from;
+      const line = view.state.doc.lineAt(pos);
+      const text = line.text;
+      const col = pos - line.from;
+      let ws = col, we = col;
+      while (ws > 0 && /\w/.test(text[ws - 1])) ws--;
+      while (we < text.length && /\w/.test(text[we])) we++;
       if (ws < we) {
-        const from = { line: cursor.line, ch: ws };
-        const to   = { line: cursor.line, ch: we };
-        const word = doc.getRange(from, to);
-        doc.replaceRange(open + word + close, from, to);
-        doc.setSelection(
-          { line: cursor.line, ch: ws + open.length },
-          { line: cursor.line, ch: ws + open.length + word.length }
-        );
+        const from = line.from + ws, to = line.from + we;
+        const word = text.slice(ws, we);
+        view.dispatch({
+          changes: { from, to, insert: open + word + close },
+          selection: { anchor: from + open.length, head: from + open.length + word.length },
+        });
       } else {
-        doc.replaceRange(open + close, cursor);
-        doc.setCursor({ line: cursor.line, ch: cursor.ch + open.length });
+        view.dispatch({
+          changes: { from: pos, to: pos, insert: open + close },
+          selection: { anchor: pos + open.length },
+        });
       }
     }
-    cm.focus();
+    view.focus();
     return;
   }
   const el = document.getElementById('sqlInput');
