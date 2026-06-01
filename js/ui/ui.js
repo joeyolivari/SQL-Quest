@@ -241,21 +241,31 @@ export function showHomeError(msg) {
   if (el) { el.textContent = msg; el.style.display = 'block'; }
 }
 
-export function renderLearningDashboard(summary) {
+export function renderLearningDashboard(summary, onLaunch) {
   const el = document.getElementById('learningDashboard');
   if (!el || !summary) return;
 
   const strongest = renderSkillList(summary.strongest, 'No completed skills yet');
   const weakest = renderSkillList(summary.weakest, 'Complete a mission to reveal weak spots');
   const skills = summary.skills.map(skill => `
-    <div class="mastery-row">
-      <div class="mastery-row-top">
+    <button type="button" class="mastery-row is-clickable" data-launch-skill="${escapeHtml(String(skill.id))}">
+      <span class="mastery-row-top">
         <span>${escapeHtml(skill.label)}</span>
         <strong>${skill.mastery}%</strong>
-      </div>
-      <div class="mastery-track"><span style="width:${skill.mastery}%"></span></div>
-    </div>
+      </span>
+      <span class="mastery-track"><span style="width:${skill.mastery}%"></span></span>
+    </button>
   `).join('');
+
+  const rec = summary.recommended;
+  const recInner = `
+    <span>Recommended Next Review</span>
+    <strong>${escapeHtml(rec.skillLabel)}</strong>
+    <small>${rec.missionId ? 'Mission ' + rec.missionId + ': ' : ''}${escapeHtml(rec.missionTitle)}</small>
+  `;
+  const recommendation = rec.missionId
+    ? `<button type="button" class="learning-recommendation is-clickable" data-launch-mission="${escapeHtml(String(rec.missionId))}">${recInner}</button>`
+    : `<div class="learning-recommendation">${recInner}</div>`;
 
   el.innerHTML = `
     <div class="learning-summary">
@@ -263,11 +273,7 @@ export function renderLearningDashboard(summary) {
         <span>Total Completed</span>
         <strong>${summary.totalCompleted}/${summary.totalMissions}</strong>
       </div>
-      <div class="learning-recommendation">
-        <span>Recommended Next Review</span>
-        <strong>${escapeHtml(summary.recommended.skillLabel)}</strong>
-        <small>${summary.recommended.missionId ? 'Mission ' + summary.recommended.missionId + ': ' : ''}${escapeHtml(summary.recommended.missionTitle)}</small>
-      </div>
+      ${recommendation}
     </div>
     <div class="learning-columns">
       <div>
@@ -284,16 +290,24 @@ export function renderLearningDashboard(summary) {
       ${skills}
     </div>
   `;
+
+  el.onclick = e => {
+    if (typeof onLaunch !== 'function') return;
+    const missionBtn = e.target.closest('[data-launch-mission]');
+    if (missionBtn) { onLaunch({ missionId: missionBtn.dataset.launchMission }); return; }
+    const skillBtn = e.target.closest('[data-launch-skill]');
+    if (skillBtn) onLaunch({ skillId: skillBtn.dataset.launchSkill });
+  };
 }
 
 function renderSkillList(skills, emptyText) {
   if (!skills.length) return `<p class="learning-empty">${escapeHtml(emptyText)}</p>`;
 
   return `<div class="skill-pill-list">${skills.map(skill => `
-    <div class="skill-pill">
+    <button type="button" class="skill-pill is-clickable" data-launch-skill="${escapeHtml(String(skill.id))}">
       <span>${escapeHtml(skill.label)}</span>
       <strong>${skill.mastery}%</strong>
-    </div>
+    </button>
   `).join('')}</div>`;
 }
 

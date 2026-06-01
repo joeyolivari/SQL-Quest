@@ -1298,6 +1298,7 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
 }
 .mastery-row-top strong { color: var(--text); font-family: var(--font-mono); }
 .mastery-track {
+  display: block;
   height: 7px;
   border-radius: 999px;
   background: rgba(255, 255, 255, 0.07);
@@ -1308,6 +1309,47 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   height: 100%;
   background: linear-gradient(90deg, var(--accent), var(--success));
   border-radius: inherit;
+}
+
+/* Clickable dashboard items jump straight into the related mission */
+.learning-recommendation.is-clickable,
+.skill-pill.is-clickable,
+.mastery-row.is-clickable {
+  cursor: pointer;
+  font: inherit;
+  color: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  text-align: left;
+  transition: border-color 0.15s ease, background 0.15s ease, transform 0.15s ease;
+}
+.learning-recommendation.is-clickable {
+  display: block;
+  width: 100%;
+}
+.mastery-row.is-clickable {
+  display: block;
+  width: 100%;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 6px;
+}
+.learning-recommendation.is-clickable:hover,
+.mastery-row.is-clickable:hover {
+  border-color: rgba(56, 189, 248, 0.45);
+  background: rgba(56, 189, 248, 0.08);
+}
+.skill-pill.is-clickable:hover {
+  border-color: rgba(56, 189, 248, 0.5);
+  background: rgba(56, 189, 248, 0.14);
+  transform: translateY(-1px);
+}
+.learning-recommendation.is-clickable:focus-visible,
+.skill-pill.is-clickable:focus-visible,
+.mastery-row.is-clickable:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* ── Learning mode selector ───────────────────────────────────────────────────────────────────────────────────── */
