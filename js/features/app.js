@@ -18,6 +18,7 @@ import { getRecommendedMission, buildTrainingQueue, buildReviewQueue, buildWeakS
 import { getHintStep, getNextHint, resetHintLadder } from '../learning/hintEngine.js';
 import { buildLearningDashboard } from '../learning/dashboard.js';
 import { initSandboxLab, openSandboxLab } from './sandbox.js';
+import { primeSound, playSelect, playNav, playToggle } from '../core/sound.js';
 import {
   initSqlEditor, enableSqlEditor,
   getSqlValue, setSqlValue, focusSqlEditor,
@@ -78,9 +79,41 @@ function renderLearningDashboard() {
   ui.renderLearningDashboard(buildLearningDashboard(missions, loadProgress()));
 }
 
+const MODE_LABELS = { story: 'Story', training: 'Training', review: 'Review' };
+
+function updateLearningLaunchMeta() {
+  const el = document.getElementById('learningLaunchMeta');
+  if (!el) return;
+  const summary = buildLearningDashboard(missions, loadProgress());
+  const mode = MODE_LABELS[selectedMode] || 'Story';
+  el.textContent = `${mode} Mode · ${summary.totalCompleted}/${summary.totalMissions} missions complete`;
+}
+
+function openLearningCenter() {
+  playNav();
+  const home = document.getElementById('homeScreen');
+  const learning = document.getElementById('learningScreen');
+  if (home) home.style.display = 'none';
+  if (learning) learning.style.display = 'flex';
+  renderLearningDashboard();
+  window.scrollTo(0, 0);
+}
+
+function closeLearningCenter() {
+  playNav();
+  const home = document.getElementById('homeScreen');
+  const learning = document.getElementById('learningScreen');
+  if (learning) learning.style.display = 'none';
+  if (home) home.style.display = 'flex';
+  renderHomeList();          // reflect any learning-mode change
+  updateLearningLaunchMeta();
+  window.scrollTo(0, 0);
+}
+
 function renderHomeList() {
   const queue = getMissionQueue(selectedDifficulty);
   ui.renderMissionList(queue, (qIdx) => {
+    playNav();
     startGame(queue, null, qIdx);
   });
   const hint = document.getElementById('missionListHint');
@@ -107,21 +140,29 @@ function initHomeScreen() {
 
   document.querySelectorAll('.mode-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      if (btn.classList.contains('selected')) return;
       document.querySelectorAll('.mode-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       selectedMode = btn.dataset.mode;
+      playToggle();
       renderHomeList();
     });
   });
 
   document.querySelectorAll('.diff-btn').forEach(btn => {
     btn.addEventListener('click', () => {
+      if (btn.classList.contains('selected')) return;
       document.querySelectorAll('.diff-btn').forEach(b => b.classList.remove('selected'));
       btn.classList.add('selected');
       selectedDifficulty = btn.dataset.diff;
+      playSelect();
       renderHomeList();
     });
   });
+
+  document.getElementById('btnOpenLearning')?.addEventListener('click', openLearningCenter);
+  document.getElementById('btnLearningBack')?.addEventListener('click', closeLearningCenter);
+  document.getElementById('btnLearningApply')?.addEventListener('click', closeLearningCenter);
 
   initSectionToggles();
 
@@ -148,6 +189,7 @@ function initHomeScreen() {
 
   refreshContinueSection();
   renderLearningDashboard();
+  updateLearningLaunchMeta();
   renderHomeList();
   updateRecommendation();
 }
@@ -278,6 +320,7 @@ function goHome() {
   ui.showHomeScreen();
   refreshContinueSection();
   renderLearningDashboard();
+  updateLearningLaunchMeta();
   renderHomeList();
   updateRecommendation();
 }
@@ -572,6 +615,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (!document.getElementById('btnRun').disabled) runQuery();
     }
   });
+
+  // Unlock the audio context on the very first interaction (browser policy).
+  window.addEventListener('pointerdown', primeSound, { once: true });
+  window.addEventListener('keydown', primeSound, { once: true });
 
   loadMastery();
   initMobileTabs();
