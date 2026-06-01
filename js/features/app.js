@@ -465,17 +465,20 @@ function showHint() {
 }
 
 function showProgressiveHint() {
-  if (state.hintsLeft <= 0) {
+  const mission = state.missionQueue[state.currentMissionIndex];
+  // A hint costs one from the shared run budget the first time it is used on a
+  // mission. Later steps of the same hint ladder are free, so only block when a
+  // new payment is actually required and the budget is empty.
+  if (!state.levelHintUsed && state.hintsLeft <= 0) {
     ui.showError('No hints left. Try running a query and studying the result.');
     return;
   }
-  const mission = state.missionQueue[state.currentMissionIndex];
   const hint = getNextHint(mission);
   if (!hint.text) {
     ui.showError('No hint is available for this mission.');
     return;
   }
-  if (hint.shouldConsume) {
+  if (hint.shouldConsume && !state.levelHintUsed) {
     if (hint.isProgressive) {
       state.hintsLeft--;
       state.levelHintUsed = true;
