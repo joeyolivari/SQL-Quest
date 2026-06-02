@@ -249,7 +249,7 @@ body.light .solution-box { background: #f1f5f9; color: #0f172a; border-color: #c
 
 /* Header */
 body.light header { background: #ffffff; border-bottom-color: #e2e8f0; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
-body.light .logo { color: #0369a1; text-shadow: none; }
+body.light .logo { filter: brightness(0.85); }
 body.light .stat span { color: #0f172a; }
 body.light .btn-theme { color: #475569; border-color: #e2e8f0; }
 body.light .btn-theme:hover { color: #0f172a; border-color: #94a3b8; }
