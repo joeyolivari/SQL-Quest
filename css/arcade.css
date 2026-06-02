@@ -1317,6 +1317,7 @@ body.light .home-error {
     max-height: 80px;
     max-width: 100%;
   }
+  .learning-launch-desc { font-size: 0.72rem; }
 }
 
 @media (max-width: 600px) {
@@ -1343,6 +1344,9 @@ body.light .home-error {
   #homeScreen .home-section h3 { font-size: 0.40rem; }
   /* Learning launch: tighter padding on narrow phones */
   .learning-launch { padding: 16px 44px 16px 16px; }
+  /* Shrink description so it doesn't overflow the card */
+  .learning-launch-desc { font-size: 0.68rem; letter-spacing: 0; }
+  .learning-launch-title { font-size: 0.42rem; }
   /* Footer buttons stack better */
   .home-footer .btn-lg { font-size: 0.40rem; padding: 15px 22px; }
   .home-footer .btn-primary { padding: 15px 30px; font-size: 0.42rem; }
