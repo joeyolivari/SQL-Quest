@@ -676,7 +676,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function copyScore() {
   const mission = state.missionQueue;
   const badges = [...state.earnedBadges].join(', ') || 'none';
-  const text = `Compliance SQL Quest\nScore: ${state.score}\nMissions: ${state.completedMissions.size}/${mission.length}\nTime: ${ui.formatTime(state.totalTime)}\nBadges: ${badges}`;
+  const text = `SQL Quest\nScore: ${state.score}\nMissions: ${state.completedMissions.size}/${mission.length}\nTime: ${ui.formatTime(state.totalTime)}\nBadges: ${badges}`;
   navigator.clipboard.writeText(text).catch(() => {});
   const btn = document.getElementById('btnCopyScore');
   if (btn) { btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = '📋 Copy Results'; }, 2000); }
