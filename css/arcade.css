@@ -1,0 +1,1296 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   SQL QUEST  ◈  1990s CYBER ARCADE SYSTEM — AESTHETIC LAYER v1.994
+   ───────────────────────────────────────────────────────────────────────────
+   TARGET  : body, header, #homeScreen
+   SCOPE   : visual / aesthetic only — zero game logic changes
+   LOADED  : last in styles.css cascade (overrides all prior rules)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── ARCADE DESIGN TOKENS ────────────────────────────────────────────────── */
+:root {
+  --arc-green:   #00ff41;
+  --arc-cyan:    #00e5ff;
+  --arc-pink:    #ff00cc;
+  --arc-yellow:  #ffe600;
+  --arc-orange:  #ff6200;
+  --arc-dim:     #1a5c30;
+  --arc-dark:    #000813;
+  --arc-panel:   #000d0a;
+  --font-pixel:  'Press Start 2P', 'Courier New', monospace;
+  --font-vt:     'VT323', monospace;
+  --font-tech:   'Share Tech Mono', 'Courier New', monospace;
+}
+
+/* ── KEYFRAMES ────────────────────────────────────────────────────────────── */
+
+@keyframes press-start-blink {
+  0%,  49% { opacity: 1; }
+  50%, 100% { opacity: 0; }
+}
+
+@keyframes phosphor-breathe {
+  0%,  100% {
+    text-shadow:
+      0 0 6px  var(--arc-green),
+      0 0 18px rgba(0, 255, 65, 0.50);
+    filter:
+      drop-shadow(0 0 14px rgba(0, 255, 65, 0.55))
+      drop-shadow(0 0 40px rgba(0, 180, 255, 0.30));
+  }
+  50% {
+    text-shadow:
+      0 0 12px var(--arc-green),
+      0 0 36px rgba(0, 255, 65, 0.75),
+      0 0 70px rgba(0, 255, 65, 0.30);
+    filter:
+      drop-shadow(0 0 22px rgba(0, 255, 65, 0.80))
+      drop-shadow(0 0 60px rgba(0, 180, 255, 0.45));
+  }
+}
+
+@keyframes neon-border-pulse {
+  0%,  100% {
+    box-shadow:
+      0 0 8px  rgba(0, 255, 65, 0.30),
+      0 0 28px rgba(0, 255, 65, 0.10),
+      inset 0 0 10px rgba(0, 255, 65, 0.04);
+  }
+  50% {
+    box-shadow:
+      0 0 20px rgba(0, 255, 65, 0.55),
+      0 0 48px rgba(0, 255, 65, 0.18),
+      inset 0 0 20px rgba(0, 255, 65, 0.08);
+  }
+}
+
+@keyframes header-stripe-march {
+  0%   { background-position: 0 0; }
+  100% { background-position: 24px 0; }
+}
+
+@keyframes stat-digit-glow {
+  0%,  100% { text-shadow: 0 0 8px rgba(0, 255, 65, 0.70); }
+  50%        { text-shadow: 0 0 16px rgba(0, 255, 65, 0.95), 0 0 30px rgba(0, 255, 65, 0.40); }
+}
+
+/* ── BODY: DEEP PHOSPHOR CRT DISPLAY ─────────────────────────────────────── */
+body {
+  background-color: var(--arc-dark);
+  background-image:
+    /* Corner vignette — dark oval frame */
+    radial-gradient(ellipse at 50% 50%,
+      transparent 22%, rgba(0, 0, 0, 0.97) 100%),
+    /* Central phosphor bloom */
+    radial-gradient(ellipse at 50% 38%,
+      rgba(0, 180, 70,  0.08) 0%,
+      rgba(0,  50, 200, 0.08) 55%,
+      transparent 74%),
+    /* Dense CRT scanlines */
+    repeating-linear-gradient(
+      0deg,
+      rgba(0, 0, 0, 0.54) 0px,
+      rgba(0, 0, 0, 0.54) 1px,
+      transparent          1px,
+      transparent          3px
+    ),
+    /* Phosphor horizontal mesh */
+    linear-gradient(0deg,   rgba(0, 255, 65, 0.030) 1px, transparent 1px),
+    /* Phosphor vertical mesh */
+    linear-gradient(90deg,  rgba(0, 255, 65, 0.030) 1px, transparent 1px);
+  background-size:
+    100% 100%,
+    100% 100%,
+    100% 100%,
+    32px 32px,
+    32px 32px;
+  background-attachment: fixed;
+  font-family: var(--font-tech);
+}
+
+/* ── HEADER: ARCADE CABINET HUD ──────────────────────────────────────────── */
+header {
+  background: #00050d;
+  border-bottom: 2px solid var(--arc-green);
+  box-shadow:
+    0 0 18px rgba(0, 255, 65, 0.50),
+    0 0 44px rgba(0, 255, 65, 0.14),
+    inset 0 -1px 0 rgba(0, 255, 65, 0.14);
+  padding: 8px 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Animated dashed neon tape along the bottom border */
+header::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; bottom: 0;
+  height: 2px;
+  background: repeating-linear-gradient(
+    90deg,
+    var(--arc-green) 0px,  var(--arc-green) 8px,
+    var(--arc-cyan)  8px,  var(--arc-cyan)  12px,
+    var(--arc-green) 12px, var(--arc-green) 20px,
+    transparent      20px, transparent      24px
+  );
+  animation: header-stripe-march 1.6s linear infinite;
+  opacity: 0.55;
+}
+
+/* "SQL QUEST" brand mark — absolute left, clears the stats flex */
+header::after {
+  content: 'SQL QUEST';
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: var(--font-pixel);
+  font-size: 0.58rem;
+  color: var(--arc-green);
+  text-shadow:
+    0 0 8px  rgba(0, 255, 65, 0.95),
+    0 0 22px rgba(0, 255, 65, 0.50);
+  letter-spacing: 0.12em;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+/* Stats panel: pushed right to clear the SQL QUEST label */
+.stats {
+  font-family: var(--font-tech);
+  font-size: 0.68rem;
+  color: rgba(0, 255, 65, 0.42);
+  gap: 16px;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  padding-left: 108px;
+}
+
+/* Stat numbers: VT323 large phosphor display */
+.stat span {
+  font-family: var(--font-vt);
+  font-size: 1.55rem;
+  color: var(--arc-green);
+  font-weight: 400;
+  text-shadow: 0 0 8px rgba(0, 255, 65, 0.70);
+  line-height: 1;
+  vertical-align: middle;
+  animation: stat-digit-glow 3.5s ease-in-out infinite;
+}
+
+/* Learn SQL button */
+.btn-learn {
+  font-family: var(--font-pixel);
+  font-size: 0.42rem;
+  background: rgba(0, 255, 65, 0.07);
+  border: 1px solid rgba(0, 255, 65, 0.38);
+  color: var(--arc-green);
+  letter-spacing: 0.08em;
+  text-shadow: 0 0 6px rgba(0, 255, 65, 0.55);
+  box-shadow: 0 0 8px rgba(0, 255, 65, 0.12);
+  border-radius: 2px;
+  padding: 8px 12px;
+}
+.btn-learn:hover {
+  background: rgba(0, 255, 65, 0.14);
+  box-shadow: 0 0 16px rgba(0, 255, 65, 0.35);
+  border-color: rgba(0, 255, 65, 0.75);
+}
+
+/* Theme toggle */
+.btn-theme {
+  border-color: rgba(0, 255, 65, 0.20);
+  color: rgba(0, 255, 65, 0.45);
+  border-radius: 2px;
+}
+.btn-theme:hover {
+  color: var(--arc-green);
+  border-color: var(--arc-green);
+  box-shadow: 0 0 8px rgba(0, 255, 65, 0.30);
+}
+
+/* ── HOME SCREEN CONTAINER ────────────────────────────────────────────────── */
+#homeScreen {
+  padding-top: 44px;
+  padding-bottom: 80px;
+  gap: 44px;
+}
+
+/* ── HERO SECTION ─────────────────────────────────────────────────────────── */
+.home-hero {
+  padding: 12px 0 20px;
+}
+
+/* Bigger phosphor backdrop */
+.home-hero::before {
+  background: radial-gradient(ellipse at center,
+    rgba(0, 255, 65,  0.09) 0%,
+    rgba(0, 100, 255, 0.06) 45%,
+    transparent 70%);
+  width: 960px;
+  height: 440px;
+  top: -90px;
+}
+
+/* "SQL Training" badge → SYSTEM INITIALISED pill */
+.home-hero-badge {
+  font-family: var(--font-pixel);
+  font-size: 0.44rem;
+  background: rgba(0, 255, 65, 0.07);
+  border: 1px solid rgba(0, 255, 65, 0.40);
+  border-radius: 2px;
+  color: var(--arc-green);
+  letter-spacing: 0.22em;
+  padding: 8px 22px;
+  box-shadow:
+    0 0 14px rgba(0, 255, 65, 0.18),
+    inset 0 0 10px rgba(0, 255, 65, 0.04);
+}
+.home-hero-badge::before {
+  background: var(--arc-green);
+  box-shadow: 0 0 14px var(--arc-green);
+}
+
+/* Logo: hard phosphor glow + breathing animation */
+.home-logo-hero {
+  height: 120px;
+  animation: phosphor-breathe 4s ease-in-out infinite;
+}
+
+/* Tagline: large VT323 terminal display */
+.home-tagline {
+  font-family: var(--font-vt);
+  font-size: 1.68rem;
+  color: var(--arc-cyan);
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.55);
+  max-width: 620px;
+  line-height: 1.4;
+  position: relative;
+}
+
+/* Blinking PRESS START below the tagline */
+.home-tagline::after {
+  content: '>> PRESS START <<';
+  display: block;
+  font-family: var(--font-pixel);
+  font-size: 0.6rem;
+  color: var(--arc-green);
+  text-shadow:
+    0 0 10px rgba(0, 255, 65, 0.95),
+    0 0 24px rgba(0, 255, 65, 0.45);
+  animation: press-start-blink 0.85s step-start infinite;
+  margin-top: 20px;
+  letter-spacing: 0.18em;
+}
+
+/* Stat chips: arcade token counter readouts */
+.home-stat-chips {
+  margin-top: 32px;
+  gap: 14px;
+}
+
+.home-stat-chip {
+  font-family: var(--font-pixel);
+  font-size: 0.38rem;
+  background: #000a06;
+  border: 1px solid rgba(0, 255, 65, 0.26);
+  border-radius: 2px;
+  color: rgba(0, 255, 65, 0.42);
+  padding: 14px 20px;
+  gap: 14px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+  box-shadow:
+    inset 0 0 18px rgba(0, 0, 0, 0.80),
+    0 0 6px rgba(0, 255, 65, 0.08);
+}
+.home-stat-chip::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(0, 255, 65, 0.55) 50%,
+    transparent 100%);
+}
+.home-stat-chip:hover {
+  border-color: rgba(0, 255, 65, 0.62);
+  color: var(--arc-green);
+  box-shadow:
+    inset 0 0 14px rgba(0, 0, 0, 0.60),
+    0 0 18px rgba(0, 255, 65, 0.22);
+  background: #001209;
+}
+.home-stat-chip strong {
+  font-family: var(--font-vt);
+  font-size: 1.65rem;
+  font-weight: 400;
+  color: var(--arc-green);
+  text-shadow: 0 0 8px rgba(0, 255, 65, 0.78);
+  vertical-align: middle;
+  line-height: 1;
+}
+
+/* ── SECTION HEADINGS ─────────────────────────────────────────────────────── */
+#homeScreen .home-section h3 {
+  font-family: var(--font-pixel);
+  font-size: 0.50rem;
+  color: var(--arc-cyan);
+  letter-spacing: 0.20em;
+  text-transform: uppercase;
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.55);
+  margin-bottom: 20px;
+}
+#homeScreen .home-section h3::before {
+  background: var(--arc-cyan);
+  box-shadow: 0 0 8px var(--arc-cyan);
+  width: 4px;
+  height: 14px;
+}
+/* Fading dashed line after heading */
+#homeScreen .home-section h3::after {
+  content: '';
+  display: inline-block;
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(90deg,
+    rgba(0, 229, 255, 0.48) 0%,
+    rgba(0, 229, 255, 0.06) 65%,
+    transparent 100%);
+  margin-left: 14px;
+  vertical-align: middle;
+}
+
+/* Section row & hint text */
+.section-hint,
+#missionListHint {
+  font-family: var(--font-tech);
+  font-size: 0.70rem;
+  color: rgba(0, 255, 65, 0.32);
+  letter-spacing: 0.06em;
+  opacity: 1;
+}
+
+/* ── CONTINUE SECTION ─────────────────────────────────────────────────────── */
+.continue-section {
+  background: #000d07;
+  border: 2px solid rgba(0, 255, 65, 0.46);
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 1px rgba(0, 255, 65, 0.06),
+    0 0 40px rgba(0, 255, 65, 0.10),
+    inset 0 0 24px rgba(0, 255, 65, 0.03);
+  animation: neon-border-pulse 3.2s ease-in-out infinite;
+}
+.continue-section::before {
+  background: linear-gradient(90deg,
+    transparent 5%,
+    rgba(0, 255, 65, 0.90) 35%,
+    rgba(0, 229, 255, 0.90) 65%,
+    transparent 95%);
+  height: 2px;
+}
+/* Phosphor scanline texture over card */
+.continue-section::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent           0px, transparent           3px,
+    rgba(0,255,65,0.016)  3px, rgba(0,255,65,0.016)  4px
+  );
+  pointer-events: none;
+  border-radius: 2px;
+  z-index: 0;
+}
+.continue-left,
+.continue-actions { position: relative; z-index: 1; }
+
+.continue-title {
+  font-family: var(--font-pixel);
+  font-size: 0.50rem;
+  color: var(--arc-green);
+  letter-spacing: 0.10em;
+  text-shadow: 0 0 8px rgba(0, 255, 65, 0.60);
+}
+.continue-info {
+  font-family: var(--font-tech);
+  font-size: 0.82rem;
+  color: rgba(0, 255, 65, 0.58);
+  letter-spacing: 0.03em;
+}
+
+/* RESUME button — green arcade input */
+.btn-continue {
+  font-family: var(--font-pixel);
+  font-size: 0.46rem;
+  letter-spacing: 0.09em;
+  background: rgba(0, 255, 65, 0.10);
+  border: 2px solid var(--arc-green);
+  color: var(--arc-green);
+  text-shadow: 0 0 8px rgba(0, 255, 65, 0.80);
+  box-shadow:
+    0 0 18px rgba(0, 255, 65, 0.28),
+    inset 0 0 12px rgba(0, 255, 65, 0.05),
+    0 5px 0 rgba(0, 60, 20, 0.90);
+  border-radius: 3px;
+  padding: 14px 28px;
+}
+.btn-continue:hover {
+  background: rgba(0, 255, 65, 0.18);
+  box-shadow:
+    0 0 30px rgba(0, 255, 65, 0.48),
+    inset 0 0 16px rgba(0, 255, 65, 0.08),
+    0 5px 0 rgba(0, 80, 25, 0.90);
+  transform: translateY(-2px);
+}
+.btn-continue:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 0 16px rgba(0, 255, 65, 0.28),
+    inset 0 0 12px rgba(0, 255, 65, 0.08),
+    0 2px 0 rgba(0, 60, 20, 0.90);
+}
+
+.btn-clear-save {
+  font-family: var(--font-tech);
+  font-size: 0.70rem;
+  border-color: rgba(0, 255, 65, 0.18);
+  color: rgba(0, 255, 65, 0.40);
+  letter-spacing: 0.05em;
+  border-radius: 2px;
+}
+.btn-clear-save:hover:not(:disabled) {
+  border-color: rgba(0, 255, 65, 0.52);
+  color: var(--arc-green);
+  background: rgba(0, 255, 65, 0.04);
+}
+
+/* ── RECOMMEND SECTION ────────────────────────────────────────────────────── */
+.recommend-section {
+  background: #0a0700;
+  border: 2px solid rgba(255, 230, 0, 0.38);
+  border-radius: 4px;
+  box-shadow:
+    0 0 0 1px rgba(255, 230, 0, 0.05),
+    0 0 32px rgba(255, 230, 0, 0.08),
+    inset 0 0 20px rgba(255, 140, 0, 0.02);
+}
+.recommend-section::before {
+  background: linear-gradient(90deg,
+    transparent 5%,
+    rgba(255, 230, 0, 0.90) 35%,
+    rgba(255, 120, 0, 0.90) 65%,
+    transparent 95%);
+}
+.recommend-left,
+.recommend-actions { position: relative; z-index: 1; }
+
+.recommend-title {
+  font-family: var(--font-pixel);
+  font-size: 0.48rem;
+  color: var(--arc-yellow);
+  text-shadow: 0 0 8px rgba(255, 230, 0, 0.60);
+  letter-spacing: 0.10em;
+}
+.recommend-reason {
+  font-family: var(--font-tech);
+  color: rgba(255, 210, 0, 0.55);
+  font-size: 0.82rem;
+  letter-spacing: 0.03em;
+}
+.recommend-mission {
+  font-family: var(--font-vt);
+  font-size: 1.22rem;
+  color: var(--arc-yellow);
+  text-shadow: 0 0 8px rgba(255, 230, 0, 0.55);
+  letter-spacing: 0.04em;
+}
+
+/* PRACTICE NOW — amber arcade input */
+.btn-recommend {
+  font-family: var(--font-pixel);
+  font-size: 0.44rem;
+  letter-spacing: 0.07em;
+  background: rgba(255, 230, 0, 0.08);
+  border: 2px solid var(--arc-yellow);
+  color: var(--arc-yellow);
+  text-shadow: 0 0 8px rgba(255, 230, 0, 0.65);
+  box-shadow:
+    0 0 16px rgba(255, 230, 0, 0.20),
+    0 5px 0 rgba(80, 60, 0, 0.90);
+  border-radius: 3px;
+}
+.btn-recommend:hover {
+  background: rgba(255, 230, 0, 0.16);
+  box-shadow:
+    0 0 28px rgba(255, 230, 0, 0.40),
+    0 5px 0 rgba(90, 65, 0, 0.90);
+  transform: translateY(-2px);
+}
+.btn-recommend:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 0 14px rgba(255, 230, 0, 0.22),
+    0 2px 0 rgba(80, 60, 0, 0.90);
+}
+
+/* ── LEARNING LAUNCH BUTTON ───────────────────────────────────────────────── */
+.learning-launch {
+  background:
+    radial-gradient(circle at 12% 18%, rgba(0, 229, 255, 0.12), transparent 40%),
+    linear-gradient(135deg, #00080d 0%, #000d14 100%);
+  border: 1px solid rgba(0, 229, 255, 0.30);
+  border-radius: 4px;
+  box-shadow:
+    0 0 20px rgba(0, 229, 255, 0.07),
+    inset 0 0 24px rgba(0, 0, 0, 0.40);
+  padding: 20px 24px;
+  gap: 18px;
+  transition: border-color .2s, box-shadow .2s, background .2s, transform .15s;
+}
+/* Top phosphor line */
+.learning-launch::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent 5%,
+    rgba(0, 229, 255, 0.65) 50%,
+    transparent 95%);
+  z-index: 1;
+  pointer-events: none;
+}
+.learning-launch:hover {
+  border-color: rgba(0, 229, 255, 0.65);
+  box-shadow:
+    0 0 32px rgba(0, 229, 255, 0.18),
+    inset 0 0 20px rgba(0, 229, 255, 0.04);
+  background:
+    radial-gradient(circle at 12% 18%, rgba(0, 229, 255, 0.16), transparent 42%),
+    linear-gradient(135deg, #000d14 0%, #001018 100%);
+  transform: translateY(-2px);
+}
+.learning-launch:hover .learning-launch-arrow {
+  transform: translateX(5px);
+}
+
+.learning-launch-glow {
+  background: repeating-linear-gradient(
+    0deg,
+    transparent               0 7px,
+    rgba(0, 229, 255, 0.018)  7px 8px
+  );
+}
+
+.learning-launch-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 229, 255, 0.45);
+  background: linear-gradient(135deg, rgba(0, 229, 255, 0.18), rgba(0, 229, 255, 0.04));
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.08),
+    0 0 20px rgba(0, 229, 255, 0.18);
+}
+
+.learning-launch-title {
+  font-family: var(--font-pixel);
+  font-size: 0.50rem;
+  color: var(--arc-cyan);
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.70);
+  letter-spacing: 0.12em;
+}
+
+.learning-launch-desc {
+  font-family: var(--font-tech);
+  font-size: 0.80rem;
+  color: rgba(0, 229, 255, 0.55);
+  letter-spacing: 0.03em;
+}
+
+.learning-launch-meta {
+  font-family: var(--font-tech);
+  font-size: 0.68rem;
+  color: rgba(0, 255, 65, 0.55);
+  letter-spacing: 0.04em;
+}
+
+.learning-launch-arrow {
+  color: var(--arc-cyan);
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.65);
+  font-size: 1.4rem;
+  transition: transform 0.2s;
+}
+
+/* ── DIFFICULTY ROW: arcade character-select enhancements ─────────────────── */
+
+/* Restore icons hidden by components.css image-skin rule */
+.diff-btn.beginner .diff-icon,
+.diff-btn.intermediate .diff-icon,
+.diff-btn.advanced .diff-icon,
+.diff-btn[data-diff="all"] .diff-icon {
+  opacity: 1;
+}
+
+/* Clear aspect-ratios set for missing card images */
+.diff-btn.beginner,
+.diff-btn.beginner:hover,
+.diff-btn.beginner.selected,
+.diff-btn.intermediate,
+.diff-btn.intermediate:hover,
+.diff-btn.intermediate.selected,
+.diff-btn.advanced,
+.diff-btn.advanced:hover,
+.diff-btn.advanced.selected,
+.diff-btn[data-diff="all"],
+.diff-btn[data-diff="all"]:hover,
+.diff-btn[data-diff="all"].selected {
+  aspect-ratio: auto;
+  background-image: none;
+}
+
+/* LVL_01 tags: pixel font */
+.diff-row .diff-tag {
+  font-family: var(--font-pixel);
+  font-size: 0.36rem;
+  letter-spacing: 0.12em;
+}
+
+/* Difficulty labels: pixel font with phosphor glow */
+.diff-row .diff-label {
+  font-family: var(--font-pixel);
+  font-size: 0.50rem;
+  letter-spacing: 0.09em;
+  text-shadow: 0 0 14px rgba(var(--diff-rgb), 0.55);
+}
+
+/* Mission counts: technical mono */
+.diff-row .diff-count {
+  font-family: var(--font-tech);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+  color: rgba(var(--diff-rgb), 0.50);
+}
+
+/* Tighter corner radius on desktop for harder arcade feel */
+@media (min-width: 769px) {
+  .diff-row .diff-btn {
+    border-radius: 6px;
+  }
+  .diff-row .diff-btn::after {
+    border-radius: 0 0 4px 0;
+  }
+}
+
+/* ── MISSION LIST: BBS TERMINAL SCROLL ────────────────────────────────────── */
+
+.mission-list {
+  scrollbar-color: rgba(0, 255, 65, 0.24) rgba(0, 255, 65, 0.04);
+  max-height: min(540px, calc(100vh - 320px));
+}
+.mission-list::-webkit-scrollbar-thumb {
+  background: rgba(0, 255, 65, 0.24);
+  border-radius: 1px;
+}
+.mission-list::-webkit-scrollbar-track {
+  background: rgba(0, 255, 65, 0.04);
+}
+
+.mission-item {
+  background: #00060d;
+  border: 1px solid rgba(0, 255, 65, 0.10);
+  border-left: 3px solid transparent;
+  border-radius: 2px;
+  padding: 11px 16px;
+  gap: 12px;
+}
+.mission-item:hover {
+  background: #000f08;
+  border-color: rgba(0, 255, 65, 0.30);
+  border-left-color: var(--arc-green);
+  transform: translateX(2px);
+  box-shadow:
+    0 0 14px rgba(0, 255, 65, 0.06),
+    0 2px 12px rgba(0, 0, 0, 0.30);
+}
+
+.mission-item-num {
+  background: #001a0a;
+  border: 1px solid rgba(0, 255, 65, 0.22);
+  border-radius: 2px;
+  color: var(--arc-green);
+  font-family: var(--font-tech);
+  font-size: 0.70rem;
+  text-shadow: 0 0 6px rgba(0, 255, 65, 0.55);
+  min-width: 30px;
+  height: 30px;
+}
+.mission-item:hover .mission-item-num {
+  border-color: rgba(0, 255, 65, 0.52);
+  box-shadow: 0 0 8px rgba(0, 255, 65, 0.22);
+}
+
+.mission-item-title {
+  font-family: var(--font-tech);
+  font-size: 0.88rem;
+  color: rgba(0, 255, 65, 0.85);
+  text-shadow: 0 0 5px rgba(0, 255, 65, 0.28);
+  letter-spacing: 0.03em;
+}
+
+.mission-concept {
+  font-family: var(--font-tech);
+  font-size: 0.60rem;
+  color: rgba(0, 229, 255, 0.65);
+  background: rgba(0, 229, 255, 0.05);
+  border-color: rgba(0, 229, 255, 0.15);
+  letter-spacing: 0.04em;
+}
+
+/* Mission difficulty badges */
+.mission-item-badge {
+  font-family: var(--font-pixel);
+  font-size: 0.30rem;
+  letter-spacing: 0.06em;
+  border-radius: 2px;
+  padding: 3px 10px;
+}
+.mission-item-badge.beginner {
+  color: var(--arc-green);
+  background: rgba(0, 255, 65, 0.07);
+  border-color: rgba(0, 255, 65, 0.28);
+}
+.mission-item-badge.intermediate {
+  color: var(--arc-yellow);
+  background: rgba(255, 230, 0, 0.07);
+  border-color: rgba(255, 230, 0, 0.28);
+}
+.mission-item-badge.advanced {
+  color: #ff1744;
+  background: rgba(255, 23, 68, 0.07);
+  border-color: rgba(255, 23, 68, 0.28);
+}
+
+/* ── HOME FOOTER: ARCADE CABINET BUTTONS ──────────────────────────────────── */
+
+.home-footer {
+  padding-top: 12px;
+  gap: 14px;
+}
+
+/* Base large button on home footer */
+.home-footer .btn-lg {
+  font-family: var(--font-pixel);
+  font-size: 0.46rem;
+  letter-spacing: 0.12em;
+  border-radius: 4px;
+  padding: 18px 34px;
+  text-transform: uppercase;
+}
+
+/* PRIMARY — Start from Beginning: CYAN arcade button */
+.home-footer .btn-primary {
+  background: rgba(0, 229, 255, 0.09);
+  border: 2px solid var(--arc-cyan);
+  color: var(--arc-cyan);
+  text-shadow:
+    0 0 8px  rgba(0, 229, 255, 0.90),
+    0 0 22px rgba(0, 229, 255, 0.40);
+  box-shadow:
+    0 0 22px rgba(0, 229, 255, 0.30),
+    0 0 55px rgba(0, 229, 255, 0.10),
+    inset 0 0 12px rgba(0, 229, 255, 0.04),
+    0 6px 0 rgba(0, 80, 110, 0.95);
+  transition: background .15s, box-shadow .15s, transform .1s;
+  padding: 18px 50px;
+  font-size: 0.48rem;
+}
+.home-footer .btn-primary:hover {
+  background: rgba(0, 229, 255, 0.17);
+  box-shadow:
+    0 0 32px rgba(0, 229, 255, 0.52),
+    0 0 75px rgba(0, 229, 255, 0.20),
+    inset 0 0 16px rgba(0, 229, 255, 0.06),
+    0 6px 0 rgba(0, 100, 135, 0.95);
+  transform: translateY(-2px);
+}
+.home-footer .btn-primary:active {
+  transform: translateY(4px);
+  box-shadow:
+    0 0 16px rgba(0, 229, 255, 0.28),
+    inset 0 0 12px rgba(0, 229, 255, 0.08),
+    0 2px 0 rgba(0, 80, 110, 0.95);
+}
+
+/* SQL Training Lab: GREEN arcade button */
+.btn-lab {
+  background: rgba(0, 255, 65, 0.07);
+  border: 2px solid rgba(0, 255, 65, 0.44);
+  color: var(--arc-green);
+  text-shadow: 0 0 8px rgba(0, 255, 65, 0.68);
+  box-shadow:
+    0 0 14px rgba(0, 255, 65, 0.14),
+    0 5px 0 rgba(0, 60, 20, 0.95);
+}
+.btn-lab:hover:not(:disabled) {
+  background: rgba(0, 255, 65, 0.14);
+  border-color: var(--arc-green);
+  color: var(--arc-green);
+  text-shadow: 0 0 12px rgba(0, 255, 65, 0.95);
+  box-shadow:
+    0 0 26px rgba(0, 255, 65, 0.34),
+    0 5px 0 rgba(0, 70, 22, 0.95);
+  transform: translateY(-2px);
+}
+.btn-lab:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 0 14px rgba(0, 255, 65, 0.20),
+    0 2px 0 rgba(0, 60, 20, 0.95);
+}
+
+/* Weak Skill Drill: YELLOW arcade button */
+.btn-drill {
+  background: rgba(255, 230, 0, 0.06);
+  border: 2px solid rgba(255, 230, 0, 0.38);
+  color: var(--arc-yellow);
+  text-shadow: 0 0 8px rgba(255, 230, 0, 0.58);
+  box-shadow:
+    0 0 10px rgba(255, 230, 0, 0.10),
+    0 5px 0 rgba(80, 60, 0, 0.95);
+  padding: 18px 32px;
+}
+.btn-drill:hover:not(:disabled) {
+  background: rgba(255, 230, 0, 0.12);
+  border-color: var(--arc-yellow);
+  color: var(--arc-yellow);
+  box-shadow:
+    0 0 22px rgba(255, 230, 0, 0.28),
+    0 5px 0 rgba(90, 65, 0, 0.95);
+  transform: translateY(-2px);
+}
+.btn-drill:active {
+  transform: translateY(3px);
+  box-shadow:
+    0 0 10px rgba(255, 230, 0, 0.16),
+    0 2px 0 rgba(80, 60, 0, 0.95);
+}
+
+/* ── HOME ERROR MSG ───────────────────────────────────────────────────────── */
+.home-error {
+  font-family: var(--font-tech);
+  color: var(--arc-pink);
+  font-size: 0.78rem;
+  text-shadow: 0 0 6px rgba(255, 0, 204, 0.50);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   LIGHT MODE — FULL ROLLBACK
+   Every arcade override reverted to clean, readable defaults.
+   ══════════════════════════════════════════════════════════════════════════ */
+
+body.light header {
+  background: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.07);
+}
+body.light header::before { display: none; }
+body.light header::after  {
+  color: #0369a1;
+  text-shadow: none;
+  font-size: 0.52rem;
+}
+
+body.light .stats {
+  font-family: var(--font-sans);
+  font-size: 0.80rem;
+  color: var(--muted);
+  letter-spacing: normal;
+  text-transform: none;
+}
+body.light .stat span {
+  font-family: var(--font-sans);
+  font-size: inherit;
+  font-weight: 700;
+  color: #0f172a;
+  text-shadow: none;
+  animation: none;
+}
+body.light .btn-learn {
+  font-family: var(--font-sans);
+  font-size: 0.80rem;
+  letter-spacing: normal;
+  border-radius: 8px;
+  border-width: 1px;
+  box-shadow: none;
+  background: rgba(56,189,248,0.12);
+  border-color: rgba(56,189,248,0.40);
+  color: var(--accent);
+  text-shadow: none;
+}
+body.light .btn-theme {
+  border-color: #e2e8f0;
+  color: #475569;
+  border-radius: 6px;
+  box-shadow: none;
+}
+
+body.light .home-hero-badge {
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  border-radius: 999px;
+  border-width: 1px;
+  letter-spacing: 0.12em;
+  padding: 6px 18px;
+  background: rgba(3,105,161,0.10);
+  border-color: rgba(3,105,161,0.30);
+  color: #0369a1;
+  box-shadow: none;
+}
+body.light .home-logo-hero {
+  filter: none;
+  animation: none;
+}
+body.light .home-tagline {
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  color: var(--muted);
+  text-shadow: none;
+}
+body.light .home-tagline::after { display: none; }
+body.light .home-stat-chip {
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  border-radius: 12px;
+  border-width: 1px;
+  letter-spacing: normal;
+  background: #ffffff;
+  border-color: rgba(3,105,161,0.22);
+  color: #334155;
+  box-shadow: none;
+}
+body.light .home-stat-chip::before { display: none; }
+body.light .home-stat-chip strong {
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  color: #0f172a;
+  text-shadow: none;
+}
+
+body.light #homeScreen .home-section h3 {
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  color: var(--muted);
+  text-shadow: none;
+  letter-spacing: 0.12em;
+}
+body.light #homeScreen .home-section h3::before {
+  background: var(--accent);
+  box-shadow: none;
+  width: 3px;
+  height: 12px;
+}
+body.light #homeScreen .home-section h3::after { display: none; }
+body.light .section-hint,
+body.light #missionListHint {
+  font-family: var(--font-sans);
+  color: var(--muted);
+  opacity: 0.75;
+}
+
+body.light .continue-section {
+  background: linear-gradient(135deg, #eef6ff 0%, #e0f0ff 100%);
+  border: 1px solid rgba(3,105,161,0.30);
+  border-radius: 16px;
+  box-shadow: 0 0 0 1px rgba(3,105,161,0.05), var(--shadow-card);
+  animation: none;
+}
+body.light .continue-section::after { display: none; }
+body.light .continue-title {
+  font-family: var(--font-sans);
+  font-size: 1.05rem;
+  color: #0f172a;
+  text-shadow: none;
+  letter-spacing: 0.01em;
+}
+body.light .continue-info {
+  font-family: var(--font-sans);
+  color: #475569;
+}
+body.light .btn-continue {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+  border: none;
+  color: #011d2e;
+  text-shadow: none;
+  border-radius: 10px;
+  box-shadow: 0 0 24px rgba(56,189,248,0.40), 0 4px 12px rgba(0,0,0,0.30);
+  padding: 13px 40px;
+}
+body.light .btn-continue:hover {
+  background: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 100%);
+  box-shadow: 0 0 36px rgba(56,189,248,0.55), 0 4px 16px rgba(0,0,0,0.30);
+  transform: translateY(-1px);
+}
+body.light .btn-continue:active { transform: none; box-shadow: 0 0 24px rgba(56,189,248,0.40); }
+body.light .btn-clear-save {
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
+  border-radius: 8px;
+  border-color: #cbd5e1;
+  color: #475569;
+  background: #f1f5f9;
+}
+
+body.light .recommend-section {
+  background: linear-gradient(135deg, #fffbeb 0%, #fef9ee 100%);
+  border: 1px solid rgba(146,64,14,0.30);
+  border-radius: 16px;
+  box-shadow: 0 0 0 1px rgba(146,64,14,0.05), var(--shadow-card);
+}
+body.light .recommend-title {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  color: #0f172a;
+  text-shadow: none;
+  letter-spacing: 0.01em;
+}
+body.light .recommend-reason {
+  font-family: var(--font-sans);
+  color: #475569;
+}
+body.light .recommend-mission {
+  font-family: var(--font-mono);
+  font-size: 0.81rem;
+  color: #f59e0b;
+  text-shadow: none;
+  letter-spacing: 0.04em;
+}
+body.light .btn-recommend {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  letter-spacing: 0.02em;
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  border: none;
+  color: #1c0f00;
+  text-shadow: none;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(245,158,11,0.30), 0 4px 12px rgba(0,0,0,0.30);
+  padding: 13px 40px;
+}
+body.light .btn-recommend:hover {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+  box-shadow: 0 0 32px rgba(245,158,11,0.45), 0 4px 16px rgba(0,0,0,0.30);
+  transform: translateY(-1px);
+}
+body.light .btn-recommend:active { transform: none; }
+
+body.light .learning-launch {
+  background: #ffffff;
+  border: 1px solid rgba(3,105,161,0.22);
+  border-radius: 16px;
+  box-shadow: var(--shadow-card);
+}
+body.light .learning-launch::before { display: none; }
+body.light .learning-launch:hover {
+  background: #ffffff;
+  border-color: rgba(3,105,161,0.45);
+  box-shadow: 0 12px 28px rgba(15,23,42,0.12);
+  transform: translateY(-3px);
+}
+body.light .learning-launch-icon {
+  border-radius: 14px;
+  border-color: rgba(3,105,161,0.30);
+  background: rgba(3,105,161,0.07);
+  box-shadow: none;
+}
+body.light .learning-launch-title {
+  font-family: var(--font-sans);
+  font-size: 1.02rem;
+  color: #0f172a;
+  text-shadow: none;
+  letter-spacing: 0.01em;
+}
+body.light .learning-launch-desc {
+  font-family: var(--font-sans);
+  color: #475569;
+}
+body.light .learning-launch-meta { color: #0369a1; }
+body.light .learning-launch-arrow { color: #0369a1; text-shadow: none; }
+
+body.light .diff-row .diff-tag {
+  font-family: var(--font-mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.14em;
+}
+body.light .diff-row .diff-label {
+  font-family: var(--font-sans);
+  font-size: 0.98rem;
+  font-weight: 850;
+  letter-spacing: 0.02em;
+  text-shadow: none;
+}
+body.light .diff-row .diff-count {
+  font-family: var(--font-mono);
+  font-size: 0.69rem;
+  color: rgba(226, 232, 240, 0.74);
+}
+
+body.light .mission-item {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-left: 3px solid transparent;
+  border-radius: 12px;
+}
+body.light .mission-item:hover {
+  background: #f8fafc;
+  border-color: rgba(3,105,161,0.35);
+  border-left-color: #0369a1;
+  transform: translateX(4px);
+  box-shadow: 0 0 12px rgba(3,105,161,0.07), 0 2px 8px rgba(0,0,0,0.06);
+}
+body.light .mission-item-num {
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #334155;
+  font-family: var(--font-mono);
+  text-shadow: none;
+  min-width: 32px;
+  height: 32px;
+  box-shadow: none;
+}
+body.light .mission-item:hover .mission-item-num {
+  border-color: rgba(3,105,161,0.40);
+  color: #0369a1;
+  box-shadow: none;
+}
+body.light .mission-item-title {
+  font-family: var(--font-sans);
+  color: #0f172a;
+  text-shadow: none;
+  font-size: 0.85rem;
+}
+body.light .mission-concept {
+  font-family: var(--font-mono);
+  color: #0369a1;
+  background: rgba(3,105,161,0.07);
+  border-color: rgba(3,105,161,0.20);
+}
+body.light .mission-item-badge {
+  font-family: var(--font-sans);
+  font-size: 0.63rem;
+  letter-spacing: normal;
+  border-radius: 6px;
+  padding: 3px 10px;
+}
+body.light .mission-item-badge.beginner {
+  color: #22c55e;
+  background: rgba(34,197,94,0.10);
+  border-color: rgba(34,197,94,0.35);
+}
+body.light .mission-item-badge.intermediate {
+  color: #f59e0b;
+  background: rgba(245,158,11,0.10);
+  border-color: rgba(245,158,11,0.35);
+}
+body.light .mission-item-badge.advanced {
+  color: #ef4444;
+  background: rgba(239,68,68,0.10);
+  border-color: rgba(239,68,68,0.35);
+}
+
+body.light .home-footer .btn-lg {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  letter-spacing: normal;
+  border-radius: 10px;
+}
+body.light .home-footer .btn-primary {
+  background: linear-gradient(135deg, #38bdf8 0%, #0ea5e9 100%);
+  border: none;
+  color: #011d2e;
+  text-shadow: none;
+  box-shadow: 0 0 32px rgba(56,189,248,0.42), 0 0 64px rgba(56,189,248,0.15), var(--shadow-card);
+  padding: 15px 52px;
+  font-size: 1rem;
+}
+body.light .home-footer .btn-primary:hover {
+  background: linear-gradient(135deg, #7dd3fc 0%, #38bdf8 100%);
+  box-shadow: 0 0 48px rgba(56,189,248,0.58), 0 0 80px rgba(56,189,248,0.22), var(--shadow-lift);
+  transform: translateY(-2px);
+}
+body.light .home-footer .btn-primary:active { transform: none; }
+
+body.light .btn-lab {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  text-shadow: none;
+  box-shadow: none;
+}
+body.light .btn-lab:hover:not(:disabled) {
+  background: rgba(56,189,248,0.04);
+  border-color: rgba(56,189,248,0.40);
+  color: var(--text);
+  transform: none;
+  box-shadow: none;
+}
+body.light .btn-lab:active { transform: none; }
+
+body.light .btn-drill {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  text-shadow: none;
+  box-shadow: none;
+  padding: 15px 34px;
+  font-size: 0.95rem;
+}
+body.light .btn-drill:hover:not(:disabled) {
+  background: rgba(56,189,248,0.04);
+  border-color: rgba(56,189,248,0.40);
+  color: var(--text);
+  transform: none;
+  box-shadow: none;
+}
+body.light .btn-drill:active { transform: none; }
+
+body.light .home-error {
+  font-family: var(--font-sans);
+  color: var(--danger);
+  text-shadow: none;
+}
+
+/* ── MOBILE ADJUSTMENTS ───────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  /* Hide SQL QUEST header label on very small screens to avoid overlap */
+  header::after { display: none; }
+  .stats { padding-left: 0; }
+  /* Smaller press-start text */
+  .home-tagline::after { font-size: 0.48rem; letter-spacing: 0.12em; }
+  /* Tighter stat chips */
+  .home-stat-chip {
+    font-size: 0.34rem;
+    padding: 12px 14px;
+  }
+  .home-stat-chip strong { font-size: 1.35rem; }
+  /* Section heading smaller */
+  #homeScreen .home-section h3 { font-size: 0.40rem; }
+  /* Footer buttons stack better */
+  .home-footer .btn-lg { font-size: 0.40rem; padding: 15px 22px; }
+  .home-footer .btn-primary { padding: 15px 30px; font-size: 0.42rem; }
+  /* Mission badges smaller */
+  .mission-item-badge { font-size: 0.26rem; }
+  /* Diff label smaller */
+  .diff-row .diff-label { font-size: 0.40rem; }
+}
