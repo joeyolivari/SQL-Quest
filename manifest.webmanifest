@@ -1,7 +1,7 @@
 {
-  "name": "Compliance SQL Quest",
+  "name": "SQL Quest",
   "short_name": "SQL Quest",
-  "description": "Master SQL through real-world financial compliance investigations.",
+  "description": "Master SQL through real-world investigations.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

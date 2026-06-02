@@ -1,6 +1,6 @@
 {
   "appId": "com.joeyolivari.sqlquest",
-  "appName": "Compliance SQL Quest",
+  "appName": "SQL Quest",
   "webDir": ".",
   "server": {
     "androidScheme": "https"
