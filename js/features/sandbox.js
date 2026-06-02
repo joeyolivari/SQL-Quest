@@ -1,4 +1,5 @@
 import { createSandboxDatabase, executeSandboxQuery } from '../core/sqlEngine.js';
+import { createSqlHighlighter } from '../core/editor.js';
 import { loadSqlUsageStats, recordSqlUsage, resetSqlUsageStats, SQL_USAGE_SKILLS } from '../learning/sqlUsageTracker.js';
 import { schema } from '../data/schema.js';
 
@@ -23,10 +24,32 @@ GROUP BY account_id
 ORDER BY total_deposited DESC;`
 };
 
+const SANDBOX_SQL_BUTTONS = [
+  { label: 'SELECT', insert: 'SELECT ' },
+  { label: 'FROM', insert: 'FROM ' },
+  { label: 'WHERE', insert: 'WHERE ' },
+  { label: 'AND', insert: 'AND ' },
+  { label: 'OR', insert: 'OR ' },
+  { label: 'JOIN', insert: 'JOIN ' },
+  { label: 'ON', insert: 'ON ' },
+  { label: 'GROUP BY', insert: 'GROUP BY ' },
+  { label: 'ORDER BY', insert: 'ORDER BY ' },
+  { label: 'HAVING', insert: 'HAVING ' },
+  { label: 'LIMIT', insert: 'LIMIT ' },
+  { label: 'COUNT(*)', insert: 'COUNT(*)' },
+  { label: 'SUM()', insert: 'SUM()', cursorBack: 1 },
+  { label: 'AVG()', insert: 'AVG()', cursorBack: 1 },
+  { label: 'ROUND()', insert: 'ROUND()', cursorBack: 1 },
+  { label: "' ' ", action: 'quote' },
+  { label: '( )', action: 'paren' }
+];
+
 let sandboxDb = null;
 let isReady = false;
+let sandboxEditor = null;
 
 export function initSandboxLab() {
+  initSandboxEditorTools();
   bindSandboxEvents();
   renderSandboxSchema();
   initSandboxSchemaToggle();
@@ -44,7 +67,8 @@ export function openSandboxLab() {
   lab.scrollTop = 0;
   setSandboxMobileTab('editor');
   document.getElementById('sandboxMobileTabs')?.style.removeProperty('display');
-  document.getElementById('sandboxSqlInput')?.focus();
+  initSandboxEditorTools();
+  sandboxEditor?.focus();
 }
 
 export function closeSandboxLab() {
@@ -52,6 +76,26 @@ export function closeSandboxLab() {
   const tabs = document.getElementById('sandboxMobileTabs');
   if (tabs) tabs.style.display = 'none';
   document.getElementById('homeScreen').style.display = 'flex';
+}
+
+function initSandboxEditorTools() {
+  if (!sandboxEditor) {
+    sandboxEditor = createSqlHighlighter('sandboxSqlInput');
+  }
+
+  const input = document.getElementById('sandboxSqlInput');
+  const chipRow = document.querySelector('.sandbox-chip-row');
+  if (!input || !chipRow || document.getElementById('sandboxKeywordBar')) return;
+
+  const bar = document.createElement('div');
+  bar.id = 'sandboxKeywordBar';
+  bar.className = 'sandbox-keyword-bar';
+  bar.setAttribute('aria-label', 'SQL helper buttons');
+  bar.innerHTML = SANDBOX_SQL_BUTTONS.map(btn => `
+    <button type="button" class="sandbox-sql-key" data-sandbox-insert="${escapeHtml(btn.insert || '')}" data-sandbox-action="${escapeHtml(btn.action || '')}" data-cursor-back="${btn.cursorBack || 0}">${escapeHtml(btn.label)}</button>
+  `).join('');
+
+  chipRow.insertAdjacentElement('afterend', bar);
 }
 
 function bindSandboxEvents() {
@@ -68,10 +112,29 @@ function bindSandboxEvents() {
     btn.addEventListener('click', () => {
       const query = EXAMPLE_QUERIES[btn.dataset.sandboxExample];
       if (query) {
-        document.getElementById('sandboxSqlInput').value = query;
-        document.getElementById('sandboxSqlInput').focus();
+        if (!sandboxEditor) sandboxEditor = createSqlHighlighter('sandboxSqlInput');
+        sandboxEditor?.setValue(query);
+        sandboxEditor?.focus();
       }
     });
+  });
+
+  document.getElementById('sandboxKeywordBar')?.addEventListener('click', e => {
+    const btn = e.target.closest('[data-sandbox-insert], [data-sandbox-action]');
+    if (!btn) return;
+    if (!sandboxEditor) sandboxEditor = createSqlHighlighter('sandboxSqlInput');
+
+    const action = btn.dataset.sandboxAction;
+    if (action === 'quote') {
+      sandboxEditor?.wrapCursor("'", "'");
+      return;
+    }
+    if (action === 'paren') {
+      sandboxEditor?.wrapCursor('(', ')');
+      return;
+    }
+
+    sandboxEditor?.insertText(btn.dataset.sandboxInsert || '', Number(btn.dataset.cursorBack || 0));
   });
 
   document.getElementById('sandboxSqlInput')?.addEventListener('keydown', e => {
@@ -99,11 +162,15 @@ async function resetSandboxDatabase(options = {}) {
   }
 }
 
+function getSandboxSql() {
+  if (!sandboxEditor) sandboxEditor = createSqlHighlighter('sandboxSqlInput');
+  return sandboxEditor?.getValue().trim() || document.getElementById('sandboxSqlInput')?.value.trim() || '';
+}
+
 function runSandboxQuery() {
-  const editor = document.getElementById('sandboxSqlInput');
-  const sql = editor.value.trim();
+  const sql = getSandboxSql();
   if (!sql) {
-    renderSandboxEmptyState('Add a query or pick a Try this chip to begin.');
+    renderSandboxEmptyState('Add a query, tap a SQL helper, or pick a Try this chip to begin.');
     showSandboxStatus('Editor is empty.', 'error');
     return;
   }
@@ -128,7 +195,8 @@ function runSandboxQuery() {
 }
 
 function clearSandboxEditor() {
-  document.getElementById('sandboxSqlInput').value = '';
+  if (!sandboxEditor) sandboxEditor = createSqlHighlighter('sandboxSqlInput');
+  sandboxEditor?.setValue('');
   renderSandboxEmptyState();
   showSandboxStatus('Editor cleared.', 'success');
 }
