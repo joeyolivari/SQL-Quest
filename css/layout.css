@@ -11,15 +11,10 @@ header {
 }
 
 .logo {
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: var(--accent);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  white-space: nowrap;
-  min-width: 0;
-  text-shadow: var(--glow-sm);
+  height: 40px;
+  width: auto;
+  display: block;
+  flex-shrink: 0;
 }
 
 .stats {
