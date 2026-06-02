@@ -582,6 +582,10 @@ header::after {
 .learning-launch:hover .learning-launch-arrow {
   transform: translateX(5px);
 }
+.learning-launch:hover .learning-launch-arrow::after {
+  animation: none;   /* solid on hover — no flicker while scanning */
+  opacity: 1;
+}
 
 .learning-launch-glow {
   background: repeating-linear-gradient(
@@ -624,11 +628,25 @@ header::after {
   letter-spacing: 0.04em;
 }
 
+/* Retro >> arrow — pixel font, anchored to bottom-right of the card */
 .learning-launch-arrow {
-  color: var(--arc-cyan);
-  text-shadow: 0 0 8px rgba(0, 229, 255, 0.65);
-  font-size: 1.4rem;
+  font-size: 0;          /* hide the original → glyph */
+  align-self: flex-end;  /* sink to the bottom of the flex row */
+  flex-shrink: 0;
+  margin-bottom: 2px;
   transition: transform 0.2s;
+}
+.learning-launch-arrow::after {
+  content: '>>';
+  display: block;
+  font-family: var(--font-pixel);
+  font-size: 0.55rem;
+  letter-spacing: 0.12em;
+  color: var(--arc-cyan);
+  text-shadow:
+    0 0 8px  rgba(0, 229, 255, 0.80),
+    0 0 18px rgba(0, 229, 255, 0.35);
+  animation: press-start-blink 1.4s step-start infinite;
 }
 
 /* ── DIFFICULTY ROW: arcade character-select enhancements ─────────────────── */
@@ -1127,7 +1145,14 @@ body.light .learning-launch-desc {
   color: #475569;
 }
 body.light .learning-launch-meta { color: #0369a1; }
-body.light .learning-launch-arrow { color: #0369a1; text-shadow: none; }
+body.light .learning-launch-arrow {
+  font-size: 1.3rem;   /* restore the → glyph in light mode */
+  color: #0369a1;
+  text-shadow: none;
+  align-self: center;
+  animation: none;
+}
+body.light .learning-launch-arrow::after { display: none; }
 
 body.light .diff-row .diff-tag {
   font-family: var(--font-mono);
