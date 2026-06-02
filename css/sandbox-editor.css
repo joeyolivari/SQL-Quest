@@ -1,0 +1,136 @@
+/* ── Sandbox SQL helper tools + highlighter sizing ─────────────────────────────
+   Sandbox reuses the same mirrored SQL highlighter as the mission editor, but
+   needs its own sizing and helper-button treatment.
+────────────────────────────────────────────────────────────────────────────── */
+
+.sandbox-keyword-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  padding: 10px;
+  border: 1px solid rgba(56, 189, 248, 0.18);
+  border-radius: 10px;
+  background:
+    linear-gradient(135deg, rgba(56, 189, 248, 0.08), rgba(168, 85, 247, 0.05)),
+    rgba(2, 6, 23, 0.32);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.035);
+}
+
+.sandbox-sql-key {
+  border: 1px solid rgba(56, 189, 248, 0.28);
+  border-radius: 8px;
+  padding: 7px 10px;
+  background: rgba(15, 23, 42, 0.76);
+  color: var(--text);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease, color 0.15s ease;
+}
+
+.sandbox-sql-key:hover,
+.sandbox-sql-key:focus-visible {
+  color: #e0faff;
+  border-color: rgba(56, 189, 248, 0.72);
+  box-shadow: 0 0 14px rgba(56, 189, 248, 0.22);
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.sandbox-sql-key:nth-child(12),
+.sandbox-sql-key:nth-child(13),
+.sandbox-sql-key:nth-child(14),
+.sandbox-sql-key:nth-child(15) {
+  border-color: rgba(192, 132, 252, 0.34);
+  color: #e9d5ff;
+}
+
+.sandbox-sql-key:nth-last-child(-n + 2) {
+  border-color: rgba(74, 222, 128, 0.32);
+  color: #bbf7d0;
+}
+
+.sandbox-practice-panel .sql-highlight-editor {
+  min-height: 260px;
+  height: 34vh;
+  max-height: 500px;
+}
+
+.sandbox-practice-panel .sql-highlight-layer,
+.sandbox-practice-panel .sql-editor-native {
+  font-size: 1rem;
+  line-height: 1.65;
+}
+
+.sandbox-practice-panel .sql-editor-native::placeholder {
+  color: rgba(148, 163, 184, 0.72);
+  -webkit-text-fill-color: rgba(148, 163, 184, 0.72);
+}
+
+/* Light mode contrast */
+body.light .sandbox-keyword-bar {
+  background: #ffffff;
+  border-color: rgba(3, 105, 161, 0.18);
+  box-shadow: 0 1px 8px rgba(15, 23, 42, 0.06);
+}
+
+body.light .sandbox-sql-key {
+  background: #f8fafc;
+  border-color: rgba(3, 105, 161, 0.24);
+  color: #0f172a;
+}
+
+body.light .sandbox-sql-key:hover,
+body.light .sandbox-sql-key:focus-visible {
+  color: #075985;
+  border-color: rgba(3, 105, 161, 0.55);
+  box-shadow: 0 2px 10px rgba(3, 105, 161, 0.10);
+}
+
+body.light .sandbox-sql-key:nth-child(12),
+body.light .sandbox-sql-key:nth-child(13),
+body.light .sandbox-sql-key:nth-child(14),
+body.light .sandbox-sql-key:nth-child(15) {
+  border-color: rgba(107, 33, 168, 0.28);
+  color: #6b21a8;
+}
+
+body.light .sandbox-sql-key:nth-last-child(-n + 2) {
+  border-color: rgba(22, 101, 52, 0.26);
+  color: #166534;
+}
+
+@media (max-width: 900px) {
+  .sandbox-practice-panel .sql-highlight-editor {
+    min-height: 300px;
+    height: 38vh;
+  }
+}
+
+@media (max-width: 560px) {
+  .sandbox-keyword-bar {
+    gap: 6px;
+    padding: 8px;
+  }
+
+  .sandbox-sql-key {
+    flex: 1 1 calc(33.333% - 6px);
+    min-width: 78px;
+    padding: 8px 7px;
+    font-size: 0.66rem;
+    text-align: center;
+  }
+
+  .sandbox-practice-panel .sql-highlight-editor {
+    min-height: 260px;
+    height: 320px;
+  }
+
+  .sandbox-practice-panel .sql-highlight-layer,
+  .sandbox-practice-panel .sql-editor-native {
+    font-size: 0.9rem;
+    line-height: 1.6;
+  }
+}
