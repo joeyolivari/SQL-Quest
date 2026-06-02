@@ -73,6 +73,13 @@
   50%        { text-shadow: 0 0 16px rgba(0, 255, 65, 0.95), 0 0 30px rgba(0, 255, 65, 0.40); }
 }
 
+/* Dedicated blink for the >> arrow — step-end holds opacity-1 for the first
+   half-period then snaps to 0, giving a clean 50/50 phosphor flash */
+@keyframes arc-arrow-blink {
+  0%  { opacity: 1; }
+  50% { opacity: 0; }
+}
+
 /* ── BODY: DEEP PHOSPHOR CRT DISPLAY ─────────────────────────────────────── */
 body {
   background-color: var(--arc-dark);
@@ -219,6 +226,7 @@ header::after {
 /* ── HERO SECTION ─────────────────────────────────────────────────────────── */
 .home-hero {
   padding: 12px 0 20px;
+  overflow: hidden; /* clip the 960px backdrop ::before on narrow phones */
 }
 
 /* Bigger phosphor backdrop */
@@ -552,7 +560,8 @@ header::after {
   box-shadow:
     0 0 20px rgba(0, 229, 255, 0.07),
     inset 0 0 24px rgba(0, 0, 0, 0.40);
-  padding: 20px 24px;
+  position: relative; /* anchor for absolute-positioned >> arrow */
+  padding: 20px 52px 20px 24px; /* right padding clears the absolute >> arrow */
   gap: 18px;
   transition: border-color .2s, box-shadow .2s, background .2s, transform .15s;
 }
@@ -628,12 +637,13 @@ header::after {
   letter-spacing: 0.04em;
 }
 
-/* Retro >> arrow — pixel font, anchored to bottom-right of the card */
+/* Retro >> arrow — pixel font, anchored to bottom-right corner */
 .learning-launch-arrow {
-  font-size: 0;          /* hide the original → glyph */
-  align-self: flex-end;  /* sink to the bottom of the flex row */
-  flex-shrink: 0;
-  margin-bottom: 2px;
+  position: absolute;
+  bottom: 14px;
+  right: 16px;
+  font-size: 0;       /* hide the original → glyph */
+  line-height: 1;
   transition: transform 0.2s;
 }
 .learning-launch-arrow::after {
@@ -646,7 +656,7 @@ header::after {
   text-shadow:
     0 0 8px  rgba(0, 229, 255, 0.80),
     0 0 18px rgba(0, 229, 255, 0.35);
-  animation: press-start-blink 1.4s step-start infinite;
+  animation: arc-arrow-blink 1.4s step-end infinite;
 }
 
 /* ── DIFFICULTY ROW: arcade character-select enhancements ─────────────────── */
@@ -1319,8 +1329,10 @@ body.light .home-error {
     max-width: 100%;
     height: auto;
   }
+  /* Tagline: constrain to viewport so it never triggers horizontal scroll */
+  .home-tagline { max-width: 100%; }
   /* Smaller press-start text */
-  .home-tagline::after { font-size: 0.48rem; letter-spacing: 0.12em; }
+  .home-tagline::after { font-size: 0.48rem; letter-spacing: 0.10em; }
   /* Tighter stat chips */
   .home-stat-chip {
     font-size: 0.34rem;
@@ -1329,6 +1341,8 @@ body.light .home-error {
   .home-stat-chip strong { font-size: 1.35rem; }
   /* Section heading smaller */
   #homeScreen .home-section h3 { font-size: 0.40rem; }
+  /* Learning launch: tighter padding on narrow phones */
+  .learning-launch { padding: 16px 44px 16px 16px; }
   /* Footer buttons stack better */
   .home-footer .btn-lg { font-size: 0.40rem; padding: 15px 22px; }
   .home-footer .btn-primary { padding: 15px 30px; font-size: 0.42rem; }

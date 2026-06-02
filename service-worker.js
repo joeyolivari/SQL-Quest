@@ -9,7 +9,7 @@
  * Bump CACHE_VERSION to force all clients to pick up new files on deploy.
  */
 
-const CACHE_VERSION = 'csq-v9';
+const CACHE_VERSION = 'csq-v10';
 const CDN_CACHE = 'csq-cdn-v1';
 
 // Build absolute URLs relative to this SW's location so the same
