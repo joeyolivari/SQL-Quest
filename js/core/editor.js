@@ -1,14 +1,15 @@
 // Lightweight SQL editor highlighter.
 //
-// This keeps the native #sqlInput <textarea> as the real editable field so all
-// existing game logic, mobile keyboard behavior, selection helpers, and form
-// behavior stay stable. A highlighted <pre> layer sits underneath the textarea
-// and mirrors its text. The textarea text is transparent, but its caret remains
+// This keeps the native <textarea> as the real editable field so all existing
+// game logic, mobile keyboard behavior, selection helpers, and form behavior
+// stay stable. A highlighted <pre> layer sits underneath the textarea and
+// mirrors its text. The textarea text is transparent, but its caret remains
 // visible, so the user sees colored SQL while still typing into a normal field.
 
 let textarea = null;
 let highlightLayer = null;
 let editorReady = false;
+let mainEditorController = null;
 
 const SQL_KEYWORDS = new Set([
   'SELECT', 'FROM', 'WHERE', 'JOIN', 'LEFT', 'RIGHT', 'INNER', 'OUTER', 'FULL',
@@ -182,6 +183,118 @@ function highlightSql(sql) {
   return out + (sql.endsWith('\n') ? ' ' : '');
 }
 
+function buildSqlHighlighter(targetTextarea) {
+  if (!targetTextarea) return null;
+
+  const target = targetTextarea;
+  let layer = null;
+
+  if (!target.parentElement?.classList.contains('sql-highlight-editor')) {
+    const shell = document.createElement('div');
+    shell.className = 'sql-highlight-editor';
+    shell.setAttribute('data-sql-highlighting', 'active');
+
+    layer = document.createElement('pre');
+    layer.className = 'sql-highlight-layer';
+    layer.setAttribute('aria-hidden', 'true');
+
+    target.classList.add('sql-editor-native');
+
+    target.parentNode.insertBefore(shell, target);
+    shell.appendChild(layer);
+    shell.appendChild(target);
+  } else {
+    layer = target.parentElement.querySelector('.sql-highlight-layer');
+    target.classList.add('sql-editor-native');
+  }
+
+  function sync() {
+    if (!target || !layer) return;
+    layer.innerHTML = highlightSql(target.value);
+    layer.scrollTop = target.scrollTop;
+    layer.scrollLeft = target.scrollLeft;
+  }
+
+  function syncOnlyScroll() {
+    if (!target || !layer) return;
+    layer.scrollTop = target.scrollTop;
+    layer.scrollLeft = target.scrollLeft;
+  }
+
+  target.addEventListener('input', sync);
+  target.addEventListener('scroll', syncOnlyScroll);
+  target.addEventListener('keyup', sync);
+  target.addEventListener('click', syncOnlyScroll);
+
+  sync();
+
+  return {
+    get textarea() { return target; },
+    getValue() { return target ? target.value : ''; },
+    setValue(text) {
+      if (!target) return;
+      target.value = text;
+      sync();
+    },
+    focus() {
+      if (target) target.focus();
+    },
+    sync,
+    enable() {
+      if (!target) return;
+      target.disabled = false;
+      target.removeAttribute('aria-disabled');
+      sync();
+    },
+    insertText(text, cursorBack = 0) {
+      if (!target) return;
+
+      const pos = target.selectionStart;
+      const before = target.value.slice(0, pos);
+      const after = target.value.slice(target.selectionEnd);
+      const needsSpace = before.length > 0 && !/[\s(]$/.test(before);
+      const insert = (needsSpace ? ' ' : '') + text;
+
+      target.value = before + insert + after;
+      const cursorPos = Math.max(0, pos + insert.length - cursorBack);
+      target.selectionStart = target.selectionEnd = cursorPos;
+      sync();
+      target.focus();
+    },
+    wrapCursor(open, close) {
+      if (!target) return;
+
+      const s = target.selectionStart;
+      const end = target.selectionEnd;
+      const val = target.value;
+
+      if (s !== end) {
+        const selected = val.slice(s, end);
+        target.value = val.slice(0, s) + open + selected + close + val.slice(end);
+        target.selectionStart = s + open.length;
+        target.selectionEnd = s + open.length + selected.length;
+      } else {
+        let ws = s, we = s;
+        while (ws > 0 && /\w/.test(val[ws - 1])) ws--;
+        while (we < val.length && /\w/.test(val[we])) we++;
+
+        if (ws < we) {
+          const word = val.slice(ws, we);
+          target.value = val.slice(0, ws) + open + word + close + val.slice(we);
+          target.selectionStart = ws + open.length;
+          target.selectionEnd = ws + open.length + word.length;
+        } else {
+          target.value = val.slice(0, s) + open + close + val.slice(s);
+          target.selectionStart = target.selectionEnd = s + open.length;
+        }
+      }
+
+      sync();
+      target.focus();
+    }
+  };
+}
+
 function syncHighlight() {
   if (!textarea || !highlightLayer) return;
   highlightLayer.innerHTML = highlightSql(textarea.value);
@@ -195,30 +308,21 @@ function syncScroll() {
   highlightLayer.scrollLeft = textarea.scrollLeft;
 }
 
+export function createSqlHighlighter(textareaId) {
+  const el = typeof textareaId === 'string' ? document.getElementById(textareaId) : textareaId;
+  return buildSqlHighlighter(el);
+}
+
 export function initSqlEditor() {
   if (editorReady) { syncHighlight(); return; }
 
   textarea = document.getElementById('sqlInput');
   if (!textarea) return;
 
-  const shell = document.createElement('div');
-  shell.className = 'sql-highlight-editor';
-  shell.setAttribute('data-sql-highlighting', 'active');
+  mainEditorController = buildSqlHighlighter(textarea);
+  if (!mainEditorController) return;
 
-  highlightLayer = document.createElement('pre');
-  highlightLayer.className = 'sql-highlight-layer';
-  highlightLayer.setAttribute('aria-hidden', 'true');
-
-  textarea.classList.add('sql-editor-native');
-
-  textarea.parentNode.insertBefore(shell, textarea);
-  shell.appendChild(highlightLayer);
-  shell.appendChild(textarea);
-
-  textarea.addEventListener('input', syncHighlight);
-  textarea.addEventListener('scroll', syncScroll);
-  textarea.addEventListener('keyup', syncHighlight);
-  textarea.addEventListener('click', syncScroll);
+  highlightLayer = textarea.parentElement?.querySelector('.sql-highlight-layer');
 
   editorReady = true;
   syncHighlight();
@@ -251,6 +355,11 @@ export function focusSqlEditor() {
 }
 
 export function insertSqlText(text, cursorBack = 0) {
+  if (mainEditorController) {
+    mainEditorController.insertText(text, cursorBack);
+    return;
+  }
+
   const el = textarea || document.getElementById('sqlInput');
   if (!el) return;
 
@@ -268,6 +377,11 @@ export function insertSqlText(text, cursorBack = 0) {
 }
 
 export function wrapSqlCursor(open, close) {
+  if (mainEditorController) {
+    mainEditorController.wrapCursor(open, close);
+    return;
+  }
+
   const el = textarea || document.getElementById('sqlInput');
   if (!el) return;
 
