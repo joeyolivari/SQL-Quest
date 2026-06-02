@@ -9,7 +9,7 @@
  * Bump CACHE_VERSION to force all clients to pick up new files on deploy.
  */
 
-const CACHE_VERSION = 'csq-v10';
+const CACHE_VERSION = 'csq-v11';
 const CDN_CACHE = 'csq-cdn-v1';
 
 // Build absolute URLs relative to this SW's location so the same
@@ -31,6 +31,7 @@ const APP_SHELL = [
   BASE + 'css/difficulty-cards.css',
   BASE + 'css/difficulty-compact.css',
   BASE + 'css/sandbox.css',
+  BASE + 'css/sandbox-editor.css',
   BASE + 'css/mobile.css',
   BASE + 'css/arcade.css',
   BASE + 'js/components/learningScreen.js',
