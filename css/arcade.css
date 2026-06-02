@@ -254,6 +254,8 @@ header::after {
 /* Logo: hard phosphor glow + breathing animation */
 .home-logo-hero {
   height: 120px;
+  width: auto;
+  max-width: 100%; /* prevent overflow on narrow viewports */
   animation: phosphor-breathe 4s ease-in-out infinite;
 }
 
@@ -1272,10 +1274,26 @@ body.light .home-error {
 }
 
 /* ── MOBILE ADJUSTMENTS ───────────────────────────────────────────────────── */
+
+/* Tablet: logo was 120px tall — constrain to mobile.css value */
+@media (max-width: 768px) {
+  .home-logo-hero {
+    height: auto;
+    max-height: 80px;
+    max-width: 100%;
+  }
+}
+
 @media (max-width: 600px) {
   /* Hide SQL QUEST header label on very small screens to avoid overlap */
   header::after { display: none; }
   .stats { padding-left: 0; }
+  /* Logo: fit within phone viewport */
+  .home-logo-hero {
+    max-height: 64px;
+    max-width: 100%;
+    height: auto;
+  }
   /* Smaller press-start text */
   .home-tagline::after { font-size: 0.48rem; letter-spacing: 0.12em; }
   /* Tighter stat chips */
