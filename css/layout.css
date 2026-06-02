@@ -11,10 +11,11 @@ header {
 }
 
 .logo {
-  height: 40px;
+  height: 44px;
   width: auto;
   display: block;
   flex-shrink: 0;
+  margin: -4px 0;
 }
 
 .stats {
