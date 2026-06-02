@@ -10,13 +10,6 @@ header {
   box-shadow: 0 2px 16px rgba(0, 0, 0, 0.25);
 }
 
-.logo {
-  height: 44px;
-  width: auto;
-  display: block;
-  flex-shrink: 0;
-  margin: -4px 0;
-}
 
 .stats {
   display: flex;

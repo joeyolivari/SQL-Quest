@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Compliance SQL Quest</title>
+  <title>SQL Quest</title>
 
   <!-- PWA manifest -->
   <link rel="manifest" href="manifest.webmanifest" />
@@ -12,7 +12,7 @@
   <meta name="theme-color" content="#00ff41" />
 
   <!-- SEO / install prompt description -->
-  <meta name="description" content="Master SQL through real-world financial compliance investigations." />
+  <meta name="description" content="Master SQL through real-world investigations." />
 
   <!-- iOS PWA support -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -28,7 +28,6 @@
 <body>
 
 <header>
-  <img src="assets/images/logo.png" alt="SQL Quest" class="logo" />
   <div class="stats">
     <div class="stat">Level <span id="levelNum">1</span>/<span id="levelTotal">—</span></div>
     <div class="stat">Score <span id="score">0</span></div>
@@ -44,9 +43,9 @@
 
   <!-- Hero -->
   <div class="home-hero">
-    <div class="home-hero-badge">Financial Compliance Training</div>
-    <h1 class="home-title">Compliance <span>SQL Quest</span></h1>
-    <p class="home-tagline">Master SQL through real-world financial compliance investigations.</p>
+    <div class="home-hero-badge">SQL Training</div>
+    <img src="assets/images/logo.png" alt="SQL Quest" class="home-logo-hero" />
+    <p class="home-tagline">Master SQL through real-world investigations.</p>
     <div class="home-stat-chips">
       <div class="home-stat-chip">&#128203; <strong>30</strong> Missions</div>
       <div class="home-stat-chip">&#128449; <strong>5</strong> Scenarios</div>
@@ -246,7 +245,7 @@ CREATE TABLE practice_notes (id INTEGER, note TEXT);"></textarea>
       <button class="btn-schema-min" id="btnSchemaMin">&#9660; Hide</button>
     </div>
     <div id="schemaBody">
-      <div class="disclaimer">All client, account, transaction, and compliance records are synthetic and created for learning purposes only.</div>
+      <div class="disclaimer">All client, account, transaction, and data records are synthetic and created for learning purposes only.</div>
       <div id="schemaPanel"></div>
     </div>
     <h3>Mission Progress</h3>
@@ -366,7 +365,7 @@ CREATE TABLE practice_notes (id INTEGER, note TEXT);"></textarea>
 <div class="modal-overlay" id="winModal">
   <div class="modal">
     <h2>&#127942; Audit Ready</h2>
-    <p>All <span id="winModalCount">20</span> compliance SQL investigations complete.</p>
+    <p>All <span id="winModalCount">20</span> SQL investigations complete.</p>
     <div class="final-score" id="finalScore">0</div>
     <p>final score</p>
     <div class="cert-grid">

@@ -831,17 +831,11 @@ button:disabled { opacity: 0.45; cursor: not-allowed; }
   50% { opacity: 0.35; transform: scale(0.6); }
 }
 
-.home-title {
-  font-size: 2.8rem;
-  font-weight: 900;
-  color: var(--text);
-  margin: 0 0 14px;
-  letter-spacing: -.03em;
-  line-height: 1.1;
-}
-.home-title span {
-  color: var(--accent);
-  text-shadow: 0 0 32px rgba(56, 189, 248, 0.45);
+.home-logo-hero {
+  display: block;
+  height: 110px;
+  width: auto;
+  margin: 0 auto 14px;
 }
 .home-tagline {
   font-size: 1.05rem;
