@@ -628,6 +628,7 @@ header::after {
   font-size: 0.80rem;
   color: rgba(0, 229, 255, 0.55);
   letter-spacing: 0.03em;
+  white-space: normal;
 }
 
 .learning-launch-meta {
