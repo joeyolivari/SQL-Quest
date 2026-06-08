@@ -18,6 +18,7 @@ import { getRecommendedMission, buildTrainingQueue, buildReviewQueue, buildWeakS
 import { getHintStep, getNextHint, resetHintLadder } from '../learning/hintEngine.js';
 import { buildLearningDashboard } from '../learning/dashboard.js';
 import { initSandboxLab, openSandboxLab } from './sandbox.js';
+import { initLearnTrack, openLearnTrack, getLearnLaunchMeta } from './learn.js';
 import { primeSound, playSelect, playNav, playToggle } from '../core/sound.js';
 import {
   initSqlEditor, enableSqlEditor,
@@ -88,6 +89,18 @@ function updateLearningLaunchMeta() {
   const mode = MODE_LABELS[selectedMode] || 'Story';
   el.textContent = `${mode} Mode · ${summary.totalCompleted}/${summary.totalMissions} missions complete`;
 }
+
+// Update the home launcher meta for the Learn track. Exposed on window so the
+// Learn controller (learn.js) can refresh it after a lesson completes.
+function updateLearnLaunchMeta() {
+  const el = document.getElementById('learnLaunchMeta');
+  if (!el) return;
+  el.textContent = getLearnLaunchMeta();
+}
+window.updateLearnLaunchMeta = updateLearnLaunchMeta;
+
+// Let the Learn track graduate the learner into a real mission via the existing flow.
+window.launchMissionById = launchMissionById;
 
 // Apply a learning mode (story / training / review) and reflect it everywhere.
 // Exposed on window so the component fallback in learningScreen.js can reuse the
@@ -215,6 +228,8 @@ function initHomeScreen() {
   });
 
   document.getElementById('btnSandboxLab')?.addEventListener('click', openSandboxLab);
+  document.getElementById('btnOpenLearn')?.addEventListener('click', openLearnTrack);
+  updateLearnLaunchMeta();
 
   document.getElementById('btnWeakDrill')?.addEventListener('click', () => {
     startWeakSkillDrill();
@@ -670,6 +685,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initMobileTabs();
   initHomeScreen();
   initSandboxLab();
+  initLearnTrack();
   initGame();
 });
 

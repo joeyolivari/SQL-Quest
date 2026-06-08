@@ -83,6 +83,20 @@
     </div>
   </div>
 
+  <!-- Learn track launcher (progressive, start-from-zero lessons) -->
+  <div class="home-section">
+    <button class="learning-launch" id="btnOpenLearn">
+      <span class="learning-launch-glow" aria-hidden="true"></span>
+      <span class="learning-launch-icon">&#127793;</span>
+      <span class="learning-launch-body">
+        <span class="learning-launch-title">Learn SQL from Zero</span>
+        <span class="learning-launch-desc">Bite-sized lessons that build up step by step</span>
+        <span class="learning-launch-meta" id="learnLaunchMeta"></span>
+      </span>
+      <span class="learning-launch-arrow" aria-hidden="true">&#8594;</span>
+    </button>
+  </div>
+
   <!-- Learning Center launcher -->
   <div class="home-section">
     <button class="learning-launch" id="btnOpenLearning">
@@ -152,6 +166,9 @@
 
 <!-- Learning Center is rendered from js/components/learningScreen.js -->
 <div id="learningScreenMount"></div>
+
+<!-- Learn track is rendered from js/components/learnScreen.js -->
+<div id="learnScreenMount"></div>
 
 <div id="sandboxScreen" class="sandbox-screen" style="display:none">
   <section class="sandbox-shell">
@@ -390,6 +407,7 @@ CREATE TABLE practice_notes (id INTEGER, note TEXT);"></textarea>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.12.0/sql-wasm.js"></script>
 <script src="js/components/learningScreen.js"></script>
+<script src="js/components/learnScreen.js"></script>
 <script type="module" src="js/features/app.js"></script>
 
 <!-- Register service worker after page load; silent fail keeps web version unaffected -->

@@ -9,7 +9,7 @@
  * Bump CACHE_VERSION to force all clients to pick up new files on deploy.
  */
 
-const CACHE_VERSION = 'csq-v11';
+const CACHE_VERSION = 'csq-v12';
 const CDN_CACHE = 'csq-cdn-v1';
 
 // Build absolute URLs relative to this SW's location so the same
@@ -27,6 +27,7 @@ const APP_SHELL = [
   BASE + 'css/layout.css',
   BASE + 'css/components.css',
   BASE + 'css/learning.css',
+  BASE + 'css/learn.css',
   BASE + 'css/difficulty-base-reset.css',
   BASE + 'css/difficulty-cards.css',
   BASE + 'css/difficulty-compact.css',
@@ -35,9 +36,11 @@ const APP_SHELL = [
   BASE + 'css/mobile.css',
   BASE + 'css/arcade.css',
   BASE + 'js/components/learningScreen.js',
+  BASE + 'js/components/learnScreen.js',
   BASE + 'js/features/app.js',
   BASE + 'js/features/badges.js',
   BASE + 'js/features/sandbox.js',
+  BASE + 'js/features/learn.js',
   BASE + 'js/core/editor.js',
   BASE + 'js/lib/codemirror-sql.js',
   BASE + 'js/core/sqlEngine.js',
@@ -46,12 +49,14 @@ const APP_SHELL = [
   BASE + 'js/core/diagnostics.js',
   BASE + 'js/core/sound.js',
   BASE + 'js/data/missions.js',
+  BASE + 'js/data/lessons.js',
   BASE + 'js/data/schema.js',
   BASE + 'js/data/data.js',
   BASE + 'js/data/casefiles.js',
   BASE + 'js/data/scenarios.js',
   BASE + 'js/data/tutorial.js',
   BASE + 'js/learning/masteryTracker.js',
+  BASE + 'js/learning/learnProgress.js',
   BASE + 'js/learning/adaptiveQueue.js',
   BASE + 'js/learning/hintEngine.js',
   BASE + 'js/learning/diagnostics.js',
