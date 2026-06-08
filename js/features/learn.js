@@ -87,15 +87,19 @@ window.closeLearnTrack = closeLearnTrack;
 function showMapView() {
   const map = $('learnMapView');
   const player = $('learnPlayerView');
+  const hero = $('learnHero');
   if (map) map.style.display = 'block';
   if (player) player.style.display = 'none';
+  if (hero) hero.style.display = '';
 }
 
 function showPlayerView() {
   const map = $('learnMapView');
   const player = $('learnPlayerView');
+  const hero = $('learnHero');
   if (map) map.style.display = 'none';
   if (player) player.style.display = 'block';
+  if (hero) hero.style.display = 'none';
 }
 
 // ── Map rendering ───────────────────────────────────────────────────────────

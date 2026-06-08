@@ -12,7 +12,7 @@ function learnScreenMarkup() {
   return `
 <!-- Learn Track (component-rendered screen) -->
 <div id="learnScreen" class="learn-screen" style="display:none">
-  <div class="learn-hero">
+  <div class="learn-hero" id="learnHero">
     <button class="btn-home" id="btnLearnBack" type="button" data-learn-close="true">&#8592; Main Menu</button>
     <div class="learn-kicker">Learn SQL &middot; Zero to Mission-Ready</div>
     <h1 class="learn-title">Learn <span>Track</span></h1>

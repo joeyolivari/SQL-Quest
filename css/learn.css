@@ -118,7 +118,7 @@
   border: 2px solid var(--border);
   background: var(--panel);
 }
-.learn-node-title { font-weight: 600; }
+.learn-node-title { font-weight: 600; overflow-wrap: break-word; min-width: 0; }
 
 .learn-node.is-complete { border-color: rgba(34, 197, 94, 0.5); }
 .learn-node.is-complete .learn-node-dot { border-color: var(--success); color: var(--success); box-shadow: var(--glow-success-sm); }
@@ -130,7 +130,7 @@
 .learn-graduate { margin-top: 16px; width: 100%; }
 
 /* ── Lesson player ────────────────────────────────────────────────────────── */
-.learn-player-view { display: none; }
+.learn-player-view { display: none; padding-bottom: 20px; }
 
 .learn-player-top { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
 .learn-progress-track {
@@ -225,12 +225,13 @@
   padding: 16px;
   color: var(--text);
   white-space: pre-wrap;
+  overflow-x: auto;
   line-height: 2;
 }
 .learn-blank {
   font-family: var(--font-mono);
   font-size: 0.95rem;
-  min-width: 90px;
+  width: 90px;
   padding: 4px 8px;
   border: none;
   border-bottom: 2px solid var(--accent);
@@ -264,6 +265,7 @@
 .learn-query-more, .learn-query-empty { margin-top: 8px; color: var(--muted); font-size: 0.82rem; }
 
 /* Feedback banner */
+.learn-feedback[hidden] { display: none; }
 .learn-feedback {
   display: flex;
   align-items: center;
@@ -278,8 +280,28 @@
 .learn-feedback.is-wrong { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); color: var(--danger); }
 .learn-feedback-icon { font-size: 1.2rem; }
 
-/* Actions */
-.learn-actions { display: flex; gap: 12px; margin-top: 18px; align-items: center; }
+/* Actions — sticky at viewport bottom during lesson play */
+.learn-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 18px;
+  align-items: center;
+}
+.learn-player-view .learn-actions {
+  position: sticky;
+  bottom: 0;
+  background: rgba(4, 6, 14, 0.94);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border-top: 1px solid var(--border);
+  padding: 12px 0 16px;
+  margin-top: 14px;
+  /* Bleed to the edges of .learn-screen's horizontal padding */
+  margin-left: -20px;
+  margin-right: -20px;
+  padding-left: 20px;
+  padding-right: 20px;
+}
 .learn-actions .btn-lg { flex: 1; }
 .learn-hint-btn { flex: 0 0 auto; }
 
@@ -292,4 +314,11 @@
   .learn-actions { flex-wrap: wrap; }
   .learn-actions .btn-lg { flex: 1 1 100%; }
   .learn-hint-btn { flex: 1 1 100%; order: 3; }
+  /* Adjust sticky bar bleed to match narrower horizontal padding */
+  .learn-player-view .learn-actions {
+    margin-left: -14px;
+    margin-right: -14px;
+    padding-left: 14px;
+    padding-right: 14px;
+  }
 }
