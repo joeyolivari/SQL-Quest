@@ -1317,6 +1317,8 @@ body.light .home-error {
     max-height: 80px;
     max-width: 100%;
   }
+  /* Desc text smaller at tablet so it doesn't overflow the pixel-font card */
+  .learning-launch-desc { font-size: 0.72rem; }
 }
 
 @media (max-width: 600px) {
@@ -1341,8 +1343,11 @@ body.light .home-error {
   .home-stat-chip strong { font-size: 1.35rem; }
   /* Section heading smaller */
   #homeScreen .home-section h3 { font-size: 0.40rem; }
-  /* Learning launch: tighter padding on narrow phones */
-  .learning-launch { padding: 16px 44px 16px 16px; }
+  /* Learning launch: tighter padding; 24px bottom clears descenders */
+  .learning-launch { padding: 16px 44px 24px 16px; }
+  /* Shrink desc + title so text fits without wrapping excessively */
+  .learning-launch-desc { font-size: 0.64rem; letter-spacing: 0; line-height: 1.55; }
+  .learning-launch-title { font-size: 0.42rem; }
   /* Footer buttons stack better */
   .home-footer .btn-lg { font-size: 0.40rem; padding: 15px 22px; }
   .home-footer .btn-primary { padding: 15px 30px; font-size: 0.42rem; }
