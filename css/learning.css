@@ -460,7 +460,6 @@ body.light .learn-box::after { opacity: 0.4; }
   gap: 3px;
   flex: 1;
   min-width: 0;
-  overflow: hidden;
   position: relative;
   z-index: 1;
 }
