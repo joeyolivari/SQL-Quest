@@ -280,7 +280,7 @@ function renderSandboxSchema() {
   panel.innerHTML = Object.entries(schema).map(([table, cols]) => `
     <div class="schema-table collapsed">
       <div class="schema-header" data-sandbox-schema-toggle>
-        ${escapeHtml(table)} <span>&#9658;</span>
+        ${escapeHtml(table)} <span><svg class="game-icon" aria-hidden="true"><use href="#icon-next"/></svg></span>
       </div>
       <div class="schema-body">
         ${cols.map(([name, type]) =>
@@ -295,7 +295,9 @@ function renderSandboxSchema() {
     if (!header) return;
     const box = header.closest('.schema-table');
     box.classList.toggle('collapsed');
-    header.querySelector('span').textContent = box.classList.contains('collapsed') ? '▶' : '▼';
+    header.querySelector('span').innerHTML = box.classList.contains('collapsed')
+      ? '<svg class="game-icon" aria-hidden="true"><use href="#icon-next"/></svg>'
+      : '<svg class="game-icon" aria-hidden="true"><use href="#icon-collapse"/></svg>';
   });
 }
 
@@ -305,7 +307,9 @@ function initSandboxSchemaToggle() {
   if (!btn || !wrap) return;
   btn.addEventListener('click', () => {
     const isCollapsed = wrap.classList.toggle('collapsed');
-    btn.textContent = isCollapsed ? '▶ Show' : '▼ Hide';
+    btn.innerHTML = isCollapsed
+      ? '<svg class="game-icon" aria-hidden="true"><use href="#icon-next"/></svg> Show'
+      : '<svg class="game-icon" aria-hidden="true"><use href="#icon-collapse"/></svg> Hide';
   });
 }
 

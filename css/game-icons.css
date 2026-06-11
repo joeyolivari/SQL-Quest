@@ -1,0 +1,90 @@
+/* ══════════════════════════════════════════════════════════════
+   SQL Quest — game-icons.css
+   Custom retro/cyber SVG icon system.
+
+   Usage:
+     <svg class="game-icon" aria-hidden="true">
+       <use href="#icon-run" />
+     </svg>
+
+   The sprite lives in the hidden <svg> block at the top of
+   index.html; all icons resolve via same-document #id refs.
+   ══════════════════════════════════════════════════════════════ */
+
+/* ── Base ─────────────────────────────────────────────────── */
+.game-icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: -0.15em;
+  overflow: visible;
+  flex-shrink: 0;
+  pointer-events: none;
+}
+
+/* ── Context sizing ────────────────────────────────────────── */
+
+/* Inside .btn-cyber-icon — inherits 1.05rem font-size of parent */
+.btn-cyber-icon .game-icon {
+  width: 1.1em;
+  height: 1.1em;
+}
+
+/* Inside the 52 × 52 px launcher icon boxes */
+.learning-launch-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.learning-launch-icon .game-icon {
+  width: 28px;
+  height: 28px;
+}
+
+/* Inside the 52 × 52 px difficulty icon boxes */
+.diff-icon .game-icon {
+  width: 26px;
+  height: 26px;
+}
+
+/* Mobile tab icon area */
+.mobile-tab-icon .game-icon {
+  width: 1.2em;
+  height: 1.2em;
+  vertical-align: -0.2em;
+}
+
+/* Learning mode selector icons */
+.mode-icon .game-icon {
+  width: 1.4em;
+  height: 1.4em;
+}
+
+/* Mission summary result icon */
+.summary-icon .game-icon {
+  width: 1.4em;
+  height: 1.4em;
+}
+
+/* Inline stat chips */
+.home-stat-chip .game-icon {
+  width: 0.95em;
+  height: 0.95em;
+  vertical-align: -0.1em;
+}
+
+/* Schema table row expand/collapse arrows */
+.schema-header .game-icon {
+  width: 0.85em;
+  height: 0.85em;
+  vertical-align: -0.1em;
+  opacity: 0.7;
+}
+
+/* ── Reduced motion ─────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .game-icon {
+    animation: none !important;
+    transition: none !important;
+  }
+}

@@ -13,7 +13,7 @@ function learnScreenMarkup() {
 <!-- Learn Track (component-rendered screen) -->
 <div id="learnScreen" class="learn-screen" style="display:none">
   <div class="learn-hero" id="learnHero">
-    <button class="btn-home" id="btnLearnBack" type="button" data-learn-close="true">&#8592; Main Menu</button>
+    <button class="btn-home" id="btnLearnBack" type="button" data-learn-close="true"><svg class="game-icon" aria-hidden="true"><use href="#icon-back"/></svg> Main Menu</button>
     <div class="learn-kicker">Learn SQL &middot; Zero to Mission-Ready</div>
     <h1 class="learn-title">Learn <span>Track</span></h1>
     <p class="learn-tagline">Tiny lessons that build on each other. Tap, fill in the blank, then write real SQL.</p>
@@ -27,7 +27,7 @@ function learnScreenMarkup() {
   <!-- LESSON PLAYER VIEW: one step at a time -->
   <div id="learnPlayerView" class="learn-player-view" style="display:none">
     <div class="learn-player-top">
-      <button class="btn-home" id="btnLearnExitLesson" type="button">&#8592; Path</button>
+      <button class="btn-home" id="btnLearnExitLesson" type="button"><svg class="game-icon" aria-hidden="true"><use href="#icon-back"/></svg> Path</button>
       <div class="learn-progress-track"><span id="learnProgressFill" class="learn-progress-fill"></span></div>
       <span id="learnProgressLabel" class="learn-progress-label"></span>
     </div>
@@ -38,9 +38,9 @@ function learnScreenMarkup() {
     <div id="learnFeedback" class="learn-feedback" hidden></div>
 
     <div class="learn-actions">
-      <button id="btnLearnHint" class="btn-secondary learn-hint-btn" type="button" hidden>&#128161; Hint</button>
+      <button id="btnLearnHint" class="btn-secondary learn-hint-btn" type="button" hidden><svg class="game-icon" aria-hidden="true"><use href="#icon-hint"/></svg> Hint</button>
       <button id="btnLearnCheck" class="btn-lg btn-primary" type="button">Check</button>
-      <button id="btnLearnContinue" class="btn-lg btn-primary" type="button" hidden>Continue &#8594;</button>
+      <button id="btnLearnContinue" class="btn-lg btn-primary" type="button" hidden>Continue <svg class="game-icon" aria-hidden="true"><use href="#icon-next"/></svg></button>
     </div>
   </div>
 </div>`;
