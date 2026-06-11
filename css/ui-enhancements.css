@@ -1,0 +1,969 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   SQL QUEST  ◈  GAME SCREEN & COMPONENT ENHANCEMENTS v2.0
+   ───────────────────────────────────────────────────────────────────────────
+   TARGET  : .game-container panels, message boxes, editor, result table,
+             summary, modal, badge toast, schema — everything arcade.css
+             didn't touch.
+   SCOPE   : visual / aesthetic only — zero game logic changes
+   LOADED  : LAST in styles.css cascade (overrides all prior rules)
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── REUSED CRT SCANLINE GRADIENT ──────────────────────────────────────────
+   Applied as background-image overlays so no z-index juggling is needed.
+   Intensities are kept low to never hurt readability.
+──────────────────────────────────────────────────────────────────────────── */
+
+/* ══════════════════════════════════════════════════════════════════════════
+   1.  GAME CONTAINER PANELS
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Left sidebar — phosphor green terminal panel */
+.game-container .sidebar {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent           0px, transparent           3px,
+      rgba(0, 255, 65, 0.011) 3px, rgba(0, 255, 65, 0.011) 4px
+    );
+  background-color: #000810;
+  border-right: 1px solid rgba(0, 255, 65, 0.16);
+}
+
+/* Center work area — very dark, nearly-black CRT surface */
+.game-container .center {
+  background-color: #00060e;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent              0px, transparent              3px,
+      rgba(0, 180, 255, 0.008) 3px, rgba(0, 180, 255, 0.008) 4px
+    );
+}
+
+/* Right panel — data output terminal, cyan tinted */
+.game-container .right-panel {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent              0px, transparent              3px,
+      rgba(0, 229, 255, 0.011) 3px, rgba(0, 229, 255, 0.011) 4px
+    );
+  background-color: #000812;
+  border-left: 1px solid rgba(0, 229, 255, 0.16);
+}
+
+/* ── Panel headings — pixel font terminal labels ────────────────────────── */
+.game-container .panel-title,
+.game-container .sidebar h3 {
+  font-family: var(--font-pixel);
+  font-size: 0.38rem;
+  color: rgba(0, 229, 255, 0.62);
+  text-shadow: 0 0 6px rgba(0, 229, 255, 0.40);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.game-container .panel-title::before,
+.game-container .sidebar h3::before {
+  background: var(--arc-cyan);
+  box-shadow: 0 0 5px var(--arc-cyan);
+  width: 2px;
+  height: 10px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   2.  MISSION CARD — case-file terminal briefing
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.mission-card {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent              0px, transparent              3px,
+      rgba(0, 229, 255, 0.010) 3px, rgba(0, 229, 255, 0.010) 4px
+    ),
+    linear-gradient(
+      135deg,
+      rgba(0, 229, 255, 0.05) 0%,
+      rgba(0, 4, 12, 0.96)   40%,
+      rgba(0, 0, 8, 0.98)    100%
+    );
+  background-color: #000510;
+  border: 1px solid rgba(0, 229, 255, 0.28);
+  border-left: 3px solid var(--arc-cyan);
+  border-radius: 3px;
+  box-shadow:
+    0 0 20px rgba(0, 229, 255, 0.05),
+    inset 0 0 30px rgba(0, 0, 0, 0.50);
+}
+
+.mission-card h2 {
+  font-family: var(--font-pixel);
+  font-size: 0.52rem;
+  color: var(--arc-cyan);
+  letter-spacing: 0.07em;
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.60);
+  line-height: 1.75;
+  margin-bottom: 10px;
+}
+
+.mission-card p {
+  font-family: var(--font-tech);
+  font-size: 0.83rem;
+  color: rgba(0, 229, 255, 0.68);
+  line-height: 1.65;
+}
+
+.casefile-text {
+  font-family: var(--font-tech);
+  font-size: 0.82rem;
+  color: rgba(0, 229, 255, 0.55);
+  border-left: 2px solid rgba(0, 229, 255, 0.32);
+  background: rgba(0, 10, 25, 0.65);
+  border-radius: 2px;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   3.  MESSAGE BOXES — terminal alert readouts
+       [HINT], [ERROR], [SUCCESS] label injected via ::before
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.hint-box,
+.error-box,
+.success-box {
+  border-radius: 2px;
+  font-family: var(--font-tech);
+  font-size: 0.83rem;
+  padding-top: 14px;
+  position: relative;
+}
+
+/* Shared pseudo-element: the [LABEL] header line */
+.hint-box::before,
+.error-box::before,
+.success-box::before {
+  display: block;
+  font-family: var(--font-pixel);
+  font-size: 0.36rem;
+  letter-spacing: 0.12em;
+  margin-bottom: 8px;
+  pointer-events: none;
+}
+
+/* Hint — amber terminal */
+.hint-box {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent              0px, transparent              3px,
+      rgba(255, 200, 0, 0.010) 3px, rgba(255, 200, 0, 0.010) 4px
+    );
+  background-color: rgba(8, 5, 0, 0.94);
+  border: 1px solid rgba(255, 230, 0, 0.30);
+  border-left: 3px solid var(--arc-yellow);
+  color: rgba(255, 215, 0, 0.80);
+  box-shadow: 0 0 14px rgba(255, 230, 0, 0.05), inset 0 0 18px rgba(0, 0, 0, 0.45);
+}
+.hint-box::before {
+  content: '[ HINT ]';
+  color: var(--arc-yellow);
+  text-shadow: 0 0 6px rgba(255, 230, 0, 0.65);
+}
+
+/* Error — red terminal */
+.error-box {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent             0px, transparent             3px,
+      rgba(255, 20, 60, 0.010) 3px, rgba(255, 20, 60, 0.010) 4px
+    );
+  background-color: rgba(10, 0, 0, 0.94);
+  border: 1px solid rgba(255, 23, 68, 0.32);
+  border-left: 3px solid #ff1744;
+  color: rgba(255, 100, 120, 0.88);
+  box-shadow: 0 0 14px rgba(255, 23, 68, 0.05), inset 0 0 18px rgba(0, 0, 0, 0.45);
+}
+.error-box::before {
+  content: '[ ERROR ]';
+  color: #ff1744;
+  text-shadow: 0 0 6px rgba(255, 23, 68, 0.65);
+}
+
+/* Success — green terminal */
+.success-box {
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent             0px, transparent             3px,
+      rgba(0, 255, 65, 0.010) 3px, rgba(0, 255, 65, 0.010) 4px
+    );
+  background-color: rgba(0, 8, 2, 0.94);
+  border: 1px solid rgba(0, 255, 65, 0.30);
+  border-left: 3px solid var(--arc-green);
+  color: rgba(0, 230, 60, 0.82);
+  box-shadow: 0 0 14px rgba(0, 255, 65, 0.05), inset 0 0 18px rgba(0, 0, 0, 0.45);
+}
+.success-box::before {
+  content: '[ SUCCESS ]';
+  color: var(--arc-green);
+  text-shadow: 0 0 6px rgba(0, 255, 65, 0.65);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   4.  SQL EDITOR — command-line terminal
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.sql-highlight-editor {
+  background-color: #000510;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent             0px, transparent             3px,
+      rgba(0, 255, 65, 0.014) 3px, rgba(0, 255, 65, 0.014) 4px
+    );
+  border: 1px solid rgba(0, 255, 65, 0.22);
+  border-radius: 3px;
+  box-shadow:
+    inset 0 0 40px rgba(0, 0, 0, 0.60),
+    inset 0 0 80px rgba(0, 255, 65, 0.015),
+    0 0 0 1px rgba(0, 255, 65, 0.04);
+}
+
+.sql-highlight-editor:focus-within {
+  border-color: rgba(0, 255, 65, 0.52);
+  box-shadow:
+    inset 0 0 40px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(0, 255, 65, 0.22),
+    0 0 18px rgba(0, 255, 65, 0.08);
+}
+
+.sql-editor-native {
+  caret-color: var(--arc-green);
+}
+
+.editor-label {
+  font-family: var(--font-pixel);
+  font-size: 0.38rem;
+  letter-spacing: 0.12em;
+  color: rgba(0, 229, 255, 0.52);
+  text-shadow: 0 0 5px rgba(0, 229, 255, 0.30);
+}
+
+.editor-label::before {
+  content: '>>';
+  color: var(--arc-green);
+  text-shadow: 0 0 6px rgba(0, 255, 65, 0.55);
+  font-family: var(--font-pixel);
+  font-size: 0.38rem;
+  opacity: 1;
+  font-weight: 400;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   5.  RESULT PANEL — terminal output monitor
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.result-panel {
+  background-color: #000612;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent              0px, transparent              3px,
+      rgba(0, 229, 255, 0.010) 3px, rgba(0, 229, 255, 0.010) 4px
+    );
+  border: 1px solid rgba(0, 229, 255, 0.16);
+  border-radius: 2px;
+  box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.60);
+}
+
+.result-panel th {
+  font-family: var(--font-pixel);
+  font-size: 0.36rem;
+  color: var(--arc-cyan);
+  text-shadow: 0 0 5px rgba(0, 229, 255, 0.45);
+  background: rgba(0, 20, 40, 0.80);
+  letter-spacing: 0.12em;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.20);
+  padding: 8px 10px;
+}
+
+.result-panel td {
+  font-family: var(--font-tech);
+  font-size: 0.82rem;
+  color: rgba(0, 255, 65, 0.72);
+  border-bottom: 1px solid rgba(0, 255, 65, 0.06);
+}
+
+.result-panel tr:nth-child(even) td {
+  background: rgba(0, 255, 65, 0.018);
+}
+
+.result-panel tr:hover td {
+  color: var(--arc-green);
+  background: rgba(0, 255, 65, 0.04);
+}
+
+.empty-state,
+.loading {
+  font-family: var(--font-tech);
+  color: rgba(0, 229, 255, 0.35);
+}
+
+.spinner {
+  border-color: rgba(0, 229, 255, 0.18);
+  border-top-color: var(--arc-cyan);
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.15);
+}
+
+.row-count {
+  font-family: var(--font-tech);
+  color: rgba(0, 229, 255, 0.38);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   6.  MISSION PROGRESS DOTS — pixel squares
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.dot {
+  border-radius: 2px;
+  width: 10px;
+  height: 10px;
+  background: rgba(0, 255, 65, 0.08);
+  border: 1px solid rgba(0, 255, 65, 0.14);
+}
+
+.dot.done {
+  background: var(--arc-green);
+  border-color: var(--arc-green);
+  border-radius: 2px;
+  box-shadow: 0 0 6px rgba(0, 255, 65, 0.55);
+}
+
+.dot.current {
+  background: var(--arc-cyan);
+  border-color: var(--arc-cyan);
+  border-radius: 2px;
+  animation: dot-cyber-pulse 1.8s ease-in-out infinite;
+}
+
+@keyframes dot-cyber-pulse {
+  0%, 100% { box-shadow: 0 0 4px var(--arc-cyan); }
+  50%       { box-shadow: 0 0 12px var(--arc-cyan), 0 0 24px rgba(0, 229, 255, 0.28); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   7.  MISSION SUMMARY — arcade high-score screen
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.mission-summary {
+  background-color: #000510;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent              0px, transparent              3px,
+      rgba(0, 229, 255, 0.010) 3px, rgba(0, 229, 255, 0.010) 4px
+    );
+  border-radius: 3px;
+}
+
+.summary-title {
+  font-family: var(--font-pixel);
+  font-size: 0.40rem;
+  letter-spacing: 0.14em;
+  color: var(--arc-cyan);
+  text-shadow: 0 0 6px rgba(0, 229, 255, 0.48);
+}
+
+.summary-rating {
+  font-family: var(--font-vt);
+  font-size: 1.60rem;
+  letter-spacing: 0.04em;
+}
+
+.mission-summary[data-rating="Perfect"]   .summary-rating { text-shadow: 0 0 10px rgba(0, 255, 65, 0.60); }
+.mission-summary[data-rating="Good"]      .summary-rating { text-shadow: 0 0 10px rgba(255, 230, 0, 0.55); }
+.mission-summary[data-rating="Needs Review"] .summary-rating { text-shadow: 0 0 10px rgba(239, 68, 68, 0.55); }
+
+.summary-stat {
+  background: rgba(0, 10, 22, 0.80);
+  border: 1px solid rgba(0, 229, 255, 0.10);
+  border-radius: 2px;
+}
+
+.summary-stat-val {
+  font-family: var(--font-vt);
+  font-size: 1.55rem;
+  color: var(--arc-green);
+  text-shadow: 0 0 8px rgba(0, 255, 65, 0.50);
+}
+
+.summary-stat-label {
+  font-family: var(--font-pixel);
+  font-size: 0.30rem;
+  letter-spacing: 0.12em;
+  color: rgba(0, 229, 255, 0.42);
+}
+
+.summary-concept {
+  font-family: var(--font-tech);
+  background: rgba(0, 229, 255, 0.05);
+  border-color: rgba(0, 229, 255, 0.18);
+  border-radius: 2px;
+  color: rgba(0, 229, 255, 0.70);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   8.  BACK TO MENU BUTTON — retro nav button
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.btn-home {
+  font-family: var(--font-pixel);
+  font-size: 0.38rem;
+  letter-spacing: 0.10em;
+  border-radius: 2px;
+  background: rgba(0, 229, 255, 0.04);
+  border: 1px solid rgba(0, 229, 255, 0.20);
+  color: rgba(0, 229, 255, 0.52);
+  text-shadow: 0 0 5px rgba(0, 229, 255, 0.30);
+}
+
+.btn-home:hover {
+  background: rgba(0, 229, 255, 0.09);
+  border-color: rgba(0, 229, 255, 0.55);
+  color: var(--arc-cyan);
+  text-shadow: 0 0 8px rgba(0, 229, 255, 0.60);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.10);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   9.  SCENARIO LABEL — mission origin tag
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.scenario-label {
+  font-family: var(--font-tech);
+  font-size: 0.80rem;
+  color: var(--arc-cyan);
+  background: rgba(0, 10, 22, 0.80);
+  border: 1px solid rgba(0, 229, 255, 0.18);
+  border-left: 2px solid var(--arc-cyan);
+  border-radius: 2px;
+  text-shadow: 0 0 5px rgba(0, 229, 255, 0.28);
+  box-shadow: inset 0 0 12px rgba(0, 0, 0, 0.40);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   10. SCHEMA TABLE — database inspector terminal
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.schema-table {
+  background: rgba(0, 6, 16, 0.90);
+  border: 1px solid rgba(0, 229, 255, 0.14);
+  border-radius: 2px;
+}
+
+.schema-header {
+  font-family: var(--font-pixel);
+  font-size: 0.37rem;
+  letter-spacing: 0.12em;
+  color: var(--arc-cyan);
+  text-shadow: 0 0 5px rgba(0, 229, 255, 0.40);
+  background: rgba(0, 20, 40, 0.85);
+  border-left: 2px solid var(--arc-cyan);
+}
+
+.schema-body div {
+  font-family: var(--font-tech);
+  font-size: 0.80rem;
+  color: rgba(0, 255, 65, 0.52);
+  border-bottom-color: rgba(0, 255, 65, 0.06);
+}
+
+.schema-body div:hover { color: var(--arc-green); }
+
+.type-tag {
+  color: rgba(0, 229, 255, 0.55);
+  font-family: var(--font-tech);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   11. BADGES & KEYWORD CHIPS — retro chipset labels
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.badge {
+  font-family: var(--font-pixel);
+  font-size: 0.30rem;
+  letter-spacing: 0.10em;
+  border-radius: 2px;
+  color: var(--arc-cyan);
+  background: rgba(0, 229, 255, 0.05);
+  border: 1px solid rgba(0, 229, 255, 0.20);
+  text-shadow: 0 0 4px rgba(0, 229, 255, 0.35);
+}
+
+.kw-chip {
+  font-family: var(--font-tech);
+  font-size: 0.70rem;
+  background: rgba(0, 10, 20, 0.80);
+  border: 1px solid rgba(0, 229, 255, 0.14);
+  color: rgba(0, 229, 255, 0.58);
+  border-radius: 2px;
+  letter-spacing: 0.05em;
+}
+
+.kw-chip:hover {
+  background: rgba(0, 18, 36, 0.90);
+  border-color: rgba(0, 229, 255, 0.42);
+  color: var(--arc-cyan);
+  box-shadow: 0 0 8px rgba(0, 229, 255, 0.10);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   12. MODAL — arcade system dialog
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.modal {
+  background-color: #000810;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent              0px, transparent              3px,
+      rgba(0, 229, 255, 0.010) 3px, rgba(0, 229, 255, 0.010) 4px
+    );
+  border: 1px solid rgba(0, 229, 255, 0.32);
+  border-radius: 3px;
+  box-shadow:
+    0 0 40px rgba(0, 229, 255, 0.10),
+    0 0 80px rgba(0, 0, 0, 0.80);
+}
+
+.modal h2 {
+  font-family: var(--font-pixel);
+  font-size: 0.52rem;
+  letter-spacing: 0.09em;
+  color: var(--arc-cyan);
+  text-shadow: 0 0 10px rgba(0, 229, 255, 0.58);
+}
+
+.modal p {
+  font-family: var(--font-tech);
+  font-size: 0.88rem;
+  color: rgba(0, 229, 255, 0.60);
+}
+
+.final-score {
+  font-family: var(--font-vt);
+  font-size: 3.5rem;
+  color: var(--arc-green);
+  text-shadow: 0 0 20px rgba(0, 255, 65, 0.65);
+}
+
+.modal-overlay {
+  background: rgba(0, 0, 5, 0.85);
+}
+
+/* Tutorial modal */
+.tutorial-card {
+  background: rgba(0, 6, 16, 0.90);
+  border: 1px solid rgba(0, 229, 255, 0.14);
+  border-radius: 3px;
+}
+.tutorial-card h4 {
+  font-family: var(--font-pixel);
+  font-size: 0.38rem;
+  letter-spacing: 0.08em;
+  color: var(--arc-cyan);
+  text-shadow: 0 0 5px rgba(0, 229, 255, 0.40);
+}
+.tutorial-card p { font-family: var(--font-tech); font-size: 0.80rem; }
+.tutorial-card pre {
+  background: #000510;
+  border-radius: 2px;
+  color: var(--arc-green);
+  font-family: var(--font-tech);
+}
+
+.btn-close {
+  font-family: var(--font-pixel);
+  font-size: 0.34rem;
+  letter-spacing: 0.08em;
+  border-radius: 2px;
+  border-color: rgba(0, 229, 255, 0.20);
+  color: rgba(0, 229, 255, 0.42);
+}
+.btn-close:hover {
+  color: var(--arc-cyan);
+  border-color: var(--arc-cyan);
+  box-shadow: 0 0 6px rgba(0, 229, 255, 0.18);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   13. BADGE TOAST — cyber notification
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.badge-toast {
+  background: #000a16;
+  border: 1px solid rgba(0, 229, 255, 0.32);
+  border-radius: 3px;
+  box-shadow:
+    0 0 24px rgba(0, 229, 255, 0.08),
+    0 6px 28px rgba(0, 0, 0, 0.70);
+}
+
+.toast-label {
+  font-family: var(--font-pixel);
+  font-size: 0.38rem;
+  letter-spacing: 0.08em;
+  color: var(--arc-cyan);
+  text-shadow: 0 0 5px rgba(0, 229, 255, 0.45);
+}
+
+.toast-desc {
+  font-family: var(--font-tech);
+  font-size: 0.78rem;
+  color: rgba(0, 255, 65, 0.52);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   14. SANDBOX SCREEN — enhanced retro terminal
+   ══════════════════════════════════════════════════════════════════════════ */
+
+.sandbox-header h1 {
+  font-family: var(--font-vt);
+  color: var(--arc-cyan);
+  text-shadow: 0 0 20px rgba(0, 229, 255, 0.45), 0 0 50px rgba(0, 229, 255, 0.15);
+}
+
+.sandbox-kicker,
+.sandbox-panel-title {
+  font-family: var(--font-pixel);
+  font-size: 0.38rem;
+  letter-spacing: 0.16em;
+  color: rgba(0, 229, 255, 0.62);
+  text-shadow: 0 0 5px rgba(0, 229, 255, 0.38);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   15. HOME SCREEN — targeted polish (on top of arcade.css)
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* Learn-box (concept box shown inside missions on home) */
+.learn-box {
+  background: rgba(0, 4, 12, 0.92);
+  border: 1px solid rgba(0, 229, 255, 0.22);
+  border-left: 3px solid var(--arc-cyan);
+  border-radius: 2px;
+}
+.learn-box h4 {
+  font-family: var(--font-pixel);
+  font-size: 0.40rem;
+  letter-spacing: 0.08em;
+  color: var(--arc-cyan);
+  text-shadow: 0 0 6px rgba(0, 229, 255, 0.50);
+}
+.learn-box p {
+  font-family: var(--font-tech);
+  font-size: 0.82rem;
+  color: rgba(0, 229, 255, 0.62);
+}
+
+/* Disclaimer strip */
+.disclaimer {
+  font-family: var(--font-tech);
+  font-size: 0.74rem;
+  background: rgba(0, 229, 255, 0.04);
+  border: 1px solid rgba(0, 229, 255, 0.14);
+  border-left: 2px solid rgba(0, 229, 255, 0.40);
+  border-radius: 2px;
+  color: rgba(0, 229, 255, 0.40);
+}
+
+/* Skill pills in learning dashboard */
+.skill-pill {
+  font-family: var(--font-tech);
+  background: rgba(0, 8, 18, 0.80);
+  border-color: rgba(0, 229, 255, 0.16);
+  border-radius: 2px;
+  color: rgba(0, 229, 255, 0.65);
+}
+.skill-pill strong { color: var(--arc-cyan); font-family: var(--font-tech); }
+
+/* Mastery track fill */
+.mastery-track span {
+  background: linear-gradient(90deg, var(--arc-green), var(--arc-cyan));
+  box-shadow: 0 0 4px rgba(0, 255, 65, 0.35);
+}
+
+/* Mission item checkmark when complete */
+.mission-item[data-completed="true"] .mission-item-num {
+  background: rgba(0, 255, 65, 0.10);
+  border-color: rgba(0, 255, 65, 0.40);
+  color: var(--arc-green);
+  box-shadow: 0 0 8px rgba(0, 255, 65, 0.20);
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   16. LIGHT MODE — full rollback for ALL game-screen improvements above
+       Mirror the existing light-mode approach in theme.css and arcade.css
+   ══════════════════════════════════════════════════════════════════════════ */
+
+body.light .game-container .sidebar {
+  background-image: none;
+  background-color: #ffffff;
+  border-right-color: #e2e8f0;
+}
+body.light .game-container .center {
+  background-color: var(--bg);
+  background-image: none;
+}
+body.light .game-container .right-panel {
+  background-image: none;
+  background-color: #ffffff;
+  border-left-color: #e2e8f0;
+}
+
+body.light .game-container .panel-title,
+body.light .game-container .sidebar h3 {
+  font-family: var(--font-sans);
+  font-size: 0.70rem;
+  color: var(--muted);
+  text-shadow: none;
+  letter-spacing: 0.12em;
+}
+body.light .game-container .panel-title::before,
+body.light .game-container .sidebar h3::before {
+  background: var(--accent);
+  box-shadow: none;
+  width: 3px;
+  height: 11px;
+}
+
+body.light .mission-card {
+  background-image: none;
+  background-color: #ffffff;
+  border: 1px solid rgba(3,105,161,0.18);
+  border-left: 4px solid var(--accent);
+  border-radius: 12px;
+  box-shadow: var(--shadow-card);
+}
+body.light .mission-card h2 {
+  font-family: var(--font-sans);
+  font-size: 1rem;
+  color: #0369a1;
+  letter-spacing: normal;
+  text-shadow: none;
+  line-height: 1.35;
+  margin-bottom: 6px;
+}
+body.light .mission-card p {
+  font-family: var(--font-sans);
+  font-size: 0.85rem;
+  color: #0f172a;
+  line-height: 1.55;
+}
+
+body.light .hint-box,
+body.light .error-box,
+body.light .success-box {
+  border-radius: 10px;
+  font-family: var(--font-sans);
+  padding-top: 11px;
+  background-image: none;
+}
+body.light .hint-box::before,
+body.light .error-box::before,
+body.light .success-box::before { display: none; }
+body.light .hint-box  { background-color: rgba(245,158,11,0.07); border:1px solid rgba(245,158,11,0.30); border-left:3px solid var(--warning); color:#713f12; box-shadow:none; }
+body.light .error-box { background-color: rgba(190,18,60,0.07);  border:1px solid rgba(190,18,60,0.20);  border-left:3px solid var(--danger);  color:#9f1239; box-shadow:none; }
+body.light .success-box { background-color: rgba(22,101,52,0.08); border:1px solid rgba(22,101,52,0.20); border-left:3px solid var(--success); color:#14532d; box-shadow:none; }
+
+body.light .sql-highlight-editor {
+  background-color: #f8fafc;
+  background-image: none;
+  border: 1px solid #64748b;
+  border-radius: 10px;
+  box-shadow: inset 0 2px 8px rgba(15,23,42,0.06);
+}
+body.light .sql-highlight-editor:focus-within {
+  border-color: #0369a1;
+  box-shadow: inset 0 2px 8px rgba(15,23,42,0.05), 0 0 0 3px rgba(3,105,161,0.14);
+}
+body.light .sql-editor-native { caret-color: #0f172a; }
+body.light .editor-label {
+  font-family: var(--font-mono);
+  font-size: 0.70rem;
+  color: var(--muted);
+  text-shadow: none;
+  letter-spacing: 0.12em;
+}
+body.light .editor-label::before {
+  content: '>';
+  color: var(--accent);
+  text-shadow: none;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+body.light .result-panel {
+  background-color: #f8fafc;
+  background-image: none;
+  border: 1px solid #94a3b8;
+  border-radius: 10px;
+  box-shadow: none;
+}
+body.light .result-panel th {
+  font-family: var(--font-mono);
+  font-size: 0.70rem;
+  color: #0369a1;
+  text-shadow: none;
+  background: #f1f5f9;
+  letter-spacing: 0.06em;
+  border-bottom: 2px solid rgba(3,105,161,0.30);
+  padding: 7px 10px;
+}
+body.light .result-panel td {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: #0f172a;
+  border-bottom: 1px solid #cbd5e1;
+}
+body.light .result-panel tr:nth-child(even) td { background: rgba(3,105,161,0.04); }
+body.light .result-panel tr:hover td { color: #0f172a; background: rgba(3,105,161,0.08); }
+body.light .empty-state, body.light .loading { font-family: var(--font-sans); color: var(--muted); }
+body.light .spinner { border-color: rgba(56,189,248,0.20); border-top-color: var(--accent); box-shadow: 0 0 8px rgba(56,189,248,0.15); }
+body.light .row-count { font-family: var(--font-mono); color: var(--muted); }
+
+body.light .dot { border-radius: 50%; width: 9px; height: 9px; background: var(--border); border: none; }
+body.light .dot.done { background: var(--success); border-radius: 50%; box-shadow: 0 0 5px rgba(34,197,94,0.50); }
+body.light .dot.current { background: var(--accent); border-radius: 50%; animation: dot-pulse 2s ease-in-out infinite; }
+
+body.light .mission-summary {
+  background-color: #ffffff;
+  background-image: none;
+  border-radius: 12px;
+}
+body.light .summary-title { font-family: var(--font-sans); font-size: 0.72rem; color: var(--muted); text-shadow: none; letter-spacing: 0.10em; }
+body.light .summary-rating { font-family: var(--font-sans); font-size: 1rem; }
+body.light .mission-summary[data-rating="Perfect"]   .summary-rating { text-shadow: none; }
+body.light .mission-summary[data-rating="Good"]      .summary-rating { text-shadow: none; }
+body.light .mission-summary[data-rating="Needs Review"] .summary-rating { text-shadow: none; }
+body.light .summary-stat { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; }
+body.light .summary-stat-val { font-family: var(--font-mono); font-size: 1rem; color: #0f172a; text-shadow: none; }
+body.light .summary-stat-label { font-family: var(--font-sans); font-size: 0.65rem; color: var(--muted); }
+body.light .summary-concept { font-family: var(--font-sans); background: rgba(3,105,161,0.07); border-color: rgba(3,105,161,0.20); border-radius: 20px; color: #0369a1; }
+
+body.light .btn-home {
+  font-family: var(--font-sans);
+  font-size: 0.80rem;
+  letter-spacing: normal;
+  border-radius: 6px;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  text-shadow: none;
+}
+body.light .btn-home:hover {
+  background: rgba(56,189,248,0.06);
+  border-color: rgba(56,189,248,0.35);
+  color: var(--text);
+  text-shadow: none;
+  box-shadow: none;
+}
+
+body.light .scenario-label {
+  font-family: var(--font-sans);
+  color: var(--accent);
+  background: rgba(56,189,248,0.07);
+  border: 1px solid rgba(56,189,248,0.20);
+  border-left: 3px solid rgba(56,189,248,0.60);
+  border-radius: 6px;
+  text-shadow: none;
+  box-shadow: none;
+}
+
+body.light .schema-table { background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; }
+body.light .schema-header {
+  font-family: var(--font-sans);
+  font-size: 0.75rem;
+  color: var(--accent);
+  text-shadow: none;
+  background: linear-gradient(90deg, var(--panel3) 0%, rgba(56,189,248,0.04) 100%);
+  border-left: 3px solid rgba(56,189,248,0.50);
+  letter-spacing: 0.04em;
+}
+body.light .schema-body div { font-family: var(--font-sans); font-size: 0.78rem; color: #334155; border-bottom-color: #e2e8f0; }
+body.light .schema-body div:hover { color: #0f172a; }
+body.light .type-tag { color: var(--warning); font-family: var(--font-mono); }
+
+body.light .badge {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  border-radius: 999px;
+  color: var(--accent);
+  background: rgba(56,189,248,0.14);
+  border: 1px solid rgba(56,189,248,0.28);
+  text-shadow: none;
+}
+
+body.light .kw-chip {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  background: rgba(56,189,248,0.06);
+  border: 1px solid rgba(56,189,248,0.20);
+  color: var(--accent);
+  border-radius: 4px;
+}
+body.light .kw-chip:hover {
+  background: rgba(56,189,248,0.12);
+  border-color: rgba(56,189,248,0.50);
+  color: var(--accent);
+  box-shadow: 0 0 8px rgba(56,189,248,0.15);
+}
+
+body.light .modal {
+  background-color: #ffffff;
+  background-image: none;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  box-shadow: 0 26px 80px rgba(0,0,0,0.35);
+}
+body.light .modal h2 { font-family: var(--font-sans); font-size: 1.1rem; color: #0369a1; text-shadow: none; letter-spacing: normal; }
+body.light .modal p  { font-family: var(--font-sans); font-size: 0.90rem; color: var(--muted); }
+body.light .final-score { font-family: var(--font-sans); font-size: 2.2rem; color: var(--success); text-shadow: none; }
+body.light .modal-overlay { background: rgba(0,0,0,0.78); }
+
+body.light .tutorial-card { background: var(--panel2); border: 1px solid var(--border); border-radius: 10px; }
+body.light .tutorial-card h4 { font-family: var(--font-sans); font-size: 0.82rem; color: var(--accent); text-shadow: none; letter-spacing: normal; }
+body.light .tutorial-card p  { font-family: var(--font-sans); font-size: 0.75rem; }
+body.light .tutorial-card pre { background: var(--panel3); border-radius: 6px; color: var(--text); font-family: var(--font-mono); }
+body.light .btn-close { font-family: var(--font-sans); font-size: 0.78rem; letter-spacing: normal; border-radius: 6px; border-color: var(--border); color: var(--muted); }
+body.light .btn-close:hover { color: var(--text); border-color: var(--text); box-shadow: none; }
+
+body.light .badge-toast { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.10); }
+body.light .toast-label { font-family: var(--font-sans); font-size: 0.82rem; color: var(--text); text-shadow: none; letter-spacing: normal; }
+body.light .toast-desc  { font-family: var(--font-sans); font-size: 0.75rem; color: var(--text-dim); }
+
+body.light .sandbox-header h1 { font-family: var(--font-sans); color: var(--text); text-shadow: none; }
+body.light .sandbox-kicker,
+body.light .sandbox-panel-title {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  color: var(--accent);
+  text-shadow: none;
+  letter-spacing: 0.14em;
+}
+
+body.light .learn-box {
+  background: rgba(56,189,248,0.06);
+  border: 1px solid rgba(56,189,248,0.25);
+  border-left: 3px solid var(--accent);
+  border-radius: 10px;
+}
+body.light .learn-box h4 { font-family: var(--font-sans); font-size: 0.82rem; color: var(--accent); text-shadow: none; letter-spacing: normal; }
+body.light .learn-box p  { font-family: var(--font-sans); font-size: 0.82rem; color: var(--muted); }
+body.light .disclaimer   { font-family: var(--font-sans); font-size: 0.75rem; background: rgba(56,189,248,0.06); border: 1px solid rgba(56,189,248,0.20); border-left: 3px solid rgba(56,189,248,0.50); border-radius: 8px; color: var(--muted); }
+
+body.light .skill-pill { font-family: var(--font-sans); background: rgba(3,105,161,0.07); border-color: rgba(3,105,161,0.20); border-radius: 8px; color: #0f172a; }
+body.light .skill-pill strong { color: #0369a1; font-family: var(--font-sans); }
+body.light .mastery-track span { background: linear-gradient(90deg, var(--accent), var(--success)); box-shadow: none; }
