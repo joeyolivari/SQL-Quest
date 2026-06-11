@@ -1,10 +1,11 @@
 /* ══════════════════════════════════════════════════════════════
-   SQL Quest — game-icons.css  (retro 90s cyber-arcade edition)
+   SQL Quest — game-icons.css
 
-   Icons: solid-fill SVG sprites with dark outline + specular
-   highlights (paint-order="stroke fill" in the sprite symbols).
+   Icons: game-icons.net CC BY 3.0 paths (lorc, delapouite) +
+   5 hand-crafted geometric icons (chevrons, close, grid).
 
-   CSS role: pixel rendering + per-context CRT phosphor bloom.
+   CSS role: sizing + per-context CRT phosphor bloom via
+   drop-shadow filter stacks. Hover transitions for smooth glow.
    ══════════════════════════════════════════════════════════════ */
 
 /* ── Base ─────────────────────────────────────────────────── */
@@ -16,9 +17,7 @@
   overflow: visible;
   flex-shrink: 0;
   pointer-events: none;
-  /* Eliminate sub-pixel blur — pure pixel-art rendering */
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
+  transition: filter 0.18s ease, transform 0.12s ease;
 }
 
 /* ── Context sizing ────────────────────────────────────────── */
@@ -180,6 +179,46 @@
   filter:
     drop-shadow(0 0 2px rgba(0, 229, 255, 0.8))
     drop-shadow(0 0 10px rgba(0, 229, 255, 0.4));
+}
+
+/* ── Per-context hover: amplify the existing glow ───────────── */
+.btn-theme:hover .game-icon {
+  filter:
+    drop-shadow(0 0 2px #fbbf24)
+    drop-shadow(0 0 9px #fbbf24)
+    drop-shadow(0 0 22px rgba(251, 191, 36, 0.65));
+}
+.btn-learn:hover .game-icon,
+.btn-learn-schema:hover .game-icon {
+  filter:
+    drop-shadow(0 0 2px #38bdf8)
+    drop-shadow(0 0 9px #38bdf8)
+    drop-shadow(0 0 18px rgba(56, 189, 248, 0.6));
+}
+.btn-home:hover .game-icon {
+  filter:
+    drop-shadow(0 0 2px rgba(0, 229, 255, 1))
+    drop-shadow(0 0 9px rgba(0, 229, 255, 0.65));
+}
+#btnSolution:hover .game-icon {
+  filter:
+    drop-shadow(0 0 3px #a78bfa)
+    drop-shadow(0 0 11px rgba(167, 139, 250, 0.85));
+}
+#btnNext:hover .game-icon {
+  filter:
+    drop-shadow(0 0 2px #38bdf8)
+    drop-shadow(0 0 9px rgba(56, 189, 248, 0.85));
+}
+#btnCopyScore:hover .game-icon {
+  filter:
+    drop-shadow(0 0 2px #38bdf8)
+    drop-shadow(0 0 9px rgba(56, 189, 248, 0.8));
+}
+.sandbox-run:hover .game-icon {
+  filter:
+    drop-shadow(0 0 3px #4ade80)
+    drop-shadow(0 0 11px rgba(74, 222, 128, 0.85));
 }
 
 /* ── Reduced motion ─────────────────────────────────────────── */
