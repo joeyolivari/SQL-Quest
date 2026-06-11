@@ -1344,9 +1344,8 @@ body.light .home-error {
   .home-stat-chip strong { font-size: 1.35rem; }
   /* Section heading smaller */
   #homeScreen .home-section h3 { font-size: 0.40rem; }
-  /* Learning launch: tighter padding; 24px bottom clears descenders */
+  /* Learning launch: tighter padding; 24px bottom clears descenders; smaller text on phones */
   .learning-launch { padding: 16px 44px 24px 16px; }
-  /* Shrink desc + title so text fits without wrapping excessively */
   .learning-launch-desc { font-size: 0.64rem; letter-spacing: 0; line-height: 1.55; }
   .learning-launch-title { font-size: 0.42rem; }
   /* Footer buttons stack better */
