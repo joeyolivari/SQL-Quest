@@ -662,7 +662,9 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btnSchemaMin').addEventListener('click', function () {
     const body = document.getElementById('schemaBody');
     const collapsed = body.classList.toggle('schema-collapsed');
-    this.innerHTML = collapsed ? '&#9654; Show' : '&#9660; Hide';
+    this.innerHTML = collapsed
+      ? '<svg class="game-icon" aria-hidden="true"><use href="#icon-next"/></svg> Show'
+      : '<svg class="game-icon" aria-hidden="true"><use href="#icon-collapse"/></svg> Hide';
   });
 
   document.getElementById('btnQuote').addEventListener('click', () => wrapSqlCursor("'", "'"));

@@ -10,7 +10,7 @@ function learningScreenMarkup() {
 <!-- Learning Center (component-rendered screen) -->
 <div id="learningScreen" class="learning-screen" style="display:none">
   <div class="learning-page-hero">
-    <button class="btn-home" id="btnLearningBack" type="button" data-learning-close="true">&#8592; Main Menu</button>
+    <button class="btn-home" id="btnLearningBack" type="button" data-learning-close="true"><svg class="game-icon" aria-hidden="true"><use href="#icon-back"/></svg> Main Menu</button>
     <div class="learning-page-kicker">Accelerated Learning</div>
     <h1 class="learning-page-title">Learning <span>Center</span></h1>
     <p class="learning-page-tagline">Track your SQL skill mastery and tune how your next missions are ordered.</p>
@@ -31,17 +31,17 @@ function learningScreenMarkup() {
     </div>
     <div class="mode-row" id="learningModeOptions">
       <button class="mode-btn selected" type="button" data-mode="story">
-        <span class="mode-icon">&#128218;</span>
+        <span class="mode-icon"><svg class="game-icon" aria-hidden="true"><use href="#icon-learn"/></svg></span>
         <span class="mode-label">Story Mode</span>
         <span class="mode-desc">Play missions in order</span>
       </button>
       <button class="mode-btn" type="button" data-mode="training">
-        <span class="mode-icon">&#127919;</span>
+        <span class="mode-icon"><svg class="game-icon" aria-hidden="true"><use href="#icon-target"/></svg></span>
         <span class="mode-label">Training Mode</span>
         <span class="mode-desc">Start with your weakest skills</span>
       </button>
       <button class="mode-btn" type="button" data-mode="review">
-        <span class="mode-icon">&#128260;</span>
+        <span class="mode-icon"><svg class="game-icon" aria-hidden="true"><use href="#icon-review"/></svg></span>
         <span class="mode-label">Review Mode</span>
         <span class="mode-desc">Revisit failed or low-mastery skills</span>
       </button>
@@ -49,7 +49,7 @@ function learningScreenMarkup() {
   </div>
 
   <div class="home-footer">
-    <button class="btn-lg btn-primary" id="btnLearningApply" type="button" data-learning-close="true">&#8594; Back to Missions</button>
+    <button class="btn-lg btn-primary" id="btnLearningApply" type="button" data-learning-close="true"><svg class="game-icon" aria-hidden="true"><use href="#icon-next"/></svg> Back to Missions</button>
   </div>
 </div>`;
 }
