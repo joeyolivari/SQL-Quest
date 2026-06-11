@@ -20,6 +20,15 @@
   transition: filter 0.18s ease, transform 0.12s ease;
 }
 
+/* ── Context colors: ensure currentColor = neon accent ──────── */
+/* Without an explicit color, icons inherit --text (#e2e8f0 in dark
+   mode) and render as white/gray silhouettes instead of neon hues. */
+.diff-row .diff-icon           { color: rgb(var(--diff-rgb, 56, 189, 248)); }
+.learning-launch-icon          { color: var(--arc-cyan, #00e5ff); }
+.mode-icon                     { color: var(--arc-cyan, #00e5ff); }
+.schema-header                 { color: rgba(0, 229, 255, 0.7); }
+.sandbox-schema-btn            { color: rgba(0, 229, 255, 0.7); }
+
 /* ── Context sizing ────────────────────────────────────────── */
 .btn-cyber-icon .game-icon  { width: 1.1em; height: 1.1em; }
 
