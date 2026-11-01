@@ -322,3 +322,23 @@
     padding-right: 14px;
   }
 }
+
+/* Keep data previews inside the lesson on narrow screens. */
+.learn-player-view, .learn-step-host, .learn-step-card { min-width: 0; }
+.learn-data-preview { margin-bottom: 16px; max-width: 100%; color: var(--text); }
+.learn-data-preview summary { cursor: pointer; color: var(--accent); }
+.learn-data-preview p { overflow-wrap: anywhere; font-size: 0.85rem; }
+.learn-preview-scroll { overflow-x: auto; max-width: 100%; margin-bottom: 16px; }
+.learn-query-label { display: block; color: var(--text); margin-bottom: 8px; }
+.learn-unit-prerequisite { color: var(--muted); font-size: 0.85rem; }
+
+/* Quiet terminal cues for practice stages; no timer or streak pressure. */
+.learn-step-phase { color: var(--accent); font-family: var(--font-mono); text-transform: uppercase; letter-spacing: 0.12em; font-size: 0.75rem; }
+.learn-review-card { display: flex; align-items: center; gap: 18px; padding: 20px; background: var(--panel); border: 1px solid var(--accent); border-left-width: 4px; border-radius: 12px; color: var(--text); }
+.learn-review-card h3 { margin: 0 0 8px; }
+.learn-review-card p { margin: 0 0 8px; }
+.learn-review-note { font-size: 0.85rem; color: var(--muted); }
+.learn-review-card .btn-lg { flex-shrink: 0; }
+.learn-feedback { flex-wrap: wrap; }
+.learn-reflection { flex-basis: 100%; margin: 0; color: var(--text); font-weight: normal; }
+@media (max-width: 600px) { .learn-review-card { flex-direction: column; align-items: stretch; } }

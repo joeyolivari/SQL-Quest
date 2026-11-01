@@ -141,3 +141,57 @@ export const seedData = {
     [5,'CSA','Registered account disclosure','2026-01-01','Medium','Additional investor disclosure for account types.']
   ]
 };
+
+// Versioned, deterministic fixtures: no random values or current-date dependency.
+// Original IDs remain stable for existing lessons and saved mission progress.
+export const DATASET_VERSION = 3;
+const date = day => new Date(Date.UTC(2024, 2, 1 + day)).toISOString().slice(0, 10);
+for (let id = 21; id <= 200; id++) {
+  seedData.clients.push([id, `Training Client ${String(id).padStart(3, '0')}`,
+    id % 17 === 0 ? null : `client${id}@example.ca`, (id % 8) + 1,
+    ['complete', 'pending', 'expired'][id % 3],
+    ['ON', 'BC', 'AB', 'QC', 'NS', 'MB', 'ON-Toronto'][id % 7],
+    ['Low', 'Medium', 'High'][id % 3], '2023-01-01']);
+}
+for (let id = 231; id <= 550; id++) {
+  seedData.accounts.push([id, 21 + ((id - 231) % 170),
+    ['RRSP', 'TFSA', 'RESP', 'FHSA', 'Non-Registered'][id % 5],
+    id % 31 === 0 ? null : (id % 20) * 10000, '2023-03-01',
+    ['Active', 'Active', 'Dormant', 'Closed', 'Suspended'][id % 5],
+    id % 13 === 0 ? null : '2025-06-01']);
+}
+// Explicit boundaries and ties for >=, BETWEEN, and ranking exercises.
+seedData.accounts.find(a => a[0] === 231)[3] = 100000;
+seedData.accounts.find(a => a[0] === 232)[3] = 30000;
+seedData.accounts.find(a => a[0] === 233)[3] = 100000;
+for (let i = 0; i < 4980; i++) {
+  const id = 1021 + i;
+  const account = 231 + (i % 280); // retain accounts without activity
+  const day = (i * 37) % 730;
+  const amount = i % 101 === 0 ? 150000 : i % 17 === 0 ? 10000 : ((i * 719) % 20000) + 0.25;
+  const type = ['Deposit', 'Withdrawal', 'Transfer', 'Interest'][(i + Math.floor(i / 280)) % 4];
+  const status = ['Posted', 'Posted', 'Posted', 'Pending', 'Reversed'][i % 5];
+  seedData.transactions.push([id, account, date(day), amount, type,
+    type === 'Withdrawal' ? 'Debit' : 'Credit', status, 'Synthetic training activity']);
+  if (i % 3 !== 0) seedData.journalEntries.push([9011 + i, id, date(day), amount,
+    i % 53 === 0 ? amount - 10 : amount, 'Training ledger', 'system']);
+  if (i % 11 === 0) seedData.complianceFlags.push([8013 + i, id,
+    i % 22 === 0 ? 'large_amount' : 'activity_review', ['High', 'Medium', 'Low'][i % 3], i % 2, date(day)]);
+}
+// Repeated reviews expose join multiplication; some accounts remain unreviewed.
+for (let i = 0; i < 540; i++) {
+  seedData.complianceReviews.push([7021 + i, 231 + (i % 270), date((i * 19) % 730),
+    ['Routine review', 'Missing documentation', 'Unusual activity'][i % 3],
+    ['Low', 'Medium', 'High'][i % 3], ['Open', 'Closed', 'In Progress'][(i + Math.floor(i / 270)) % 3],
+    ['A. Carter', 'B. Singh', 'C. Lee'][i % 3]]);
+}
+
+// Accounts cannot predate the client's onboarding in this training model.
+for (const account of seedData.accounts) {
+  const client = seedData.clients.find(c => c[0] === account[1]);
+  if (account[4] < client[7]) account[4] = client[7];
+}
+
+// Deliberately untidy email fixtures for read-only normalization exercises.
+seedData.clients.find(client => client[0] === 21)[2] = ' Client21@EXAMPLE.CA ';
+seedData.clients.find(client => client[0] === 22)[2] = 'CLIENT22@example.ca';

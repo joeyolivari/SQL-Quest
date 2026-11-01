@@ -5,6 +5,8 @@
 // (concept mastery). Completing a lesson can optionally feed concept mastery,
 // but that call lives in the Learn feature, not here.
 
+import { LEARN_TRACK } from '../data/lessons.js';
+
 const SAVE_KEY = 'csq_learn_v1';
 
 let cache = null;
@@ -14,6 +16,8 @@ function blankState() {
     version: 1,
     completedLessons: {},   // lessonId -> true
     stepState: {},          // lessonId -> { [stepIndex]: 'correct' | 'wrong' }
+    drafts: {},
+    stepHints: {},
     position: null,         // { unitId, lessonId, stepIndex } — resume point
   };
 }
@@ -23,7 +27,14 @@ export function loadLearnProgress() {
   try {
     const raw = localStorage.getItem(SAVE_KEY);
     const parsed = raw ? JSON.parse(raw) : null;
-    cache = parsed && typeof parsed === 'object' ? { ...blankState(), ...parsed } : blankState();
+    cache = blankState();
+    if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+      for (const key of ['completedLessons', 'stepState', 'drafts', 'stepHints']) {
+        if (parsed[key] && typeof parsed[key] === 'object' && !Array.isArray(parsed[key])) cache[key] = parsed[key];
+      }
+      const pos = parsed.position;
+      if (pos && typeof pos.unitId === 'string' && typeof pos.lessonId === 'string' && Number.isInteger(pos.stepIndex) && pos.stepIndex >= 0) cache.position = pos;
+    }
   } catch {
     cache = blankState();
   }
@@ -58,6 +69,7 @@ export function markStepResult(lessonId, stepIndex, result) {
 export function completeLesson(lessonId) {
   const state = loadLearnProgress();
   state.completedLessons[lessonId] = true;
+  delete state.drafts[lessonId];
   saveLearnProgress();
 }
 
@@ -73,10 +85,17 @@ export function getPosition() {
 
 // Lesson N is unlocked once lesson N-1 is complete. The first lesson is always
 // unlocked. (unit.lessons order defines the ladder.)
+export function isUnitUnlocked(unit, track = LEARN_TRACK) {
+  const index = track.findIndex(u => u.id === unit.id);
+  return index >= 0 && track.slice(0, index).every(isUnitComplete);
+}
+
 export function isLessonUnlocked(unit, lessonIndex) {
-  if (lessonIndex <= 0) return true;
-  const prev = unit.lessons[lessonIndex - 1];
-  return prev ? isLessonComplete(prev.id) : true;
+  const lesson = unit?.lessons[lessonIndex];
+  if (!lesson) return false;
+  // Preserve access to lessons completed before prerequisites were added.
+  if (isLessonComplete(lesson.id)) return true;
+  return isUnitUnlocked(unit) && unit.lessons.slice(0, lessonIndex).every(l => isLessonComplete(l.id));
 }
 
 export function getUnitProgress(unit) {
@@ -93,4 +112,44 @@ export function getUnitProgress(unit) {
 
 export function isUnitComplete(unit) {
   return unit.lessons.every(l => isLessonComplete(l.id));
+}
+
+export function clearPosition() {
+  loadLearnProgress().position = null;
+  saveLearnProgress();
+}
+
+export function isLessonPassed(lesson) {
+  const results = loadLearnProgress().stepState[lesson.id] || {};
+  return lesson.steps.every((step, index) => step.type === 'concept' || results[index] === 'correct');
+}
+
+export function getStepResult(lessonId, stepIndex) {
+  return loadLearnProgress().stepState[lessonId]?.[stepIndex];
+}
+
+export function saveDraft(lessonId, stepIndex, sql) {
+  const state = loadLearnProgress();
+  if (isLessonComplete(lessonId)) return;
+  if (!state.drafts[lessonId]) state.drafts[lessonId] = {};
+  state.drafts[lessonId][stepIndex] = sql;
+  saveLearnProgress();
+}
+
+export function getDraft(lessonId, stepIndex) {
+  return loadLearnProgress().drafts[lessonId]?.[stepIndex];
+}
+
+export function markHintUsed(lessonId, stepIndex) {
+  const state = loadLearnProgress();
+  if (state.stepHints[lessonId]?.[stepIndex]) return false;
+  if (!state.stepHints[lessonId]) state.stepHints[lessonId] = {};
+  state.stepHints[lessonId][stepIndex] = true;
+  saveLearnProgress();
+  return true;
+}
+
+export function clearDraft(lessonId) {
+  delete loadLearnProgress().drafts[lessonId];
+  saveLearnProgress();
 }

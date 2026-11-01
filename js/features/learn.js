@@ -11,19 +11,22 @@
 //
 // Progress is stored in its own namespace via learnProgress.js (csq_learn_v1).
 
+import { getDueLearnReviews, scheduleLearnReview, recordLearnReview, markLearnReviewSupported } from '../learning/learnReview.js';
+import { schema } from '../data/schema.js';
 import { LEARN_TRACK, getUnit, getLesson } from '../data/lessons.js';
 import { createSqlHighlighter } from '../core/editor.js';
 import { executeQuery, isSafeQuery } from '../core/sqlEngine.js';
 import { compareResults } from '../core/validation.js';
-import { recordMasteryAttempt, recordMasterySuccess } from '../learning/masteryTracker.js';
+import { recordLearnAnswer, recordLearnHint } from '../learning/learnAssessment.js';
 import {
   isLessonComplete, isLessonUnlocked, isUnitComplete, getUnitProgress,
-  markStepResult, completeLesson, setPosition,
+  completeLesson, setPosition, getPosition, clearPosition, isLessonPassed, isUnitUnlocked, saveDraft, getDraft, clearDraft,
 } from '../learning/learnProgress.js';
 
 // ── Module state ────────────────────────────────────────────────────────────
 let current = null;        // { unitId, lessonId, lesson, stepIndex }
 let learnEditor = null;    // createSqlHighlighter instance for query/fill-blank steps
+let reviewQueue = [];
 let staticWired = false;   // one-time wiring of the persistent buttons
 
 // ── Small DOM helpers ───────────────────────────────────────────────────────
@@ -56,6 +59,8 @@ export function openLearnTrack() {
 
   showMapView();
   renderMap();
+  const position = getPosition();
+  if (position && !isLessonComplete(position.lessonId)) startLesson(position.unitId, position.lessonId);
   window.scrollTo(0, 0);
 }
 
@@ -71,12 +76,10 @@ export function closeLearnTrack() {
 
 // Short summary string for the home-screen launcher meta line.
 export function getLearnLaunchMeta() {
-  const unit = LEARN_TRACK[0];
-  if (!unit) return '';
-  const { done, total } = getUnitProgress(unit);
-  if (done === 0) return 'Start here · ' + total + ' lessons';
-  if (done >= total) return 'Foundations complete ✓';
-  return done + '/' + total + ' lessons done';
+  const total = LEARN_TRACK.reduce((n, u) => n + u.lessons.length, 0);
+  const done = LEARN_TRACK.reduce((n, u) => n + getUnitProgress(u).done, 0);
+  return done === total ? 'Tutorial complete ✓' : `${done}/${total} lessons done`;
+
 }
 
 // Expose for the component fallback + cross-module calls.
@@ -107,7 +110,9 @@ function renderMap() {
   const host = $('learnUnits');
   if (!host) return;
 
-  host.innerHTML = LEARN_TRACK.map(unit => {
+  const due = getDueLearnReviews(LEARN_TRACK, isLessonComplete);
+  const review = `<aside class="learn-review-card"><div><h3>Recall desk</h3><p>${due.length ? 'A short mixed review is ready. Try remembering before using hints.' : 'No review is due. Keep learning; completed query lessons return for practice later.'}</p><p class="learn-review-note">Optional and untimed. Suggested gaps: 1, 3, 7, 14, then 30 days.</p></div>${due.length ? '<button type="button" class="btn-lg btn-primary" data-learn-review="true">Review ' + due.length + ' questions</button>' : ''}</aside>`;
+  host.innerHTML = review + LEARN_TRACK.map((unit, unitIndex) => {
     const { done, total, pct } = getUnitProgress(unit);
     const complete = isUnitComplete(unit);
 
@@ -119,7 +124,7 @@ function renderMap() {
       const badge = doneLesson ? '✓' : (unlocked ? (idx + 1) : '🔒');
       const attrs = unlocked
         ? `data-learn-unit="${escapeHtml(unit.id)}" data-learn-lesson="${escapeHtml(lesson.id)}"`
-        : 'aria-disabled="true"';
+        : 'disabled aria-disabled="true"';
       return `
         <button type="button" class="learn-node ${stateClass}" ${attrs}>
           <span class="learn-node-dot">${badge}</span>
@@ -142,6 +147,7 @@ function renderMap() {
           <span class="learn-unit-count">${done}/${total}</span>
         </div>
         <div class="learn-unit-track"><span class="learn-unit-fill" style="width:${pct}%"></span></div>
+        ${!isUnitUnlocked(unit) ? `<p class="learn-unit-prerequisite">Complete ${escapeHtml(LEARN_TRACK[unitIndex - 1]?.title || 'the earlier units')} first.</p>` : ''}
         <div class="learn-path">${nodes}</div>
         ${graduate}
       </div>`;
@@ -151,9 +157,13 @@ function renderMap() {
 // ── Lesson player ───────────────────────────────────────────────────────────
 function startLesson(unitId, lessonId) {
   const lesson = getLesson(unitId, lessonId);
-  if (!lesson) return;
-  current = { unitId, lessonId, lesson, stepIndex: 0 };
-  setPosition(unitId, lessonId, 0);
+  const unit = getUnit(unitId);
+  if (!lesson || !unit || !isLessonUnlocked(unit, unit.lessons.indexOf(lesson))) return;
+  const position = getPosition();
+  const stepIndex = !isLessonComplete(lessonId) && position?.lessonId === lessonId
+    ? Math.min(Math.max(Number.isInteger(position.stepIndex) ? position.stepIndex : 0, 0), lesson.steps.length - 1) : 0;
+  current = { unitId, lessonId, lesson, stepIndex };
+  setPosition(unitId, lessonId, stepIndex);
   showPlayerView();
   renderStep();
 }
@@ -171,9 +181,12 @@ function renderStep() {
   const pct = Math.round((stepIndex / total) * 100);
   const fill = $('learnProgressFill');
   if (fill) fill.style.width = pct + '%';
+  const stage = $('learnStepPhase');
+  if (stage) stage.textContent = step.phase || (current.mode === 'review' ? 'Retrieve' : 'Practice');
   const label = $('learnProgressLabel');
   if (label) label.textContent = (stepIndex + 1) + ' / ' + total;
 
+  current.hintIndex = 0;
   // Reset feedback + buttons.
   hideFeedback();
   const checkBtn = $('btnLearnCheck');
@@ -196,11 +209,11 @@ function renderStep() {
   } else if (step.type === 'fill') {
     host.innerHTML = renderFill(step);
     if (checkBtn) { checkBtn.hidden = false; checkBtn.disabled = false; }
-    if (hintBtn) hintBtn.hidden = !step.hint;
+    if (hintBtn) hintBtn.hidden = !(step.hint || step.hintSteps?.length);
   } else if (step.type === 'query') {
     host.innerHTML = renderQuery(step);
     if (checkBtn) { checkBtn.hidden = false; checkBtn.disabled = false; }
-    if (hintBtn) hintBtn.hidden = !step.hint;
+    if (hintBtn) hintBtn.hidden = !(step.hint || step.hintSteps?.length);
     mountQueryEditor(step);
   }
 
@@ -224,14 +237,40 @@ function renderChoice(step) {
   return `
     <div class="learn-step-card">
       <p class="learn-prompt">${escapeHtml(step.prompt)}</p>
+      ${renderPrediction(step)}
       <div class="learn-choices">${choices}</div>
     </div>`;
+}
+
+
+function renderPrediction(step) {
+  const samples = [step.sample, ...(step.relatedSamples || [])].filter(Boolean);
+  const table = samples.map(sample => `<div class="learn-preview-scroll"><table class="learn-result-table"><caption>Small example: ${escapeHtml(sample.name)}</caption><thead><tr>${sample.columns.map(c => `<th scope="col">${escapeHtml(c)}</th>`).join('')}</tr></thead><tbody>${sample.rows.map(row => `<tr>${row.map(v => `<td>${escapeHtml(v === null ? 'NULL' : v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`).join('');
+  return table + (step.example ? `<pre class="learn-example">${escapeHtml(step.example)}</pre>` : '');
+}
+
+function beginReview() {
+  reviewQueue = getDueLearnReviews(LEARN_TRACK, isLessonComplete);
+  showNextReview();
+}
+
+function showNextReview() {
+  const item = reviewQueue.shift();
+  if (!item) { current = null; showMapView(); renderMap(); return; }
+  current = {
+    mode: 'review', unitId: item.unitId, sourceLessonId: item.lesson.id,
+    lessonId: 'review:' + item.lesson.id,
+    lesson: { ...item.lesson, title: 'Recall: ' + item.lesson.title, steps: [item.question] },
+    stepIndex: 0, assisted: false
+  };
+  showPlayerView();
+  renderStep();
 }
 
 function renderFill(step) {
   // Replace {{n}} tokens with inline inputs.
   const html = escapeHtml(step.template).replace(/\{\{(\d+)\}\}/g, (m, n) =>
-    `<input type="text" class="learn-blank" data-blank-index="${n}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />`
+    `<input type="text" aria-label="Blank ${Number(n) + 1}" class="learn-blank" data-blank-index="${n}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />`
   );
   return `
     <div class="learn-step-card">
@@ -244,6 +283,10 @@ function renderQuery(step) {
   return `
     <div class="learn-step-card">
       <p class="learn-prompt">${escapeHtml(step.prompt)}</p>
+      <details class="learn-data-preview"><summary>Explore the tables and sample data</summary>
+        <div id="learnTablePreview"></div>
+      </details>
+      <label for="learnQueryInput" class="learn-query-label">Your SQL query</label>
       <textarea id="learnQueryInput" class="learn-query-input" rows="5" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
       <div id="learnQueryResult" class="learn-query-result" hidden></div>
     </div>`;
@@ -254,7 +297,7 @@ function mountQueryEditor(step) {
   // so always (re)wrap the current element and seed the starter SQL.
   learnEditor = createSqlHighlighter('learnQueryInput');
   if (learnEditor) {
-    learnEditor.setValue(step.starterSQL || '');
+    learnEditor.setValue(getDraft(current.lessonId, current.stepIndex) ?? step.starterSQL ?? '');
     learnEditor.focus();
   }
 }
@@ -276,6 +319,8 @@ function checkChoice(step) {
   if (!selected) return;
   const idx = Number(selected.dataset.choiceIndex);
   const ok = idx === step.answerIndex;
+
+  if (!ok) return resolveStep(false, 'Try again. ' + (step.choiceFeedback?.[idx] || step.explain || 'Trace the rows and try once more.'));
 
   host.querySelectorAll('.learn-choice').forEach((btn, i) => {
     btn.disabled = true;
@@ -311,17 +356,17 @@ function checkFill(step) {
     inputs.forEach(i => { i.disabled = true; });
     resolveStep(true, step.explain || 'Correct!');
   } else {
-    resolveStep(false, step.hint ? 'Not quite. Hint: ' + step.hint : 'Not quite — check the highlighted blanks and try again.', { retry: true });
+    resolveStep(false, step.hint ? 'Not quite. Hint: ' + step.hint : 'Not quite — check the highlighted blanks and try again.');
   }
 }
 
 function checkQuery(step) {
   const sql = (learnEditor ? learnEditor.getValue() : ($('learnQueryInput')?.value || '')).trim();
   if (!sql) {
-    return resolveStep(false, 'Write a query first.', { retry: true });
+    return resolveStep(false, 'Write a query first.');
   }
   if (!isSafeQuery(sql)) {
-    return resolveStep(false, 'Only SELECT / WITH queries are allowed here.', { retry: true });
+    return resolveStep(false, 'Only SELECT / WITH queries are allowed here.');
   }
 
   let userResult, expected;
@@ -329,12 +374,12 @@ function checkQuery(step) {
     userResult = executeQuery(sql);
     expected = executeQuery(step.solutionSQL);
   } catch (err) {
-    return resolveStep(false, 'SQL error: ' + (err && err.message ? err.message : 'check your syntax.'), { retry: true });
+    return resolveStep(false, 'SQL error: ' + (err && err.message ? err.message : 'check your syntax.'));
   }
 
   const { ok, message } = compareResults(userResult, expected, step.requiredColumns, step.orderMatters);
   renderQueryResult(userResult);
-  resolveStep(ok, ok ? (step.explain || 'Correct!') : message, { retry: !ok });
+  resolveStep(ok, ok ? (step.explain || 'Correct!') : message);
 }
 
 function renderQueryResult(result) {
@@ -352,18 +397,23 @@ function renderQueryResult(result) {
   panel.innerHTML = `<table class="learn-result-table"><thead><tr>${thead}</tr></thead><tbody>${tbody}</tbody></table>${more}`;
 }
 
-// Show feedback + flip Check/Continue. `retry` keeps Check available on a wrong answer.
-function resolveStep(ok, message, options = {}) {
+// Wrong answers keep Check available; correct answers unlock Continue.
+function resolveStep(ok, message) {
   showFeedback(ok, message);
-  if (current) markStepResult(current.lessonId, current.stepIndex, ok ? 'correct' : 'wrong');
+  if (current?.mode === 'review') {
+    if (!ok) { current.assisted = true; markLearnReviewSupported(current.sourceLessonId); }
+  } else if (current) recordLearnAnswer(current.lesson, current.stepIndex, ok);
 
   const checkBtn = $('btnLearnCheck');
   const continueBtn = $('btnLearnContinue');
   if (ok) {
-    if (checkBtn) checkBtn.hidden = true;
-    if (continueBtn) continueBtn.hidden = false;
-  } else if (!options.retry) {
-    // choice steps are single-shot: reveal the answer and let them move on
+    const step = current?.lesson.steps[current.stepIndex];
+    if (step?.explanationPrompt) {
+      const reflection = document.createElement('p');
+      reflection.className = 'learn-reflection';
+      reflection.textContent = 'Explain it to yourself: ' + step.explanationPrompt;
+      $('learnFeedback')?.appendChild(reflection);
+    }
     if (checkBtn) checkBtn.hidden = true;
     if (continueBtn) continueBtn.hidden = false;
   }
@@ -376,22 +426,23 @@ function onContinue() {
     finishLesson();
     return;
   }
-  setPosition(current.unitId, current.lessonId, current.stepIndex);
+  if (current.mode !== 'review') setPosition(current.unitId, current.lessonId, current.stepIndex);
   renderStep();
 }
 
 function finishLesson() {
   if (!current) return;
-  const { unitId, lesson } = current;
-  completeLesson(lesson.id);
-
-  // Feed the existing concept-mastery dashboard (does not affect mission scoring).
-  if (Array.isArray(lesson.concepts) && lesson.concepts.length) {
-    try {
-      recordMasteryAttempt(lesson.concepts);
-      recordMasterySuccess(lesson.concepts);
-    } catch (e) {}
+  if (current.mode === 'review') {
+    recordLearnReview(current.sourceLessonId, { correct: true, assisted: current.assisted });
+    clearDraft(current.lessonId);
+    showNextReview();
+    return;
   }
+  const { lesson } = current;
+  if (!isLessonComplete(lesson.id) && !isLessonPassed(lesson)) return;
+  completeLesson(lesson.id);
+  scheduleLearnReview(lesson.id);
+  clearPosition();
 
   current = null;
   showMapView();
@@ -420,6 +471,8 @@ function wireStaticButtons() {
 
   // Delegate clicks within the Learn screen (handles re-rendered content).
   document.addEventListener('click', event => {
+    if (event.target.closest('[data-learn-review]')) { beginReview(); return; }
+
     // Open a lesson node from the map.
     const node = event.target.closest('.learn-node[data-learn-lesson]');
     if (node) {
@@ -450,13 +503,40 @@ function wireStaticButtons() {
     // Persistent action buttons.
     if (event.target.closest('#btnLearnCheck')) { onCheck(); return; }
     if (event.target.closest('#btnLearnContinue')) { onContinue(); return; }
-    if (event.target.closest('#btnLearnExitLesson')) { current = null; showMapView(); renderMap(); return; }
+    if (event.target.closest('#btnLearnExitLesson')) { reviewQueue = []; current = null; showMapView(); renderMap(); return; }
     if (event.target.closest('#btnLearnHint')) {
       const step = current?.lesson.steps[current.stepIndex];
-      if (step?.hint) showFeedback(false, 'Hint: ' + step.hint);
+      const hints = step?.hintSteps?.length ? step.hintSteps : step?.hint ? [step.hint] : [];
+      if (hints.length) {
+        if (current.mode === 'review') { current.assisted = true; markLearnReviewSupported(current.sourceLessonId); }
+        else recordLearnHint(current.lesson, current.stepIndex);
+        const index = Math.min(current.hintIndex++, hints.length - 1);
+        showFeedback(false, `Hint ${index + 1}/${hints.length}: ${hints[index]}`);
+      }
       return;
     }
   });
+
+  document.addEventListener('input', event => {
+    if (current && event.target.id === 'learnQueryInput') saveDraft(current.lessonId, current.stepIndex, event.target.value);
+  });
+
+  // Load only the tables used by this question, after the learner expands it.
+  document.addEventListener('toggle', event => {
+    if (!current || !event.target.matches?.('.learn-data-preview') || !event.target.open) return;
+    const host = $('learnTablePreview');
+    if (!host || host.childElementCount) return;
+    const step = current.lesson.steps[current.stepIndex];
+    const tables = Object.keys(schema).filter(table => new RegExp('\\b' + table + '\\b', 'i').test(step.solutionSQL || ''));
+    try {
+      host.innerHTML = tables.map(table => {
+        const sample = executeQuery(`SELECT * FROM ${table} LIMIT 3`);
+        return `<h4>${escapeHtml(table)}</h4><p>${schema[table].map(([name, type]) => escapeHtml(name + ' (' + type + ')')).join(', ')}</p><div class="learn-preview-scroll"><table class="learn-result-table"><caption>First 3 sample rows from ${escapeHtml(table)}</caption><thead><tr>${sample.columns.map(c => `<th scope="col">${escapeHtml(c)}</th>`).join('')}</tr></thead><tbody>${sample.rows.map(row => `<tr>${row.map(value => `<td>${escapeHtml(value === null ? 'NULL' : value)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+      }).join('');
+    } catch {
+      host.textContent = 'Sample data is unavailable. Close and reopen this lesson to try again.';
+    }
+  }, true);
 
   // Ctrl/Cmd+Enter checks the current step (matches the missions editor).
   document.addEventListener('keydown', e => {

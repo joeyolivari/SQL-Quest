@@ -18,7 +18,7 @@ export const tutorials = [
     summary: 'Combine rows from two tables using a shared key.',
     example: `SELECT c.full_name, a.account_type\nFROM clients c\nJOIN accounts a ON c.client_id = a.client_id;`,
     complianceUse: 'Link clients to accounts, transactions, or reviews for complete risk profiles.',
-    eli12: 'Two teachers have separate class lists. JOIN is like stapling them together by matching the student ID numbers so each student shows up once with info from both lists.'
+    eli12: 'Two teachers have separate class lists. JOIN is like stapling them together by matching the student ID numbers so matching records appear together. A student with multiple matches appears more than once.'
   },
   {
     concept: 'GROUP BY',
