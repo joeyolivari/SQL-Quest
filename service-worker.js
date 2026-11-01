@@ -9,7 +9,7 @@
  * Bump CACHE_VERSION to force all clients to pick up new files on deploy.
  */
 
-const CACHE_VERSION = 'csq-v19';
+const CACHE_VERSION = 'csq-v20';
 const CDN_CACHE = 'csq-cdn-v1';
 
 // Build absolute URLs relative to this SW's location so the same
@@ -59,6 +59,7 @@ const APP_SHELL = [
   BASE + 'js/data/tutorial.js',
   BASE + 'js/learning/masteryTracker.js',
   BASE + 'js/learning/learnProgress.js',
+  BASE + 'js/learning/learnAssessment.js',
   BASE + 'js/learning/adaptiveQueue.js',
   BASE + 'js/learning/hintEngine.js',
   BASE + 'js/learning/diagnostics.js',

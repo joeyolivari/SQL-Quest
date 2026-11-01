@@ -284,8 +284,7 @@ export const LEARN_TRACK = [
             "blanks": [
               {
                 "accept": [
-                  "DESC",
-                  "descending"
+                  "DESC"
                 ]
               }
             ],
@@ -1177,6 +1176,61 @@ export const LEARN_TRACK = [
         ]
       },
       {
+        "id": "analysis-null-values",
+        "title": "COALESCE — fill missing values",
+        "concepts": [
+          "NULL",
+          "CASE"
+        ],
+        "steps": [
+          {
+            "type": "concept",
+            "title": "Unknown is different from zero",
+            "body": "NULL means unknown. COALESCE picks the first value that is not NULL. Use COALESCE(balance, 0) only when the report explicitly requires missing balances to display as zero; this does not change the source data.",
+            "example": "SELECT account_id, COALESCE(balance, 0) AS reported_balance\nFROM accounts;"
+          },
+          {
+            "type": "query",
+            "prompt": "Return account_id and reported_balance for every account. Display 0 for a missing balance; keep all other balances unchanged.",
+            "starterSQL": "SELECT account_id,\nFROM accounts;",
+            "solutionSQL": "SELECT account_id, COALESCE(balance, 0) AS reported_balance FROM accounts;",
+            "requiredColumns": [
+              "account_id",
+              "reported_balance"
+            ],
+            "orderMatters": false,
+            "hint": "COALESCE(balance, 0) chooses balance when it is known, otherwise 0."
+          }
+        ]
+      },
+      {
+        "id": "analysis-not-exists",
+        "title": "NOT EXISTS — find missing relationships",
+        "concepts": [
+          "EXISTS",
+          "WHERE"
+        ],
+        "steps": [
+          {
+            "type": "concept",
+            "title": "Check for no matching rows",
+            "body": "NOT EXISTS is true when the inner query finds no matching row. Correlate the inner query to the current outer row. Unlike a join, it does not duplicate the outer row when multiple matches exist.",
+            "example": "SELECT a.account_id FROM accounts a\nWHERE NOT EXISTS (\n  SELECT 1 FROM compliance_reviews r\n  WHERE r.account_id = a.account_id\n);"
+          },
+          {
+            "type": "query",
+            "prompt": "Return account_id for accounts that have no compliance reviews using NOT EXISTS.",
+            "starterSQL": "SELECT a.account_id FROM accounts a\nWHERE NOT EXISTS (\n);",
+            "solutionSQL": "SELECT a.account_id FROM accounts a WHERE NOT EXISTS (SELECT 1 FROM compliance_reviews r WHERE r.account_id = a.account_id);",
+            "requiredColumns": [
+              "account_id"
+            ],
+            "orderMatters": false,
+            "hint": "Match r.account_id to a.account_id inside the subquery."
+          }
+        ]
+      },
+      {
         "id": "analysis-checkpoint",
         "title": "Independent checkpoint",
         "concepts": [
@@ -1377,6 +1431,35 @@ export const LEARN_TRACK = [
         ]
       },
       {
+        "id": "advanced-conditional-totals",
+        "title": "Conditional totals",
+        "concepts": [
+          "CASE",
+          "GROUP BY"
+        ],
+        "steps": [
+          {
+            "type": "concept",
+            "title": "SUM with CASE",
+            "body": "Place CASE inside SUM to add only a particular category while still counting all rows. ELSE 0 makes other categories contribute zero. Use WHERE first when you want to exclude a status from every calculation.",
+            "example": "SELECT account_id,\n  SUM(CASE WHEN transaction_type = 'Deposit' THEN amount ELSE 0 END) AS total_deposited,\n  COUNT(*) AS transaction_count\nFROM transactions WHERE transaction_status = 'Posted'\nGROUP BY account_id;"
+          },
+          {
+            "type": "query",
+            "prompt": "For each account with posted activity, return account_id, total_withdrawn (sum only Withdrawal amounts) and transaction_count (all Posted transactions).",
+            "starterSQL": "",
+            "solutionSQL": "SELECT account_id, SUM(CASE WHEN transaction_type = 'Withdrawal' THEN amount ELSE 0 END) AS total_withdrawn, COUNT(*) AS transaction_count FROM transactions WHERE transaction_status = 'Posted' GROUP BY account_id;",
+            "requiredColumns": [
+              "account_id",
+              "total_withdrawn",
+              "transaction_count"
+            ],
+            "orderMatters": false,
+            "hint": "Filter Posted rows, group by account_id, then use SUM(CASE...) and COUNT(*)."
+          }
+        ]
+      },
+      {
         "id": "advanced-checkpoint",
         "title": "Independent checkpoint",
         "concepts": [
@@ -1388,17 +1471,18 @@ export const LEARN_TRACK = [
         "steps": [
           {
             "type": "query",
-            "prompt": "Independent challenge: Return advisor_id, high_risk_clients and open_reviews. Count distinct clients rated High and distinct Open reviews, include every advisor, then sort by open_reviews descending and advisor_id ascending. Separate aggregates prevent account and review joins from multiplying people.",
+            "prompt": "Final investigation: consider only Posted transactions. For each advisor with posted activity, calculate total_deposited from Deposit transactions (use 0 for other transaction types) and transaction_count for all posted transactions. Rank advisors by total_deposited highest first using DENSE_RANK. Return advisor_id, total_deposited, transaction_count and deposit_rank; sort by deposit_rank ascending, then advisor_id ascending. Use a CTE to separate the grouped totals from the ranking.",
             "starterSQL": "",
-            "solutionSQL": "WITH people AS (SELECT advisor_id, COUNT(*) AS high_risk_clients FROM clients WHERE risk_rating = 'High' GROUP BY advisor_id), reviews AS (SELECT c.advisor_id, COUNT(DISTINCT r.review_id) AS open_reviews FROM clients c JOIN accounts a ON c.client_id = a.client_id JOIN compliance_reviews r ON a.account_id = r.account_id WHERE r.review_status = 'Open' GROUP BY c.advisor_id) SELECT adv.advisor_id, COALESCE(p.high_risk_clients,0) AS high_risk_clients, COALESCE(r.open_reviews,0) AS open_reviews FROM advisors adv LEFT JOIN people p ON adv.advisor_id = p.advisor_id LEFT JOIN reviews r ON adv.advisor_id = r.advisor_id ORDER BY open_reviews DESC, adv.advisor_id ASC;",
+            "solutionSQL": "WITH advisor_totals AS (SELECT c.advisor_id, SUM(CASE WHEN t.transaction_type = 'Deposit' THEN t.amount ELSE 0 END) AS total_deposited, COUNT(*) AS transaction_count FROM clients c JOIN accounts a ON c.client_id = a.client_id JOIN transactions t ON a.account_id = t.account_id WHERE t.transaction_status = 'Posted' GROUP BY c.advisor_id) SELECT advisor_id, total_deposited, transaction_count, DENSE_RANK() OVER (ORDER BY total_deposited DESC) AS deposit_rank FROM advisor_totals ORDER BY deposit_rank ASC, advisor_id ASC;",
             "requiredColumns": [
               "advisor_id",
-              "high_risk_clients",
-              "open_reviews"
+              "total_deposited",
+              "transaction_count",
+              "deposit_rank"
             ],
             "orderMatters": true,
-            "hint": "Combine the ideas from this unit.",
-            "explain": "You completed the unit investigation."
+            "hint": "First join clients → accounts → transactions and group posted activity by advisor in a CTE. Then rank the deposit totals in the outer query.",
+            "explain": "You combined filtering, table relationships, conditional totals, a CTE, ranking and deterministic sorting in one investigation."
           }
         ]
       }

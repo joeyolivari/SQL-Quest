@@ -16,10 +16,10 @@ import { LEARN_TRACK, getUnit, getLesson } from '../data/lessons.js';
 import { createSqlHighlighter } from '../core/editor.js';
 import { executeQuery, isSafeQuery } from '../core/sqlEngine.js';
 import { compareResults } from '../core/validation.js';
-import { recordMasteryAttempt, recordMasterySuccess } from '../learning/masteryTracker.js';
+import { recordLearnAnswer, recordLearnHint } from '../learning/learnAssessment.js';
 import {
   isLessonComplete, isLessonUnlocked, isUnitComplete, getUnitProgress,
-  markStepResult, completeLesson, setPosition, getPosition, clearPosition, isLessonPassed,
+  completeLesson, setPosition, getPosition, clearPosition, isLessonPassed, isUnitUnlocked, saveDraft, getDraft,
 } from '../learning/learnProgress.js';
 
 // ── Module state ────────────────────────────────────────────────────────────
@@ -108,7 +108,7 @@ function renderMap() {
   const host = $('learnUnits');
   if (!host) return;
 
-  host.innerHTML = LEARN_TRACK.map(unit => {
+  host.innerHTML = LEARN_TRACK.map((unit, unitIndex) => {
     const { done, total, pct } = getUnitProgress(unit);
     const complete = isUnitComplete(unit);
 
@@ -120,7 +120,7 @@ function renderMap() {
       const badge = doneLesson ? '✓' : (unlocked ? (idx + 1) : '🔒');
       const attrs = unlocked
         ? `data-learn-unit="${escapeHtml(unit.id)}" data-learn-lesson="${escapeHtml(lesson.id)}"`
-        : 'aria-disabled="true"';
+        : 'disabled aria-disabled="true"';
       return `
         <button type="button" class="learn-node ${stateClass}" ${attrs}>
           <span class="learn-node-dot">${badge}</span>
@@ -143,6 +143,7 @@ function renderMap() {
           <span class="learn-unit-count">${done}/${total}</span>
         </div>
         <div class="learn-unit-track"><span class="learn-unit-fill" style="width:${pct}%"></span></div>
+        ${!isUnitUnlocked(unit) ? `<p class="learn-unit-prerequisite">Complete ${escapeHtml(LEARN_TRACK[unitIndex - 1]?.title || 'the earlier units')} first.</p>` : ''}
         <div class="learn-path">${nodes}</div>
         ${graduate}
       </div>`;
@@ -152,10 +153,11 @@ function renderMap() {
 // ── Lesson player ───────────────────────────────────────────────────────────
 function startLesson(unitId, lessonId) {
   const lesson = getLesson(unitId, lessonId);
-  if (!lesson) return;
+  const unit = getUnit(unitId);
+  if (!lesson || !unit || !isLessonUnlocked(unit, unit.lessons.indexOf(lesson))) return;
   const position = getPosition();
   const stepIndex = !isLessonComplete(lessonId) && position?.lessonId === lessonId
-    ? Math.min(position.stepIndex, lesson.steps.length - 1) : 0;
+    ? Math.min(Math.max(Number.isInteger(position.stepIndex) ? position.stepIndex : 0, 0), lesson.steps.length - 1) : 0;
   current = { unitId, lessonId, lesson, stepIndex };
   setPosition(unitId, lessonId, stepIndex);
   showPlayerView();
@@ -235,7 +237,7 @@ function renderChoice(step) {
 function renderFill(step) {
   // Replace {{n}} tokens with inline inputs.
   const html = escapeHtml(step.template).replace(/\{\{(\d+)\}\}/g, (m, n) =>
-    `<input type="text" class="learn-blank" data-blank-index="${n}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />`
+    `<input type="text" aria-label="Blank ${Number(n) + 1}" class="learn-blank" data-blank-index="${n}" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" />`
   );
   return `
     <div class="learn-step-card">
@@ -249,11 +251,9 @@ function renderQuery(step) {
     <div class="learn-step-card">
       <p class="learn-prompt">${escapeHtml(step.prompt)}</p>
       <details class="learn-data-preview"><summary>Explore the tables and sample data</summary>
-        ${Object.entries(schema).map(([table, columns]) => {
-          const sample = executeQuery(`SELECT * FROM ${table} LIMIT 3`);
-          return `<h4>${escapeHtml(table)}</h4><p>${columns.map(([name, type]) => escapeHtml(name + ' (' + type + ')')).join(', ')}</p><pre>${escapeHtml(JSON.stringify(sample.rows, null, 2))}</pre>`;
-        }).join('')}
+        <div id="learnTablePreview"></div>
       </details>
+      <label for="learnQueryInput" class="learn-query-label">Your SQL query</label>
       <textarea id="learnQueryInput" class="learn-query-input" rows="5" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
       <div id="learnQueryResult" class="learn-query-result" hidden></div>
     </div>`;
@@ -264,7 +264,7 @@ function mountQueryEditor(step) {
   // so always (re)wrap the current element and seed the starter SQL.
   learnEditor = createSqlHighlighter('learnQueryInput');
   if (learnEditor) {
-    learnEditor.setValue(step.starterSQL || '');
+    learnEditor.setValue(getDraft(current.lessonId, current.stepIndex) ?? step.starterSQL ?? '');
     learnEditor.focus();
   }
 }
@@ -287,7 +287,7 @@ function checkChoice(step) {
   const idx = Number(selected.dataset.choiceIndex);
   const ok = idx === step.answerIndex;
 
-  if (!ok) return resolveStep(false, 'Try again. ' + (step.explain || ''), { retry: true });
+  if (!ok) return resolveStep(false, 'Try again. ' + (step.explain || ''));
 
   host.querySelectorAll('.learn-choice').forEach((btn, i) => {
     btn.disabled = true;
@@ -323,17 +323,17 @@ function checkFill(step) {
     inputs.forEach(i => { i.disabled = true; });
     resolveStep(true, step.explain || 'Correct!');
   } else {
-    resolveStep(false, step.hint ? 'Not quite. Hint: ' + step.hint : 'Not quite — check the highlighted blanks and try again.', { retry: true });
+    resolveStep(false, step.hint ? 'Not quite. Hint: ' + step.hint : 'Not quite — check the highlighted blanks and try again.');
   }
 }
 
 function checkQuery(step) {
   const sql = (learnEditor ? learnEditor.getValue() : ($('learnQueryInput')?.value || '')).trim();
   if (!sql) {
-    return resolveStep(false, 'Write a query first.', { retry: true });
+    return resolveStep(false, 'Write a query first.');
   }
   if (!isSafeQuery(sql)) {
-    return resolveStep(false, 'Only SELECT / WITH queries are allowed here.', { retry: true });
+    return resolveStep(false, 'Only SELECT / WITH queries are allowed here.');
   }
 
   let userResult, expected;
@@ -341,12 +341,12 @@ function checkQuery(step) {
     userResult = executeQuery(sql);
     expected = executeQuery(step.solutionSQL);
   } catch (err) {
-    return resolveStep(false, 'SQL error: ' + (err && err.message ? err.message : 'check your syntax.'), { retry: true });
+    return resolveStep(false, 'SQL error: ' + (err && err.message ? err.message : 'check your syntax.'));
   }
 
   const { ok, message } = compareResults(userResult, expected, step.requiredColumns, step.orderMatters);
   renderQueryResult(userResult);
-  resolveStep(ok, ok ? (step.explain || 'Correct!') : message, { retry: !ok });
+  resolveStep(ok, ok ? (step.explain || 'Correct!') : message);
 }
 
 function renderQueryResult(result) {
@@ -364,18 +364,14 @@ function renderQueryResult(result) {
   panel.innerHTML = `<table class="learn-result-table"><thead><tr>${thead}</tr></thead><tbody>${tbody}</tbody></table>${more}`;
 }
 
-// Show feedback + flip Check/Continue. `retry` keeps Check available on a wrong answer.
-function resolveStep(ok, message, options = {}) {
+// Wrong answers keep Check available; correct answers unlock Continue.
+function resolveStep(ok, message) {
   showFeedback(ok, message);
-  if (current) markStepResult(current.lessonId, current.stepIndex, ok ? 'correct' : 'wrong');
+  if (current) recordLearnAnswer(current.lesson, current.stepIndex, ok);
 
   const checkBtn = $('btnLearnCheck');
   const continueBtn = $('btnLearnContinue');
   if (ok) {
-    if (checkBtn) checkBtn.hidden = true;
-    if (continueBtn) continueBtn.hidden = false;
-  } else if (!options.retry) {
-    // choice steps are single-shot: reveal the answer and let them move on
     if (checkBtn) checkBtn.hidden = true;
     if (continueBtn) continueBtn.hidden = false;
   }
@@ -394,17 +390,10 @@ function onContinue() {
 
 function finishLesson() {
   if (!current) return;
-  const { unitId, lesson } = current;
+  const { lesson } = current;
+  if (!isLessonComplete(lesson.id) && !isLessonPassed(lesson)) return;
   completeLesson(lesson.id);
   clearPosition();
-
-  // Feed the existing concept-mastery dashboard (does not affect mission scoring).
-  if (Array.isArray(lesson.concepts) && lesson.concepts.length) {
-    try {
-      recordMasteryAttempt(lesson.concepts);
-      if (isLessonPassed(lesson)) recordMasterySuccess(lesson.concepts);
-    } catch (e) {}
-  }
 
   current = null;
   showMapView();
@@ -466,10 +455,34 @@ function wireStaticButtons() {
     if (event.target.closest('#btnLearnExitLesson')) { current = null; showMapView(); renderMap(); return; }
     if (event.target.closest('#btnLearnHint')) {
       const step = current?.lesson.steps[current.stepIndex];
-      if (step?.hint) showFeedback(false, 'Hint: ' + step.hint);
+      if (step?.hint) {
+        recordLearnHint(current.lesson, current.stepIndex);
+        showFeedback(false, 'Hint: ' + step.hint);
+      }
       return;
     }
   });
+
+  document.addEventListener('input', event => {
+    if (current && event.target.id === 'learnQueryInput') saveDraft(current.lessonId, current.stepIndex, event.target.value);
+  });
+
+  // Load only the tables used by this question, after the learner expands it.
+  document.addEventListener('toggle', event => {
+    if (!current || !event.target.matches?.('.learn-data-preview') || !event.target.open) return;
+    const host = $('learnTablePreview');
+    if (!host || host.childElementCount) return;
+    const step = current.lesson.steps[current.stepIndex];
+    const tables = Object.keys(schema).filter(table => new RegExp('\\b' + table + '\\b', 'i').test(step.solutionSQL || ''));
+    try {
+      host.innerHTML = tables.map(table => {
+        const sample = executeQuery(`SELECT * FROM ${table} LIMIT 3`);
+        return `<h4>${escapeHtml(table)}</h4><p>${schema[table].map(([name, type]) => escapeHtml(name + ' (' + type + ')')).join(', ')}</p><div class="learn-preview-scroll"><table class="learn-result-table"><caption>First 3 sample rows from ${escapeHtml(table)}</caption><thead><tr>${sample.columns.map(c => `<th scope="col">${escapeHtml(c)}</th>`).join('')}</tr></thead><tbody>${sample.rows.map(row => `<tr>${row.map(value => `<td>${escapeHtml(value === null ? 'NULL' : value)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
+      }).join('');
+    } catch {
+      host.textContent = 'Sample data is unavailable. Close and reopen this lesson to try again.';
+    }
+  }, true);
 
   // Ctrl/Cmd+Enter checks the current step (matches the missions editor).
   document.addEventListener('keydown', e => {

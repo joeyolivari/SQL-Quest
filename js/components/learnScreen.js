@@ -35,7 +35,7 @@ function learnScreenMarkup() {
     <div id="learnLessonTitle" class="learn-lesson-title"></div>
     <div id="learnStepHost" class="learn-step-host"></div>
 
-    <div id="learnFeedback" class="learn-feedback" hidden></div>
+    <div id="learnFeedback" class="learn-feedback" role="status" aria-live="polite" hidden></div>
 
     <div class="learn-actions">
       <button id="btnLearnHint" class="btn-secondary learn-hint-btn" type="button" hidden><svg class="game-icon" aria-hidden="true"><use href="#icon-hint"/></svg> Hint</button>

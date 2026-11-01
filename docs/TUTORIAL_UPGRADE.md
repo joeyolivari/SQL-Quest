@@ -11,3 +11,15 @@ Plan:
 Risks: join fanout, sort ties, changed expected results, saved progress compatibility. Reference answers are computed from the live seed. Existing lesson/mission IDs remain stable. No production data is used.
 
 Validation: `node tests/verify.mjs` passes all 32 tutorial queries, 30 mission solutions and fill exercises, dataset relationships and coverage, independent audit counts, order checks and progress/mastery checks. Native SQLite is used by this harness. Browser serving was blocked by the execution sandbox (listen EPERM); desktop/mobile navigation, resume UI and actual sql.js/PWA execution still require browser validation.
+
+## Follow-up review
+
+Goal: make the expanded tutorial behave as a progressive course and preserve work accurately.
+
+Plan:
+1. learnProgress.js and learn.js: enforce unit prerequisites without locking existing completed lessons; validate resume positions; persist SQL drafts; count actual attempts and hints without replay farming. Verify progress and browser interactions.
+2. lessons.js: remove invalid DESC synonym; explain COALESCE and NOT EXISTS before requiring them. Verify all fill alternatives and reference queries.
+3. learn.js, learnScreen.js and learn.css: replace raw JSON previews with labeled tables for relevant query tables, loaded when expanded; add accessible feedback and inputs. Verify narrow-screen overflow.
+4. validation.js: distinguish real NULL from literal text and compare returned text faithfully. Verify negative grading cases. Bump PWA cache and update the same PR.
+
+Follow-up validation: `node tests/verify.mjs` passes 35 tutorial query solutions, all 30 mission solutions, and every accepted fill alternative. Additional regressions cover unit prerequisites, saved draft reload, wrong attempts, hint deduplication, replay credit, malformed saves, duplicate rows and exact NULL/text distinctions. The tutorial now has 37 lessons. Both HTTP serving and Chromium launch were blocked by the sandbox (socket operations denied); no browser or sql.js validation is claimed.

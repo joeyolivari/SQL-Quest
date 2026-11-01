@@ -322,3 +322,12 @@
     padding-right: 14px;
   }
 }
+
+/* Keep data previews inside the lesson on narrow screens. */
+.learn-player-view, .learn-step-host, .learn-step-card { min-width: 0; }
+.learn-data-preview { margin-bottom: 16px; max-width: 100%; color: var(--text); }
+.learn-data-preview summary { cursor: pointer; color: var(--accent); }
+.learn-data-preview p { overflow-wrap: anywhere; font-size: 0.85rem; }
+.learn-preview-scroll { overflow-x: auto; max-width: 100%; margin-bottom: 16px; }
+.learn-query-label { display: block; color: var(--text); margin-bottom: 8px; }
+.learn-unit-prerequisite { color: var(--muted); font-size: 0.85rem; }

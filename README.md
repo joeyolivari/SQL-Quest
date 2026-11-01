@@ -61,7 +61,7 @@ Built by Joey Carbajo Olivari. For permission requests or questions, reach out a
 
 ## Progressive tutorial and dataset
 
-The guided tutorial has six units: Foundations, Filtering, Summaries, Relationships, Analysis, and Advanced investigations. Each new unit includes teaching cards, guided exercises, query writing and an independent checkpoint. Missions provide additional practice. Query steps include an expandable schema and three-row table preview. Unfinished lessons resume at the saved step; correct practice is required before mastery is credited.
+The guided tutorial has 37 lessons across six units: Foundations, Filtering, Summaries, Relationships, Analysis, and Advanced investigations. Each new unit includes teaching cards, guided exercises, query writing and an independent checkpoint. Missions provide additional practice. Query steps include an expandable schema and three-row table preview. Units unlock in order, while previously completed lessons remain available for review. Unfinished lessons resume at the saved step with your SQL draft. Wrong attempts and hints count toward mastery; replaying a passed exercise earns no extra credit.
 
 Dataset version 2 is deterministic and entirely synthetic: 200 clients, 350 accounts, 5,000 transactions, 560 reviews, and associated flags and journal records. Generated activity spans March 2024 through February 2026. Missing values, exact thresholds, ties, unmatched records and repeated reviews support meaningful exercises. Original IDs are preserved. The data is a training fixture, not regulatory guidance or a complete accounting system.
 
