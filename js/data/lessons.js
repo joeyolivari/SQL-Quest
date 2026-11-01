@@ -1,3 +1,5 @@
+import { extendLearnTrack } from './lessonExpansion.js';
+
 // Progressive "Learn" track content.
 //
 // This is PURE DATA. The Learn track screen (js/features/learn.js) reads this
@@ -1489,6 +1491,8 @@ export const LEARN_TRACK = [
     ]
   }
 ];
+
+extendLearnTrack(LEARN_TRACK);
 
 // ── Pure helpers (no DOM) ──────────────────────────────────────────────────
 export function getUnit(unitId) {

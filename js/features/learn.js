@@ -11,6 +11,7 @@
 //
 // Progress is stored in its own namespace via learnProgress.js (csq_learn_v1).
 
+import { getDueLearnReviews, scheduleLearnReview, recordLearnReview, markLearnReviewSupported } from '../learning/learnReview.js';
 import { schema } from '../data/schema.js';
 import { LEARN_TRACK, getUnit, getLesson } from '../data/lessons.js';
 import { createSqlHighlighter } from '../core/editor.js';
@@ -19,12 +20,13 @@ import { compareResults } from '../core/validation.js';
 import { recordLearnAnswer, recordLearnHint } from '../learning/learnAssessment.js';
 import {
   isLessonComplete, isLessonUnlocked, isUnitComplete, getUnitProgress,
-  completeLesson, setPosition, getPosition, clearPosition, isLessonPassed, isUnitUnlocked, saveDraft, getDraft,
+  completeLesson, setPosition, getPosition, clearPosition, isLessonPassed, isUnitUnlocked, saveDraft, getDraft, clearDraft,
 } from '../learning/learnProgress.js';
 
 // ── Module state ────────────────────────────────────────────────────────────
 let current = null;        // { unitId, lessonId, lesson, stepIndex }
 let learnEditor = null;    // createSqlHighlighter instance for query/fill-blank steps
+let reviewQueue = [];
 let staticWired = false;   // one-time wiring of the persistent buttons
 
 // ── Small DOM helpers ───────────────────────────────────────────────────────
@@ -108,7 +110,9 @@ function renderMap() {
   const host = $('learnUnits');
   if (!host) return;
 
-  host.innerHTML = LEARN_TRACK.map((unit, unitIndex) => {
+  const due = getDueLearnReviews(LEARN_TRACK, isLessonComplete);
+  const review = `<aside class="learn-review-card"><div><h3>Recall desk</h3><p>${due.length ? 'A short mixed review is ready. Try remembering before using hints.' : 'No review is due. Keep learning; completed query lessons return for practice later.'}</p><p class="learn-review-note">Optional and untimed. Suggested gaps: 1, 3, 7, 14, then 30 days.</p></div>${due.length ? '<button type="button" class="btn-lg btn-primary" data-learn-review="true">Review ' + due.length + ' questions</button>' : ''}</aside>`;
+  host.innerHTML = review + LEARN_TRACK.map((unit, unitIndex) => {
     const { done, total, pct } = getUnitProgress(unit);
     const complete = isUnitComplete(unit);
 
@@ -177,9 +181,12 @@ function renderStep() {
   const pct = Math.round((stepIndex / total) * 100);
   const fill = $('learnProgressFill');
   if (fill) fill.style.width = pct + '%';
+  const stage = $('learnStepPhase');
+  if (stage) stage.textContent = step.phase || (current.mode === 'review' ? 'Retrieve' : 'Practice');
   const label = $('learnProgressLabel');
   if (label) label.textContent = (stepIndex + 1) + ' / ' + total;
 
+  current.hintIndex = 0;
   // Reset feedback + buttons.
   hideFeedback();
   const checkBtn = $('btnLearnCheck');
@@ -202,11 +209,11 @@ function renderStep() {
   } else if (step.type === 'fill') {
     host.innerHTML = renderFill(step);
     if (checkBtn) { checkBtn.hidden = false; checkBtn.disabled = false; }
-    if (hintBtn) hintBtn.hidden = !step.hint;
+    if (hintBtn) hintBtn.hidden = !(step.hint || step.hintSteps?.length);
   } else if (step.type === 'query') {
     host.innerHTML = renderQuery(step);
     if (checkBtn) { checkBtn.hidden = false; checkBtn.disabled = false; }
-    if (hintBtn) hintBtn.hidden = !step.hint;
+    if (hintBtn) hintBtn.hidden = !(step.hint || step.hintSteps?.length);
     mountQueryEditor(step);
   }
 
@@ -230,8 +237,34 @@ function renderChoice(step) {
   return `
     <div class="learn-step-card">
       <p class="learn-prompt">${escapeHtml(step.prompt)}</p>
+      ${renderPrediction(step)}
       <div class="learn-choices">${choices}</div>
     </div>`;
+}
+
+
+function renderPrediction(step) {
+  const samples = [step.sample, ...(step.relatedSamples || [])].filter(Boolean);
+  const table = samples.map(sample => `<div class="learn-preview-scroll"><table class="learn-result-table"><caption>Small example: ${escapeHtml(sample.name)}</caption><thead><tr>${sample.columns.map(c => `<th scope="col">${escapeHtml(c)}</th>`).join('')}</tr></thead><tbody>${sample.rows.map(row => `<tr>${row.map(v => `<td>${escapeHtml(v === null ? 'NULL' : v)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`).join('');
+  return table + (step.example ? `<pre class="learn-example">${escapeHtml(step.example)}</pre>` : '');
+}
+
+function beginReview() {
+  reviewQueue = getDueLearnReviews(LEARN_TRACK, isLessonComplete);
+  showNextReview();
+}
+
+function showNextReview() {
+  const item = reviewQueue.shift();
+  if (!item) { current = null; showMapView(); renderMap(); return; }
+  current = {
+    mode: 'review', unitId: item.unitId, sourceLessonId: item.lesson.id,
+    lessonId: 'review:' + item.lesson.id,
+    lesson: { ...item.lesson, title: 'Recall: ' + item.lesson.title, steps: [item.question] },
+    stepIndex: 0, assisted: false
+  };
+  showPlayerView();
+  renderStep();
 }
 
 function renderFill(step) {
@@ -287,7 +320,7 @@ function checkChoice(step) {
   const idx = Number(selected.dataset.choiceIndex);
   const ok = idx === step.answerIndex;
 
-  if (!ok) return resolveStep(false, 'Try again. ' + (step.explain || ''));
+  if (!ok) return resolveStep(false, 'Try again. ' + (step.choiceFeedback?.[idx] || step.explain || 'Trace the rows and try once more.'));
 
   host.querySelectorAll('.learn-choice').forEach((btn, i) => {
     btn.disabled = true;
@@ -367,11 +400,20 @@ function renderQueryResult(result) {
 // Wrong answers keep Check available; correct answers unlock Continue.
 function resolveStep(ok, message) {
   showFeedback(ok, message);
-  if (current) recordLearnAnswer(current.lesson, current.stepIndex, ok);
+  if (current?.mode === 'review') {
+    if (!ok) { current.assisted = true; markLearnReviewSupported(current.sourceLessonId); }
+  } else if (current) recordLearnAnswer(current.lesson, current.stepIndex, ok);
 
   const checkBtn = $('btnLearnCheck');
   const continueBtn = $('btnLearnContinue');
   if (ok) {
+    const step = current?.lesson.steps[current.stepIndex];
+    if (step?.explanationPrompt) {
+      const reflection = document.createElement('p');
+      reflection.className = 'learn-reflection';
+      reflection.textContent = 'Explain it to yourself: ' + step.explanationPrompt;
+      $('learnFeedback')?.appendChild(reflection);
+    }
     if (checkBtn) checkBtn.hidden = true;
     if (continueBtn) continueBtn.hidden = false;
   }
@@ -384,15 +426,22 @@ function onContinue() {
     finishLesson();
     return;
   }
-  setPosition(current.unitId, current.lessonId, current.stepIndex);
+  if (current.mode !== 'review') setPosition(current.unitId, current.lessonId, current.stepIndex);
   renderStep();
 }
 
 function finishLesson() {
   if (!current) return;
+  if (current.mode === 'review') {
+    recordLearnReview(current.sourceLessonId, { correct: true, assisted: current.assisted });
+    clearDraft(current.lessonId);
+    showNextReview();
+    return;
+  }
   const { lesson } = current;
   if (!isLessonComplete(lesson.id) && !isLessonPassed(lesson)) return;
   completeLesson(lesson.id);
+  scheduleLearnReview(lesson.id);
   clearPosition();
 
   current = null;
@@ -422,6 +471,8 @@ function wireStaticButtons() {
 
   // Delegate clicks within the Learn screen (handles re-rendered content).
   document.addEventListener('click', event => {
+    if (event.target.closest('[data-learn-review]')) { beginReview(); return; }
+
     // Open a lesson node from the map.
     const node = event.target.closest('.learn-node[data-learn-lesson]');
     if (node) {
@@ -452,12 +503,15 @@ function wireStaticButtons() {
     // Persistent action buttons.
     if (event.target.closest('#btnLearnCheck')) { onCheck(); return; }
     if (event.target.closest('#btnLearnContinue')) { onContinue(); return; }
-    if (event.target.closest('#btnLearnExitLesson')) { current = null; showMapView(); renderMap(); return; }
+    if (event.target.closest('#btnLearnExitLesson')) { reviewQueue = []; current = null; showMapView(); renderMap(); return; }
     if (event.target.closest('#btnLearnHint')) {
       const step = current?.lesson.steps[current.stepIndex];
-      if (step?.hint) {
-        recordLearnHint(current.lesson, current.stepIndex);
-        showFeedback(false, 'Hint: ' + step.hint);
+      const hints = step?.hintSteps?.length ? step.hintSteps : step?.hint ? [step.hint] : [];
+      if (hints.length) {
+        if (current.mode === 'review') { current.assisted = true; markLearnReviewSupported(current.sourceLessonId); }
+        else recordLearnHint(current.lesson, current.stepIndex);
+        const index = Math.min(current.hintIndex++, hints.length - 1);
+        showFeedback(false, `Hint ${index + 1}/${hints.length}: ${hints[index]}`);
       }
       return;
     }

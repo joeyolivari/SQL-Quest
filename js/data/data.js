@@ -144,7 +144,7 @@ export const seedData = {
 
 // Versioned, deterministic fixtures: no random values or current-date dependency.
 // Original IDs remain stable for existing lessons and saved mission progress.
-export const DATASET_VERSION = 2;
+export const DATASET_VERSION = 3;
 const date = day => new Date(Date.UTC(2024, 2, 1 + day)).toISOString().slice(0, 10);
 for (let id = 21; id <= 200; id++) {
   seedData.clients.push([id, `Training Client ${String(id).padStart(3, '0')}`,
@@ -191,3 +191,7 @@ for (const account of seedData.accounts) {
   const client = seedData.clients.find(c => c[0] === account[1]);
   if (account[4] < client[7]) account[4] = client[7];
 }
+
+// Deliberately untidy email fixtures for read-only normalization exercises.
+seedData.clients.find(client => client[0] === 21)[2] = ' Client21@EXAMPLE.CA ';
+seedData.clients.find(client => client[0] === 22)[2] = 'CLIENT22@example.ca';

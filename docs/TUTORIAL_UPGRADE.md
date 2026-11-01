@@ -23,3 +23,10 @@ Plan:
 4. validation.js: distinguish real NULL from literal text and compare returned text faithfully. Verify negative grading cases. Bump PWA cache and update the same PR.
 
 Follow-up validation: `node tests/verify.mjs` passes 35 tutorial query solutions, all 30 mission solutions, and every accepted fill alternative. Additional regressions cover unit prerequisites, saved draft reload, wrong attempts, hint deduplication, replay credit, malformed saves, duplicate rows and exact NULL/text distinctions. The tutorial now has 37 lessons. Both HTTP serving and Chromium launch were blocked by the sandbox (socket operations denied); no browser or sql.js validation is claimed.
+
+
+## Research-informed expansion
+
+See [LEARNING_RESEARCH.md](LEARNING_RESEARCH.md) for sources, design choices, iteration notes and human evaluation plans. Added 14 bridge lessons (51 total), miniature prediction tables, genuine query repair, changed independent tasks and review variants. The player adds staged hints and explanation prompts. A separate optional review store spaces practice without changing mission scoring or main-course drafts. Dataset version 3 adds two untidy email fixtures. PWA cache v21 includes lessonExpansion.js and learnReview.js.
+
+Validation: all three Node test commands in README pass, including 63 tutorial query solutions, 30 missions, 14 miniature predictions, 14 broken starters and 14 separate review queries. The controller integration harness uses DOM/editor adapters, not a browser. Learning effectiveness and browser layout/sql.js/PWA behavior remain to be evaluated.

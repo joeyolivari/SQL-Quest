@@ -148,3 +148,8 @@ export function markHintUsed(lessonId, stepIndex) {
   saveLearnProgress();
   return true;
 }
+
+export function clearDraft(lessonId) {
+  delete loadLearnProgress().drafts[lessonId];
+  saveLearnProgress();
+}

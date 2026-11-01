@@ -32,6 +32,7 @@ function learnScreenMarkup() {
       <span id="learnProgressLabel" class="learn-progress-label"></span>
     </div>
 
+    <p id="learnStepPhase" class="learn-step-phase"></p>
     <div id="learnLessonTitle" class="learn-lesson-title"></div>
     <div id="learnStepHost" class="learn-step-host"></div>
 
