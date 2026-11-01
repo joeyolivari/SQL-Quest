@@ -25,7 +25,7 @@ export function compareResults(userResult, expectedResult, requiredColumns, orde
   return {
     ok,
     message: orderMatters
-      ? 'Right rows, wrong order. Check your ORDER BY clause — this mission requires a specific sort.'
+      ? 'Values or row order differ. Check your calculations and the required ORDER BY, including tie-breakers.'
       : 'Right row count, but values differ. Check column calculations, joins, or text casing.'
   };
 }

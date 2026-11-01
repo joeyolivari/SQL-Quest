@@ -4,12 +4,10 @@
 
 SQL Quest is a browser-based SQL learning game with a retro 1990s cyber-arcade look and feel. Instead of abstract exercises, you learn SQL by working cases — sweeping client records for expired KYC status, tracing suspicious transactions, reconciling accounts, and clearing audits. It runs entirely in the browser, installs as an offline-capable PWA, and needs no build step or server-side code.
 
-<!-- Replace with a real screenshot, e.g. assets/images/screenshot.png -->
-![SQL Quest screenshot placeholder](assets/images/screenshot.png)
 
 ## Features
 
-- **Mission-based investigations** — around 20 missions across scenario tracks: Client Documentation Review, Transaction Monitoring, Reconciliation & Accounting, Advisor Risk Dashboard, Audit Readiness, and the hardest tier, **Boss Mode**.
+- **Mission-based investigations** — 30 missions across scenario tracks: Client Documentation Review, Transaction Monitoring, Reconciliation & Accounting, Advisor Risk Dashboard, Audit Readiness, and the hardest tier, **Boss Mode**.
 - **Learning Center** — structured lessons, adaptive hints, and skill-mastery tracking that adjusts to what you've practiced.
 - **SQL Training Lab** — a free-practice sandbox with a live schema, helper buttons, and instant results/errors, for experimenting outside of mission constraints.
 - **Retro cyber-arcade UI** — dark neon interface (cyan, green, purple, magenta) built to feel like a mission-select training simulator, not a generic form.
@@ -60,3 +58,17 @@ SQL Quest is **source-available**, not open source. You may view and study the c
 ## Author
 
 Built by Joey Carbajo Olivari. For permission requests or questions, reach out at joeyolivari@gmail.com.
+
+## Progressive tutorial and dataset
+
+The guided tutorial has six units: Foundations, Filtering, Summaries, Relationships, Analysis, and Advanced investigations. Each new unit includes teaching cards, guided exercises, query writing and an independent checkpoint. Missions provide additional practice. Query steps include an expandable schema and three-row table preview. Unfinished lessons resume at the saved step; correct practice is required before mastery is credited.
+
+Dataset version 2 is deterministic and entirely synthetic: 200 clients, 350 accounts, 5,000 transactions, 560 reviews, and associated flags and journal records. Generated activity spans March 2024 through February 2026. Missing values, exact thresholds, ties, unmatched records and repeated reviews support meaningful exercises. Original IDs are preserved. The data is a training fixture, not regulatory guidance or a complete accounting system.
+
+Run the regression checks with Node 24 or newer:
+
+```bash
+node tests/verify.mjs
+```
+
+These execute every lesson and mission reference query with SQLite and check dataset coverage, relationships, distinct report counts, grading and progress. Browser and sql.js checks are separate from these SQLite checks.

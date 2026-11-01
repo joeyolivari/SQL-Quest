@@ -11,6 +11,7 @@
 //
 // Progress is stored in its own namespace via learnProgress.js (csq_learn_v1).
 
+import { schema } from '../data/schema.js';
 import { LEARN_TRACK, getUnit, getLesson } from '../data/lessons.js';
 import { createSqlHighlighter } from '../core/editor.js';
 import { executeQuery, isSafeQuery } from '../core/sqlEngine.js';
@@ -18,7 +19,7 @@ import { compareResults } from '../core/validation.js';
 import { recordMasteryAttempt, recordMasterySuccess } from '../learning/masteryTracker.js';
 import {
   isLessonComplete, isLessonUnlocked, isUnitComplete, getUnitProgress,
-  markStepResult, completeLesson, setPosition,
+  markStepResult, completeLesson, setPosition, getPosition, clearPosition, isLessonPassed,
 } from '../learning/learnProgress.js';
 
 // ── Module state ────────────────────────────────────────────────────────────
@@ -56,6 +57,8 @@ export function openLearnTrack() {
 
   showMapView();
   renderMap();
+  const position = getPosition();
+  if (position && !isLessonComplete(position.lessonId)) startLesson(position.unitId, position.lessonId);
   window.scrollTo(0, 0);
 }
 
@@ -71,12 +74,10 @@ export function closeLearnTrack() {
 
 // Short summary string for the home-screen launcher meta line.
 export function getLearnLaunchMeta() {
-  const unit = LEARN_TRACK[0];
-  if (!unit) return '';
-  const { done, total } = getUnitProgress(unit);
-  if (done === 0) return 'Start here · ' + total + ' lessons';
-  if (done >= total) return 'Foundations complete ✓';
-  return done + '/' + total + ' lessons done';
+  const total = LEARN_TRACK.reduce((n, u) => n + u.lessons.length, 0);
+  const done = LEARN_TRACK.reduce((n, u) => n + getUnitProgress(u).done, 0);
+  return done === total ? 'Tutorial complete ✓' : `${done}/${total} lessons done`;
+
 }
 
 // Expose for the component fallback + cross-module calls.
@@ -152,8 +153,11 @@ function renderMap() {
 function startLesson(unitId, lessonId) {
   const lesson = getLesson(unitId, lessonId);
   if (!lesson) return;
-  current = { unitId, lessonId, lesson, stepIndex: 0 };
-  setPosition(unitId, lessonId, 0);
+  const position = getPosition();
+  const stepIndex = !isLessonComplete(lessonId) && position?.lessonId === lessonId
+    ? Math.min(position.stepIndex, lesson.steps.length - 1) : 0;
+  current = { unitId, lessonId, lesson, stepIndex };
+  setPosition(unitId, lessonId, stepIndex);
   showPlayerView();
   renderStep();
 }
@@ -244,6 +248,12 @@ function renderQuery(step) {
   return `
     <div class="learn-step-card">
       <p class="learn-prompt">${escapeHtml(step.prompt)}</p>
+      <details class="learn-data-preview"><summary>Explore the tables and sample data</summary>
+        ${Object.entries(schema).map(([table, columns]) => {
+          const sample = executeQuery(`SELECT * FROM ${table} LIMIT 3`);
+          return `<h4>${escapeHtml(table)}</h4><p>${columns.map(([name, type]) => escapeHtml(name + ' (' + type + ')')).join(', ')}</p><pre>${escapeHtml(JSON.stringify(sample.rows, null, 2))}</pre>`;
+        }).join('')}
+      </details>
       <textarea id="learnQueryInput" class="learn-query-input" rows="5" spellcheck="false" autocapitalize="off" autocorrect="off"></textarea>
       <div id="learnQueryResult" class="learn-query-result" hidden></div>
     </div>`;
@@ -276,6 +286,8 @@ function checkChoice(step) {
   if (!selected) return;
   const idx = Number(selected.dataset.choiceIndex);
   const ok = idx === step.answerIndex;
+
+  if (!ok) return resolveStep(false, 'Try again. ' + (step.explain || ''), { retry: true });
 
   host.querySelectorAll('.learn-choice').forEach((btn, i) => {
     btn.disabled = true;
@@ -384,12 +396,13 @@ function finishLesson() {
   if (!current) return;
   const { unitId, lesson } = current;
   completeLesson(lesson.id);
+  clearPosition();
 
   // Feed the existing concept-mastery dashboard (does not affect mission scoring).
   if (Array.isArray(lesson.concepts) && lesson.concepts.length) {
     try {
       recordMasteryAttempt(lesson.concepts);
-      recordMasterySuccess(lesson.concepts);
+      if (isLessonPassed(lesson)) recordMasterySuccess(lesson.concepts);
     } catch (e) {}
   }
 

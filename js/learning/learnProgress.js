@@ -94,3 +94,13 @@ export function getUnitProgress(unit) {
 export function isUnitComplete(unit) {
   return unit.lessons.every(l => isLessonComplete(l.id));
 }
+
+export function clearPosition() {
+  loadLearnProgress().position = null;
+  saveLearnProgress();
+}
+
+export function isLessonPassed(lesson) {
+  const results = loadLearnProgress().stepState[lesson.id] || {};
+  return lesson.steps.every((step, index) => step.type === 'concept' || results[index] === 'correct');
+}
